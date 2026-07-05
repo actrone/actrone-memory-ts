@@ -1,0 +1,59 @@
+{
+  "name": "@actrone/memory",
+  "version": "0.1.0",
+  "description": "Two-tier persistent agent memory for TypeScript/JS — short-term session turns + long-term semantic recall, with a pluggable store (in-memory default, Redis/Qdrant adapters) and embeddings. The open-source on-ramp to Actrone's governed hosted memory.",
+  "license": "MIT",
+  "author": "Actrone",
+  "homepage": "https://actrone.com",
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/actrone/actrone-memory-ts.git"
+  },
+  "type": "module",
+  "engines": {
+    "node": ">=22"
+  },
+  "sideEffects": false,
+  "files": [
+    "dist"
+  ],
+  "exports": {
+    ".": {
+      "types": "./dist/index.d.ts",
+      "import": "./dist/index.js"
+    },
+    "./adapters": {
+      "types": "./dist/adapters.d.ts",
+      "import": "./dist/adapters.js"
+    },
+    "./package.json": "./package.json"
+  },
+  "main": "./dist/index.js",
+  "module": "./dist/index.js",
+  "types": "./dist/index.d.ts",
+  "scripts": {
+    "build": "tsup",
+    "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "prepublishOnly": "npm run typecheck && npm run test && npm run build"
+  },
+  "keywords": [
+    "ai",
+    "agents",
+    "llm",
+    "memory",
+    "rag",
+    "vector",
+    "actrone"
+  ],
+  "dependencies": {
+    "zod": "4.4.3"
+  },
+  "devDependencies": {
+    "@types/node": "25.9.3",
+    "tsup": "8.5.1",
+    "typescript": "5.9.3",
+    "vitest": "4.1.8"
+  }
+}
