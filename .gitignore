@@ -1,0 +1,41 @@
+# Dependencies
+node_modules/
+.pnp
+.pnp.*
+
+# Build output — rebuilt on `prepublishOnly` and shipped via package.json "files";
+# never source-controlled (the hashed dist chunks change on every build).
+dist/
+build/
+*.tsbuildinfo
+
+# Test / coverage
+coverage/
+*.lcov
+
+# Caches
+.turbo/
+.eslintcache
+.cache/
+
+# Env files — only the example is committed
+.env
+.env.*
+!.env.example
+
+# Logs
+*.log
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+pnpm-debug.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE / editor
+.idea/
+.vscode/
+*.swp
+*.swo

@@ -3,10 +3,13 @@ import { beforeEach, describe, expect, it } from "vitest";
 import { MemoryManager } from "../src/index.js";
 import {
   formatContext,
+  genkitMemory,
   langchainMemory,
   langgraphMemory,
+  llamaindexMemory,
   mastraMemory,
   memoryFor,
+  openaiAgentsMemory,
   recall,
   remember,
   vercelMemory,
@@ -102,6 +105,39 @@ describe("memory adapters", () => {
     const sys = await ms.getSystemContext("sla");
     expect(sys).toContain("SLA");
     await ms.remember("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("llamaindexMemory exposes getSystemPrompt + saveTurn", async () => {
+    const li = llamaindexMemory(mm, { agentId: agent, sessionId: session });
+    await mm.injectMemory(agent, "Index rebuilds nightly at 2am.", 0.9);
+    const sys = await li.getSystemPrompt("index rebuild");
+    expect(sys).toContain("rebuilds");
+    await li.saveTurn("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("openaiAgentsMemory prepends memory to base instructions (and returns base when empty)", async () => {
+    const oa = openaiAgentsMemory(mm, { agentId: agent, sessionId: session });
+    // No memory yet ⇒ the base instructions come back unchanged.
+    expect(await oa.withMemory("You are a helpful agent.", "nothing here")).toBe("You are a helpful agent.");
+
+    await mm.injectMemory(agent, "The customer is on the Enterprise plan.", 0.9);
+    const merged = await oa.withMemory("You are a helpful agent.", "enterprise plan");
+    expect(merged).toContain("Enterprise");
+    expect(merged).toContain("You are a helpful agent.");
+    expect(merged.indexOf("Enterprise")).toBeLessThan(merged.indexOf("You are a helpful agent."));
+
+    await oa.remember("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("genkitMemory exposes getSystem + remember", async () => {
+    const gk = genkitMemory(mm, { agentId: agent, sessionId: session });
+    await mm.injectMemory(agent, "Deployments require two approvals.", 0.9);
+    const sys = await gk.getSystem("deploy approvals");
+    expect(sys).toContain("approvals");
+    await gk.remember("q", "a");
     expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
   });
 });

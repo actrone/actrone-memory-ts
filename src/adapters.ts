@@ -4,9 +4,10 @@
  * The core here is framework-agnostic and dependency-free: `recall` assembles a
  * context string to prepend to a prompt, and `remember` persists a completed
  * turn. `memoryFor(mm, agentId, sessionId)` binds those to one conversation for
- * ergonomic use. Thin framework wrappers (Vercel AI SDK, LangChain.js) build on
- * this same core and inject the framework's own primitives, so nothing is
- * imported at runtime — the frameworks stay optional peer dependencies.
+ * ergonomic use. Thin framework wrappers build on this same core and inject the
+ * framework's own primitives, so nothing is imported at runtime — every framework
+ * stays an optional peer dependency. Covered: Vercel AI SDK, LangChain.js,
+ * LangGraph.js, Mastra, LlamaIndex.TS, OpenAI Agents JS, and Firebase Genkit.
  */
 
 import type { MemoryManager } from "./manager.js";
@@ -198,6 +199,61 @@ export function mastraMemory(mm: MemoryManager, ref: ConversationRef): {
   const helper = memoryFor(mm, ref.agentId, ref.sessionId);
   return {
     getSystemContext: async (query, tokenBudget) => (await helper.recall(query, tokenBudget)).systemPrompt,
+    remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * LlamaIndex.TS: memory for a `llamaindex` agent / chat engine. `getSystemPrompt` returns the
+ * governed context to pass as the agent's `systemPrompt` (or prepend to it) for the turn, and
+ * `saveTurn` persists the completed exchange — call them around `agent.chat({ message })`.
+ * Structural, so `llamaindex` stays an optional peer dependency.
+ */
+export function llamaindexMemory(mm: MemoryManager, ref: ConversationRef): {
+  getSystemPrompt: (query: string, tokenBudget?: number) => Promise<string>;
+  saveTurn: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    getSystemPrompt: async (query, tokenBudget) => (await helper.recall(query, tokenBudget)).systemPrompt,
+    saveTurn: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * OpenAI Agents JS (`@openai/agents`): an Agent's `instructions` carry its system context.
+ * `withMemory(baseInstructions, query)` returns the instructions to give the Agent for the turn —
+ * the governed memory context prepended to the developer's base instructions (or just the memory
+ * when there are no base instructions) — and `remember` persists the turn after `run(agent, …)`.
+ * Structural, so `@openai/agents` stays an optional peer dependency.
+ */
+export function openaiAgentsMemory(mm: MemoryManager, ref: ConversationRef): {
+  withMemory: (baseInstructions: string, query: string, tokenBudget?: number) => Promise<string>;
+  remember: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    withMemory: async (baseInstructions, query, tokenBudget) => {
+      const { systemPrompt } = await helper.recall(query, tokenBudget);
+      if (!systemPrompt) return baseInstructions;
+      return baseInstructions ? `${systemPrompt}\n\n${baseInstructions}` : systemPrompt;
+    },
+    remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * Firebase Genkit (`genkit`): `ai.generate({ system, prompt })` accepts a system string — like the
+ * Vercel path, `getSystem` returns the governed context to pass as `system` for the turn, and
+ * `remember` persists the completed turn. Structural, so `genkit` stays an optional peer dependency.
+ */
+export function genkitMemory(mm: MemoryManager, ref: ConversationRef): {
+  getSystem: (query: string, tokenBudget?: number) => Promise<string>;
+  remember: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    getSystem: async (query, tokenBudget) => (await helper.recall(query, tokenBudget)).systemPrompt,
     remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
   };
 }
