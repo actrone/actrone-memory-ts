@@ -1,0 +1,51 @@
+name: Publish to npm
+
+# Publishes @actrone/memory to the npm registry on a version tag (vX.Y.Z). The tag's
+# version MUST match package.json "version" (npm publish refuses a duplicate, so a
+# mismatched/rerun tag fails loudly rather than double-publishing).
+#
+# Supply-chain posture (mirrors the CLI's cosign signing + the Python libs' PyPI
+# trusted publishing): uses npm OIDC **Trusted Publishing** — no long-lived NPM_TOKEN.
+# GitHub's OIDC identity authenticates the publish with short-lived, workflow-scoped
+# credentials, and npm provenance attaches a Sigstore-signed attestation linking the
+# tarball to this repo + commit + workflow (public transparency log). Requires a public
+# repo + `id-token: write` + a Trusted Publisher configured on npmjs.com for this package
+# (see docs/Actrone_SDK_OSS_Publishing_Runbook.md §2).
+#
+# NOTE (CI hardening): third-party actions are pinned to release tags for
+# readability; repin to exact commit SHAs per workspace policy before enabling.
+
+on:
+  push:
+    tags:
+      - "v*"
+
+permissions:
+  contents: read
+  id-token: write # OIDC trusted publishing + provenance — no signing key, no token
+
+jobs:
+  publish:
+    name: Build & Publish
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          registry-url: "https://registry.npmjs.org"
+
+      # Trusted publishing requires npm CLI >= 11.5.1; Node 22 ships an older npm.
+      - name: Upgrade npm (trusted publishing)
+        run: npm install -g npm@latest
+
+      - name: Install dependencies (clean, from lockfile)
+        run: npm ci
+
+      # `prepublishOnly` (typecheck + test + build) runs automatically as the publish
+      # gate, so a failing check aborts the publish. --access public is required for a
+      # scoped package; --provenance attaches the signed attestation. No NODE_AUTH_TOKEN:
+      # authentication is via the OIDC trusted publisher.
+      - name: Publish
+        run: npm publish --provenance --access public

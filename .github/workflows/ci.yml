@@ -1,0 +1,38 @@
+name: CI
+
+# Type-check, test, and build @actrone/memory on every push/PR to main — the same gate
+# `prepublishOnly` enforces at publish time, run early so a break is caught on the PR.
+#
+# NOTE (CI hardening): third-party actions are pinned to release tags for readability;
+# repin to exact commit SHAs per workspace policy before enabling.
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+concurrency:
+  group: ci-${{ github.ref }}
+  cancel-in-progress: true
+
+permissions:
+  contents: read
+
+jobs:
+  typecheck-test-build:
+    name: Type-check, test & build
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Type-check (tsc, strict)
+        run: npm run typecheck
+      - name: Test (vitest)
+        run: npm test
+      - name: Build (tsup)
+        run: npm run build
