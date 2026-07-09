@@ -36,3 +36,13 @@ jobs:
         run: npm test
       - name: Build (tsup)
         run: npm run build
+      - name: Generate API reference (TypeDoc)
+        # Gates the docs: a broken doc-comment, @link, or entry point fails the build
+        # (Public-Domain Cutover Runbook Phase 6, item 4 — OSS-memory reference from package source).
+        run: npm run docs:api
+      - name: Type-check docs examples (Phase 6 item 5)
+        # The guide snippets are real, compiled example files — an API change that breaks a documented
+        # snippet fails here before it can ship stale.
+        run: npm run typecheck:examples
+      - name: Verify extracted snippets are in sync
+        run: npm run snippets:check

@@ -1,0 +1,19 @@
+{
+  "$schema": "https://typedoc.org/schema.json",
+  "entryPoints": ["src/index.ts", "src/adapters.ts"],
+  "tsconfig": "tsconfig.typedoc.json",
+  "out": "docs/api",
+  "name": "@actrone/memory",
+  "readme": "none",
+  "githubPages": false,
+  "hideGenerator": true,
+  "excludePrivate": true,
+  "excludeInternal": true,
+  "sort": ["source-order"],
+  "navigation": { "includeCategories": true, "includeGroups": true },
+  "validation": {
+    "notExported": false,
+    "invalidLink": true,
+    "notDocumented": false
+  }
+}

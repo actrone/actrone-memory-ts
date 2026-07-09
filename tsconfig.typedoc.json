@@ -1,0 +1,6 @@
+{
+  "//": "Docs-only TS project for TypeDoc: the public API surface (src) without the test tree, which sits outside rootDir and would otherwise fail TypeDoc's program compilation (TS6059).",
+  "extends": "./tsconfig.json",
+  "include": ["src"],
+  "exclude": ["dist", "node_modules", "test"]
+}

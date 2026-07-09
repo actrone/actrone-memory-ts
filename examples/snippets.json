@@ -1,0 +1,3 @@
+{
+  "memory-ts-quickstart": "import { MemoryManager } from '@actrone/memory'\n\n// In-memory + local embedder by default — no Redis/Qdrant required to start\nconst memory = await MemoryManager.create()\n\nawait memory.storeTurn(\n  'research-agent',\n  'session-42',\n  'Summarise Q4 earnings for AAPL',\n  'Apple reported revenue of $119.6B in Q4 2024, up 6% YoY...',\n)\n\nconst context = await memory.retrieveContext(\n  'research-agent',\n  'session-42',\n  'Apple revenue Q4',\n  2000,\n)\n\n// context.recentTurns          – recent session turns (L1)\n// context.episodicMemories     – semantically relevant long-term memories (L2)\n// context.totalTokensUsed      – tokens consumed across both tiers\n// context.retrievalDurationMs  – retrieval latency in milliseconds\n"
+}

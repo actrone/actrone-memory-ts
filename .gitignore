@@ -39,3 +39,4 @@ Thumbs.db
 .vscode/
 *.swp
 *.swo
+docs/api/
