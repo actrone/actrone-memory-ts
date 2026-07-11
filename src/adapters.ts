@@ -257,3 +257,196 @@ export function genkitMemory(mm: MemoryManager, ref: ConversationRef): {
     remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
   };
 }
+
+// ── Deep integrations: structured messages + real framework memory contracts ──
+// The wrappers above return prompt *strings* (great for `system`-string frameworks).
+// These go deeper — a structured message view plus classes that implement a
+// framework's actual memory interface — reaching parity with the Python adapters
+// that implement `BaseChatMessageHistory` / `BaseMemory` etc.
+
+/** A role-tagged chat message — the structured counterpart of a prompt string. */
+export type ChatRole = "system" | "user" | "assistant";
+export interface ChatMessage {
+  readonly role: ChatRole;
+  readonly content: string;
+}
+
+/**
+ * Structured recall: relevant long-term memory as a leading `system` message
+ * (omitted when empty), followed by the recent turns as `user`/`assistant`
+ * messages. This is what every framework memory interface actually needs, rather
+ * than a pre-formatted string.
+ */
+export async function loadMessages(
+  mm: MemoryManager,
+  opts: ConversationRef & { query: string; tokenBudget?: number },
+): Promise<ChatMessage[]> {
+  const { context } = await recall(mm, {
+    agentId: opts.agentId,
+    sessionId: opts.sessionId,
+    query: opts.query,
+    tokenBudget: opts.tokenBudget ?? 4096,
+  });
+  const messages: ChatMessage[] = [];
+  if (context.episodicMemories.length > 0) {
+    const facts = context.episodicMemories.map((m: MemoryEntry) => `- ${m.content}`).join("\n");
+    messages.push({ role: "system", content: `Relevant long-term memory:\n${facts}` });
+  }
+  for (const t of context.recentTurns) {
+    messages.push({ role: "user", content: t.userMessage });
+    messages.push({ role: "assistant", content: t.assistantMessage });
+  }
+  return messages;
+}
+
+/** A LangChain.js-style message (`_getType()` + `content`) — structural, no import. */
+export interface LcChatMessage {
+  _getType(): string;
+  readonly content: string;
+}
+
+/** Optional real message-class constructors so the adapter emits genuine LangChain
+ * instances (`new HumanMessage(content)`) instead of structural stand-ins. */
+export interface LcMessageClasses {
+  readonly human: new (content: string) => LcChatMessage;
+  readonly ai: new (content: string) => LcChatMessage;
+  readonly system?: new (content: string) => LcChatMessage;
+}
+
+/**
+ * LangChain.js: a governed **`BaseListChatMessageHistory`** implementation. Drop it
+ * in anywhere LangChain persists chat history (e.g. `RunnableWithMessageHistory`) —
+ * `getMessages` reads the recent turns, and `addMessage(s)` pairs a human message
+ * with the following AI message into one governed turn (`clear` clears the session).
+ * Pass `messageClasses` to emit real `HumanMessage`/`AIMessage` instances (recommended for
+ * consumers that call `BaseMessage` methods); without it, structural `{ _getType, content }`
+ * messages are returned (fine for reads). This returns a plain object that duck-types the
+ * interface — it is not a `BaseListChatMessageHistory` subclass, so passing it to APIs typed
+ * to `BaseChatMessageHistory` (e.g. `RunnableWithMessageHistory`) needs a cast:
+ * `langchainChatHistory(...) as unknown as BaseChatMessageHistory`.
+ *
+ * ```ts
+ * import { HumanMessage, AIMessage } from "@langchain/core/messages";
+ * const history = langchainChatHistory(mm, { agentId, sessionId }, { human: HumanMessage, ai: AIMessage });
+ * ```
+ */
+export function langchainChatHistory(
+  mm: MemoryManager,
+  ref: ConversationRef,
+  opts: { messageClasses?: LcMessageClasses } = {},
+): {
+  getMessages(): Promise<LcChatMessage[]>;
+  addMessage(message: LcChatMessage): Promise<void>;
+  addMessages(messages: LcChatMessage[]): Promise<void>;
+  clear(): Promise<void>;
+} {
+  // A human message with no paired AI reply yet — flushed on the next AI message.
+  let pendingHuman: string | null = null;
+
+  const toStruct = (role: "human" | "ai", content: string): LcChatMessage => {
+    const cls = role === "human" ? opts.messageClasses?.human : opts.messageClasses?.ai;
+    if (cls) return new cls(content);
+    return { _getType: () => role, content };
+  };
+
+  const roleOf = (m: LcChatMessage): string => {
+    try {
+      return m._getType();
+    } catch {
+      return "unknown";
+    }
+  };
+
+  const addOne = async (message: LcChatMessage): Promise<void> => {
+    const type = roleOf(message);
+    const content = String(message.content ?? "");
+    if (type === "human") {
+      // If a human is already pending (two humans in a row), flush it solo.
+      if (pendingHuman !== null) {
+        await mm.storeTurn(ref.agentId, ref.sessionId, pendingHuman, "");
+      }
+      pendingHuman = content;
+    } else if (type === "ai") {
+      await mm.storeTurn(ref.agentId, ref.sessionId, pendingHuman ?? "", content);
+      pendingHuman = null;
+    }
+    // Other message types (system/tool) are not persisted as turns.
+  };
+
+  return {
+    async getMessages(): Promise<LcChatMessage[]> {
+      const turns = await mm.getRecentTurns(ref.agentId, ref.sessionId);
+      const messages: LcChatMessage[] = [];
+      for (const t of turns) {
+        messages.push(toStruct("human", t.userMessage));
+        if (t.assistantMessage) messages.push(toStruct("ai", t.assistantMessage));
+      }
+      return messages;
+    },
+    addMessage: addOne,
+    async addMessages(messages: LcChatMessage[]): Promise<void> {
+      for (const m of messages) await addOne(m);
+    },
+    async clear(): Promise<void> {
+      pendingHuman = null;
+      await mm.clearSession(ref.agentId, ref.sessionId);
+    },
+  };
+}
+
+/** A LlamaIndex.TS-style chat message (`role` + `content`) — structural, no import. */
+export interface LiChatMessage {
+  readonly role: string;
+  readonly content: string;
+}
+
+/**
+ * LlamaIndex.TS: a governed chat-memory store whose method names track the **current**
+ * LlamaIndex.TS `Memory` API (`createMemory()` → a `Memory` with `add()` / `get()` /
+ * `clear()`) — not the removed legacy `BaseMemory` (`put`/`get`/`reset`). Use it to back or
+ * mirror an agent's memory with the governed store: `add(message)` buffers a user message
+ * then persists it with the following assistant reply as one governed turn, `get()`/`getAll()`
+ * return the recent turns as messages, and `clear()` clears the session. Structural, so
+ * `llamaindex` stays an optional peer dependency.
+ */
+export function llamaindexChatMemory(
+  mm: MemoryManager,
+  ref: ConversationRef,
+): {
+  get(): Promise<LiChatMessage[]>;
+  getAll(): Promise<LiChatMessage[]>;
+  add(message: LiChatMessage): Promise<void>;
+  clear(): Promise<void>;
+} {
+  let pendingUser: string | null = null;
+
+  const readAll = async (): Promise<LiChatMessage[]> => {
+    const turns = await mm.getRecentTurns(ref.agentId, ref.sessionId);
+    const messages: LiChatMessage[] = [];
+    for (const t of turns) {
+      messages.push({ role: "user", content: t.userMessage });
+      if (t.assistantMessage) messages.push({ role: "assistant", content: t.assistantMessage });
+    }
+    return messages;
+  };
+
+  return {
+    get: readAll,
+    getAll: readAll,
+    async add(message: LiChatMessage): Promise<void> {
+      const role = message.role;
+      const content = String(message.content ?? "");
+      if (role === "user") {
+        if (pendingUser !== null) await mm.storeTurn(ref.agentId, ref.sessionId, pendingUser, "");
+        pendingUser = content;
+      } else if (role === "assistant") {
+        await mm.storeTurn(ref.agentId, ref.sessionId, pendingUser ?? "", content);
+        pendingUser = null;
+      }
+    },
+    async clear(): Promise<void> {
+      pendingUser = null;
+      await mm.clearSession(ref.agentId, ref.sessionId);
+    },
+  };
+}

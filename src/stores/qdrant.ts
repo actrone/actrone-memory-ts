@@ -1,5 +1,5 @@
 import { StoreConnectionError } from "../errors.js";
-import type { ContentType, MemoryEntry } from "../models.js";
+import type { ContentType, MemoryEntry, MemorySource, Sensitivity } from "../models.js";
 import type { L2SearchParams, L2Store } from "../store.js";
 
 /** A single scored hit from a vector search. */
@@ -29,7 +29,10 @@ export interface QdrantLike {
       with_payload?: boolean;
     },
   ): Promise<QdrantHit[]>;
-  delete(collection: string, args: { points: string[] }): Promise<unknown>;
+  delete(
+    collection: string,
+    args: { points: string[] } | { filter: unknown },
+  ): Promise<unknown>;
 }
 
 export interface QdrantL2Options {
@@ -76,6 +79,8 @@ export class QdrantL2Store implements L2Store {
               tokenCount: entry.tokenCount,
               timestamp: entry.timestamp,
               sourceTurnIds: [...entry.sourceTurnIds],
+              source: entry.source,
+              sensitivity: entry.sensitivity,
             },
           },
         ],
@@ -122,6 +127,16 @@ export class QdrantL2Store implements L2Store {
       throw new StoreConnectionError("qdrant delete failed", { cause: String(err) });
     }
   }
+
+  async deleteAgentMemories(agentId: string): Promise<void> {
+    try {
+      await this.client.delete(this.collection, {
+        filter: { must: [{ key: "agentId", match: { value: agentId } }] },
+      });
+    } catch (err) {
+      throw new StoreConnectionError("qdrant deleteAgentMemories failed", { cause: String(err) });
+    }
+  }
 }
 
 function payloadToEntry(
@@ -144,6 +159,8 @@ function payloadToEntry(
     tokenCount: num("tokenCount"),
     timestamp: str("timestamp", new Date(0).toISOString()),
     sourceTurnIds: arr("sourceTurnIds"),
+    source: str("source", "unknown") as MemorySource,
+    sensitivity: str("sensitivity", "none") as Sensitivity,
     relevanceScore: score,
   };
 }

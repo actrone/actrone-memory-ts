@@ -38,7 +38,35 @@ export {
 } from "./stores/qdrant.js";
 export { type TokenCounter, heuristicTokenCounter } from "./tokens.js";
 export {
+  type ExtractedFact,
+  type FactExtractor,
+  type ChatCompleterLike,
+  OpenAIFactExtractor,
+  parseFacts,
+  EXTRACTION_SPEC_VERSION,
+  EXTRACTION_SYSTEM_PROMPT,
+} from "./extraction.js";
+export {
+  type MemoryItem,
+  type EvalQuery,
+  type EvalCase,
+  type EvalReport,
+  DEFAULT_DATASET,
+  runEval,
+} from "./benchmark.js";
+export {
+  type Recipe,
+  RECIPES,
+  HOSTED_UPGRADE_HINT,
+  listFrameworks,
+  getRecipe,
+  renderRecipe,
+  renderStandaloneFile,
+} from "./recipes.js";
+export {
   type ContentType,
+  type MemorySource,
+  type Sensitivity,
   type ToolResult,
   type MemoryEntry,
   type Turn,
@@ -67,9 +95,17 @@ export {
   llamaindexMemory,
   openaiAgentsMemory,
   genkitMemory,
+  loadMessages,
+  langchainChatHistory,
+  llamaindexChatMemory,
   type ConversationRef,
   type Recalled,
   type MemoryHelper,
   type LcLikeMessage,
   type LangGraphSystemMessage,
+  type ChatRole,
+  type ChatMessage,
+  type LcChatMessage,
+  type LcMessageClasses,
+  type LiChatMessage,
 } from "./adapters.js";

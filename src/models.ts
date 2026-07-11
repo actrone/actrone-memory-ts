@@ -8,7 +8,36 @@ import { z } from "zod";
  */
 
 /** The kind of content a long-term memory entry holds. */
-export type ContentType = "turn" | "summary" | "tool_result" | "injected";
+export type ContentType = "turn" | "summary" | "tool_result" | "injected" | "fact";
+
+/**
+ * Provenance-typing v1 (the governance seed that graduates to hosted). Every
+ * stored fact carries *where it came from* and *how sensitive it is*, so a memory
+ * can be filtered, attributed, and erased by policy — even in the free library.
+ * These vocabularies are the language-neutral memory spec shared with the Python
+ * lib and the hosted engine; keep the two enums in lockstep.
+ *
+ * Origin/attribution of a memory. The typed values are the canonical set; a
+ * namespaced string (e.g. `"tool:web_search"`, `"import:crm"`) is also accepted.
+ */
+export type MemorySource =
+  | "user"
+  | "assistant"
+  | "tool"
+  | "summary"
+  | "injected"
+  | "extracted"
+  | "reflection"
+  | "imported"
+  | "unknown"
+  | (string & {});
+
+/**
+ * Sensitivity classification for governance / right-to-erasure, ordered least →
+ * most sensitive. Mirrors the hosted DPE tiers so handling policy is consistent
+ * from the OSS wedge up to the governed platform.
+ */
+export type Sensitivity = "none" | "low" | "pii" | "sensitive";
 
 /** The outcome of a single tool call recorded on a conversation turn. */
 export const toolResultSchema = z.object({
@@ -37,6 +66,10 @@ export interface MemoryEntry {
   readonly timestamp: string;
   /** Turn IDs this entry was summarised from, when applicable. */
   readonly sourceTurnIds: readonly string[];
+  /** Provenance attribution — where this fact originated. Default `"unknown"`. */
+  readonly source: MemorySource;
+  /** PII/sensitivity classification for governance. Default `"none"`. */
+  readonly sensitivity: Sensitivity;
   /** Relevance score attached by a search (0–1); absent outside search results. */
   readonly relevanceScore?: number;
 }

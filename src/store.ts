@@ -35,6 +35,8 @@ export interface L2Store {
   upsert(entry: MemoryEntry): Promise<void>;
   search(params: L2SearchParams): Promise<MemoryEntry[]>;
   delete(memoryId: string): Promise<void>;
+  /** Delete every memory for an agent (local right-to-erasure). */
+  deleteAgentMemories(agentId: string): Promise<void>;
 }
 
 /** `${agentId}::${sessionId}` composite key for L1 buckets. */
@@ -146,5 +148,9 @@ export class InMemoryStore implements L1Store, L2Store {
       }
     }
     throw new MemoryNotFoundError(memoryId);
+  }
+
+  async deleteAgentMemories(agentId: string): Promise<void> {
+    this.memories.delete(agentId);
   }
 }

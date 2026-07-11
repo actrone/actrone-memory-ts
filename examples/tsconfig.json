@@ -6,7 +6,8 @@
     "rootDir": "..",
     "baseUrl": ".",
     "paths": {
-      "@actrone/memory": ["../src/index.ts"]
+      "@actrone/memory": ["../src/index.ts"],
+      "@actrone/memory/adapters": ["../src/adapters.ts"]
     }
   },
   "include": ["**/*.ts"]

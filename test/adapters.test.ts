@@ -4,9 +4,12 @@ import { MemoryManager } from "../src/index.js";
 import {
   formatContext,
   genkitMemory,
+  langchainChatHistory,
   langchainMemory,
   langgraphMemory,
+  llamaindexChatMemory,
   llamaindexMemory,
+  loadMessages,
   mastraMemory,
   memoryFor,
   openaiAgentsMemory,
@@ -139,5 +142,77 @@ describe("memory adapters", () => {
     expect(sys).toContain("approvals");
     await gk.remember("q", "a");
     expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  // ── Deep integrations (structured messages + real framework memory contracts) ──
+
+  it("loadMessages returns a system memory message + turns as role-tagged messages", async () => {
+    await mm.storeTurn(agent, session, "hi", "hello");
+    await mm.injectMemory(agent, "The user prefers dark mode.", 0.9);
+    const msgs = await loadMessages(mm, { agentId: agent, sessionId: session, query: "user prefers dark mode" });
+    expect(msgs[0]?.role).toBe("system");
+    expect(msgs[0]?.content).toContain("dark mode");
+    expect(msgs.some((m) => m.role === "user" && m.content === "hi")).toBe(true);
+    expect(msgs.some((m) => m.role === "assistant" && m.content === "hello")).toBe(true);
+  });
+
+  it("langchainChatHistory implements the BaseChatMessageHistory contract", async () => {
+    const history = langchainChatHistory(mm, { agentId: agent, sessionId: session });
+    // addMessage pairs a human then the following ai into one governed turn.
+    await history.addMessage({ _getType: () => "human", content: "what is my plan?" });
+    await history.addMessage({ _getType: () => "ai", content: "Enterprise." });
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+
+    const messages = await history.getMessages();
+    expect(messages.map((m) => m._getType())).toEqual(["human", "ai"]);
+    expect(messages[0]?.content).toBe("what is my plan?");
+    expect(messages[1]?.content).toBe("Enterprise.");
+
+    await history.clear();
+    expect(await mm.getSessionMetadata(agent, session)).toBeNull();
+  });
+
+  it("langchainChatHistory emits real message-class instances when provided", async () => {
+    class Human {
+      constructor(public content: string) {}
+      _getType() {
+        return "human";
+      }
+    }
+    class Ai {
+      constructor(public content: string) {}
+      _getType() {
+        return "ai";
+      }
+    }
+    const history = langchainChatHistory(
+      mm,
+      { agentId: agent, sessionId: session },
+      { messageClasses: { human: Human, ai: Ai } },
+    );
+    await history.addMessages([
+      { _getType: () => "human", content: "q" },
+      { _getType: () => "ai", content: "a" },
+    ]);
+    const messages = await history.getMessages();
+    expect(messages[0]).toBeInstanceOf(Human);
+    expect(messages[1]).toBeInstanceOf(Ai);
+  });
+
+  it("llamaindexChatMemory implements the current Memory add/get/clear contract", async () => {
+    const memory = llamaindexChatMemory(mm, { agentId: agent, sessionId: session });
+    await memory.add({ role: "user", content: "hello" });
+    await memory.add({ role: "assistant", content: "hi there" });
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+
+    const messages = await memory.get();
+    expect(messages).toEqual([
+      { role: "user", content: "hello" },
+      { role: "assistant", content: "hi there" },
+    ]);
+    expect(await memory.getAll()).toEqual(messages);
+
+    await memory.clear();
+    expect(await mm.getSessionMetadata(agent, session)).toBeNull();
   });
 });

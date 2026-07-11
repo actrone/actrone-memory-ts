@@ -8,7 +8,7 @@ import { defineConfig } from "tsup";
  * duplicate copy when used alongside `@actrone/sdk`.
  */
 export default defineConfig({
-  entry: ["src/index.ts", "src/adapters.ts"],
+  entry: ["src/index.ts", "src/adapters.ts", "src/cli.ts"],
   format: ["esm"],
   dts: true,
   sourcemap: true,

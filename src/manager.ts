@@ -2,10 +2,13 @@ import { randomUUID } from "node:crypto";
 
 import { type MemoryConfig, resolveConfig } from "./config.js";
 import { type Embedder, LocalEmbedder } from "./embedder.js";
-import { TokenBudgetError, ValidationError } from "./errors.js";
+import { ConfigurationError, TokenBudgetError, ValidationError } from "./errors.js";
+import type { FactExtractor } from "./extraction.js";
 import type {
   MemoryEntry,
+  MemorySource,
   RetrievedContext,
+  Sensitivity,
   SessionMetadata,
   ToolResult,
   Turn,
@@ -34,6 +37,8 @@ export interface MemoryManagerParts {
   readonly l2: L2Store;
   readonly embedder: Embedder;
   readonly config: MemoryConfig;
+  /** Optional LLM fact extractor (turns → durable facts). LLM-gated, opt-in. */
+  readonly extractor?: FactExtractor;
 }
 
 /**
@@ -54,12 +59,14 @@ export class MemoryManager {
   private readonly l2: L2Store;
   private readonly embedder: Embedder;
   private readonly cfg: MemoryConfig;
+  private readonly extractor: FactExtractor | undefined;
 
   constructor(parts: MemoryManagerParts) {
     this.l1 = parts.l1;
     this.l2 = parts.l2;
     this.embedder = parts.embedder;
     this.cfg = parts.config;
+    this.extractor = parts.extractor;
   }
 
   /**
@@ -72,6 +79,7 @@ export class MemoryManager {
     l1?: L1Store;
     l2?: L2Store;
     embedder?: Embedder;
+    extractor?: FactExtractor;
   } = {}): Promise<MemoryManager> {
     const config = resolveConfig(options.config);
     // A single in-memory store backs both tiers by default; it is unused when
@@ -82,6 +90,7 @@ export class MemoryManager {
       l2: options.l2 ?? shared,
       embedder: options.embedder ?? new LocalEmbedder(),
       config,
+      ...(options.extractor !== undefined ? { extractor: options.extractor } : {}),
     });
   }
 
@@ -171,13 +180,21 @@ export class MemoryManager {
     };
   }
 
-  /** Write a fact directly into long-term memory. Returns the memory id. */
+  /**
+   * Write a fact directly into long-term memory. Returns the memory id.
+   *
+   * `source` and `sensitivity` are provenance-typing v1: they record where the
+   * fact came from and how sensitive it is, so it can be attributed, filtered,
+   * and erased by policy (the governance seed that graduates to hosted memory).
+   */
   async injectMemory(
     agentId: string,
     content: string,
     importance = 0.8,
     sessionId = "injected",
     topicTags?: readonly string[],
+    source: MemorySource = "injected",
+    sensitivity: Sensitivity = "none",
   ): Promise<string> {
     validateId(agentId, "agentId");
     validateText(content, "content", MAX_CONTENT_LEN);
@@ -187,6 +204,7 @@ export class MemoryManager {
     }
     const tags = topicTags ?? [];
     if (tags.length > MAX_TAGS) throw new ValidationError("topicTags", `must contain ≤ ${MAX_TAGS} tags`);
+    validateText(source, "source", MAX_ID_LEN);
 
     const embedding = await this.embedder.embed(content);
     const entry: MemoryEntry = {
@@ -201,6 +219,8 @@ export class MemoryManager {
       tokenCount: this.cfg.tokenCounter(content),
       timestamp: new Date().toISOString(),
       sourceTurnIds: [],
+      source,
+      sensitivity,
     };
     await this.l2.upsert(entry);
     return entry.id;
@@ -211,6 +231,21 @@ export class MemoryManager {
     validateId(agentId, "agentId");
     validateId(memoryId, "memoryId");
     await this.l2.delete(memoryId);
+  }
+
+  /**
+   * Local right-to-erasure — irreversibly delete an agent's long-term memories.
+   * The governance seed that graduates to hosted *provable* erasure. When
+   * `sessionId` is given, the session's hot-tier turns are cleared too; otherwise
+   * only the durable L2 store is wiped (hot-tier turns are ephemeral).
+   */
+  async eraseAgentMemories(agentId: string, sessionId?: string): Promise<void> {
+    validateId(agentId, "agentId");
+    await this.l2.deleteAgentMemories(agentId);
+    if (sessionId !== undefined) {
+      validateId(sessionId, "sessionId");
+      await this.l1.clearSession(agentId, sessionId);
+    }
   }
 
   /** Delete all hot-tier turns for a session. Long-term memories persist. */
@@ -242,6 +277,74 @@ export class MemoryManager {
     validateId(agentId, "agentId");
     validateId(sessionId, "sessionId");
     return this.l1.getSessionMetadata(agentId, sessionId);
+  }
+
+  /**
+   * Recent session turns, oldest → newest, capped at `n` (defaults to all
+   * retained). This is the raw history read that framework memory adapters (e.g.
+   * a LangChain `BaseChatMessageHistory` or a LlamaIndex `BaseMemory`) build on.
+   */
+  async getRecentTurns(agentId: string, sessionId: string, n?: number): Promise<Turn[]> {
+    validateId(agentId, "agentId");
+    validateId(sessionId, "sessionId");
+    return this.l1.getRecentTurns(agentId, sessionId, n);
+  }
+
+  /**
+   * Extract durable facts from a session's recent turns and store them as
+   * first-class memories (`contentType: "fact"`, `source: "extracted"`, with an
+   * LLM-classified sensitivity). LLM-gated: a {@link FactExtractor} must have been
+   * supplied to `create()` / the constructor, else a `ConfigurationError` is thrown.
+   * Returns the stored memory ids (empty when nothing durable is found).
+   */
+  async extractMemories(agentId: string, sessionId: string, n?: number): Promise<string[]> {
+    validateId(agentId, "agentId");
+    validateId(sessionId, "sessionId");
+    if (this.extractor === undefined) {
+      throw new ConfigurationError(
+        "Fact extraction is not enabled — pass an `extractor` to MemoryManager.create().",
+      );
+    }
+    const turns = await this.l1.getRecentTurns(agentId, sessionId, n);
+    return this.storeExtractedFacts(agentId, sessionId, turns);
+  }
+
+  private async storeExtractedFacts(
+    agentId: string,
+    sessionId: string,
+    turns: readonly Turn[],
+  ): Promise<string[]> {
+    if (this.extractor === undefined || turns.length === 0) return [];
+
+    const combined = turns
+      .map((t) => `User: ${t.userMessage}\nAssistant: ${t.assistantMessage}`)
+      .join("\n");
+    const facts = await this.extractor.extract(combined);
+    if (facts.length === 0) return [];
+
+    const sourceTurnIds = turns.map((t) => t.id);
+    const ids: string[] = [];
+    for (const fact of facts) {
+      const embedding = await this.embedder.embed(fact.content);
+      const entry: MemoryEntry = {
+        id: randomUUID(),
+        agentId,
+        sessionId,
+        content: fact.content,
+        contentType: "fact",
+        embedding,
+        importanceScore: fact.importance,
+        topicTags: fact.topicTags,
+        tokenCount: this.cfg.tokenCounter(fact.content),
+        timestamp: new Date().toISOString(),
+        sourceTurnIds,
+        source: "extracted",
+        sensitivity: fact.sensitivity,
+      };
+      await this.l2.upsert(entry);
+      ids.push(entry.id);
+    }
+    return ids;
   }
 
   /** Release any resources. In-memory mode is a no-op; adapters override the stores. */

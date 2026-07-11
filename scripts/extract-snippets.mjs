@@ -22,13 +22,27 @@ const OUT = join(EXAMPLES_DIR, 'snippets.json')
 
 const REGION = /\/\/\s*#region\s+(\S+)\s*\n([\s\S]*?)\n\s*\/\/\s*#endregion(?:\s+\S+)?/g
 
+/** Collect .ts files at the top level and one level down (e.g. examples/frameworks/). */
+function tsFiles() {
+  /** @type {string[]} */
+  const out = []
+  for (const entry of readdirSync(EXAMPLES_DIR, { withFileTypes: true })) {
+    if (entry.isFile() && entry.name.endsWith('.ts')) {
+      out.push(join(EXAMPLES_DIR, entry.name))
+    } else if (entry.isDirectory()) {
+      const sub = join(EXAMPLES_DIR, entry.name)
+      for (const f of readdirSync(sub).filter((f) => f.endsWith('.ts'))) out.push(join(sub, f))
+    }
+  }
+  return out
+}
+
 /** @returns {Record<string,string>} */
 function extract() {
   /** @type {Record<string,string>} */
   const snippets = {}
-  const files = readdirSync(EXAMPLES_DIR).filter((f) => f.endsWith('.ts'))
-  for (const file of files) {
-    const src = readFileSync(join(EXAMPLES_DIR, file), 'utf8')
+  for (const file of tsFiles()) {
+    const src = readFileSync(file, 'utf8')
     let m
     while ((m = REGION.exec(src)) !== null) {
       const [, id, body] = m

@@ -78,8 +78,19 @@ class FakeQdrant implements QdrantLike {
     hits.sort((a, b) => b.score - a.score);
     return hits.slice(0, args.limit);
   }
-  async delete(_c: string, args: { points: string[] }): Promise<unknown> {
-    for (const id of args.points) this.points.delete(id);
+  async delete(
+    _c: string,
+    args: { points: string[] } | { filter: unknown },
+  ): Promise<unknown> {
+    if ("points" in args) {
+      for (const id of args.points) this.points.delete(id);
+      return "OK";
+    }
+    const agentId = (args.filter as { must?: Array<{ match?: { value?: unknown } }> })
+      ?.must?.[0]?.match?.value;
+    for (const [id, pt] of this.points) {
+      if (pt.payload["agentId"] === agentId) this.points.delete(id);
+    }
     return "OK";
   }
 }
@@ -128,6 +139,8 @@ describe("QdrantL2Store", () => {
       tokenCount: 3,
       timestamp: new Date().toISOString(),
       sourceTurnIds: [],
+      source: "injected",
+      sensitivity: "none",
     });
 
     const e1 = { ...entry("m1", "bot", "refunds take five days"), embedding: await embedder.embed("refunds take five days") };
@@ -158,6 +171,64 @@ describe("QdrantL2Store", () => {
       recencyWeight: 0.3,
     });
     expect(after).toHaveLength(0);
+  });
+
+  it("persists and reads back provenance (source + sensitivity)", async () => {
+    const store = new QdrantL2Store(new FakeQdrant());
+    const embedder = { dimensions: 8, embed: async (t: string) => hashVec(t, 8) };
+    await store.upsert({
+      id: "m1",
+      agentId: "bot",
+      sessionId: "s",
+      content: "account number 12345",
+      contentType: "injected",
+      importanceScore: 0.9,
+      topicTags: [],
+      tokenCount: 3,
+      timestamp: new Date().toISOString(),
+      sourceTurnIds: [],
+      source: "import:crm",
+      sensitivity: "pii",
+      embedding: await embedder.embed("account number 12345"),
+    });
+    const [hit] = await store.search({
+      agentId: "bot",
+      queryEmbedding: await embedder.embed("account number 12345"),
+      threshold: 0.01,
+      limit: 5,
+      relevanceWeight: 0.7,
+      recencyWeight: 0.3,
+    });
+    expect(hit?.source).toBe("import:crm");
+    expect(hit?.sensitivity).toBe("pii");
+  });
+
+  it("deleteAgentMemories wipes only the target agent's points", async () => {
+    const store = new QdrantL2Store(new FakeQdrant());
+    const embedder = { dimensions: 8, embed: async (t: string) => hashVec(t, 8) };
+    const mk = async (id: string, agentId: string): Promise<MemoryEntry & { embedding: number[] }> => ({
+      id,
+      agentId,
+      sessionId: "s",
+      content: "shared content",
+      contentType: "injected",
+      importanceScore: 0.9,
+      topicTags: [],
+      tokenCount: 3,
+      timestamp: new Date().toISOString(),
+      sourceTurnIds: [],
+      source: "injected",
+      sensitivity: "none",
+      embedding: await embedder.embed("shared content"),
+    });
+    await store.upsert(await mk("m1", "bot"));
+    await store.upsert(await mk("m2", "other"));
+
+    await store.deleteAgentMemories("bot");
+
+    const q = { queryEmbedding: await embedder.embed("shared content"), threshold: 0.01, limit: 5, relevanceWeight: 0.7, recencyWeight: 0.3 };
+    expect(await store.search({ agentId: "bot", ...q })).toHaveLength(0);
+    expect(await store.search({ agentId: "other", ...q })).toHaveLength(1);
   });
 });
 

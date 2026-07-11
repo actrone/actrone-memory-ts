@@ -119,4 +119,36 @@ describe("MemoryManager (contract)", () => {
     const other = await mm.searchMemories("agent-b", "secret alpha content", 5);
     expect(other).toHaveLength(0);
   });
+
+  // ── Provenance-typing v1 + local erase ──────────────────────────────────────
+
+  it("defaults provenance to injected/none and round-trips custom values", async () => {
+    await mm.injectMemory(agent, "plain preference note here", 0.9);
+    const [plain] = await mm.searchMemories(agent, "plain preference note", 5);
+    expect(plain?.source).toBe("injected");
+    expect(plain?.sensitivity).toBe("none");
+
+    await mm.injectMemory(
+      agent,
+      "the account number on file is 12345",
+      0.9,
+      "injected",
+      ["billing"],
+      "import:crm",
+      "pii",
+    );
+    const [sensitive] = await mm.searchMemories(agent, "account number on file 12345", 5);
+    expect(sensitive?.source).toBe("import:crm");
+    expect(sensitive?.sensitivity).toBe("pii");
+  });
+
+  it("eraseAgentMemories wipes long-term memories (and the session when given)", async () => {
+    await mm.storeTurn(agent, session, "hi", "hello");
+    await mm.injectMemory(agent, "a durable fact about the account holder", 0.9, "injected", [], "user", "low");
+
+    await mm.eraseAgentMemories(agent, session);
+
+    expect(await mm.searchMemories(agent, "a durable fact about the account holder", 5)).toHaveLength(0);
+    expect(await mm.getSessionMetadata(agent, session)).toBeNull();
+  });
 });
