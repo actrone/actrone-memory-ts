@@ -7,7 +7,8 @@
  * ergonomic use. Thin framework wrappers build on this same core and inject the
  * framework's own primitives, so nothing is imported at runtime — every framework
  * stays an optional peer dependency. Covered: Vercel AI SDK, LangChain.js,
- * LangGraph.js, Mastra, LlamaIndex.TS, OpenAI Agents JS, and Firebase Genkit.
+ * LangGraph.js, Mastra, LlamaIndex.TS, OpenAI Agents JS, Firebase Genkit,
+ * VoltAgent, Claude Agent SDK, Cloudflare Agents, and Inngest AgentKit.
  */
 
 import type { MemoryManager } from "./manager.js";
@@ -254,6 +255,92 @@ export function genkitMemory(mm: MemoryManager, ref: ConversationRef): {
   const helper = memoryFor(mm, ref.agentId, ref.sessionId);
   return {
     getSystem: async (query, tokenBudget) => (await helper.recall(query, tokenBudget)).systemPrompt,
+    remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * VoltAgent (`@voltagent/core`): an `Agent`'s `instructions` carry its system context.
+ * `withInstructions(baseInstructions, query)` returns the instructions to give the Agent for the turn —
+ * the governed memory context prepended to the developer's base instructions (or just the memory when
+ * there are none) — and `remember` persists the turn after `agent.generateText(...)`. VoltAgent's own
+ * `Memory` is a storage subsystem rather than a simple injectable interface, so the system-instructions
+ * path is the idiomatic Tier-1 integration (§2.1). Structural, so `@voltagent/core` stays an optional
+ * peer dependency.
+ */
+export function voltagentMemory(mm: MemoryManager, ref: ConversationRef): {
+  withInstructions: (baseInstructions: string, query: string, tokenBudget?: number) => Promise<string>;
+  remember: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    withInstructions: async (baseInstructions, query, tokenBudget) => {
+      const { systemPrompt } = await helper.recall(query, tokenBudget);
+      if (!systemPrompt) return baseInstructions;
+      return baseInstructions ? `${systemPrompt}\n\n${baseInstructions}` : systemPrompt;
+    },
+    remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * Cloudflare Agents (`agents`): an Agent typically calls the AI SDK's `generateText({ system, ... })`
+ * on Workers. `getSystem` returns the governed context to pass as `system` for the turn, and
+ * `remember` persists the completed turn. Structural, so `agents` stays an optional peer dependency
+ * and this runs on the Workers runtime (the in-memory store needs no Node APIs).
+ */
+export function cloudflareAgentsMemory(mm: MemoryManager, ref: ConversationRef): {
+  getSystem: (query: string, tokenBudget?: number) => Promise<string>;
+  remember: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    getSystem: async (query, tokenBudget) => (await helper.recall(query, tokenBudget)).systemPrompt,
+    remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * Inngest AgentKit (`@inngest/agent-kit`): `createAgent({ system, model })` takes a `system` string
+ * (or function). `withSystem(baseSystem, query)` returns the `system` to give the agent for the turn —
+ * the developer's base system with governed memory appended (or just the memory when there is no
+ * base) — and `remember` persists the turn. Structural, so `@inngest/agent-kit` stays an optional
+ * peer dependency.
+ */
+export function inngestAgentKitMemory(mm: MemoryManager, ref: ConversationRef): {
+  withSystem: (baseSystem: string, query: string, tokenBudget?: number) => Promise<string>;
+  remember: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    withSystem: async (baseSystem, query, tokenBudget) => {
+      const { systemPrompt } = await helper.recall(query, tokenBudget);
+      if (!systemPrompt) return baseSystem;
+      return baseSystem ? `${baseSystem}\n\n${systemPrompt}` : systemPrompt;
+    },
+    remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
+  };
+}
+
+/**
+ * Claude Agent SDK (`@anthropic-ai/claude-agent-sdk`): `query({ prompt, options: { systemPrompt } })`
+ * accepts a system prompt. `appendToSystemPrompt(baseSystemPrompt, query)` returns the system prompt to
+ * pass for the turn — the developer's base system prompt with governed memory context appended (or just
+ * the memory when there is no base) — and `remember` persists the turn after the `query(...)` completes.
+ * The Claude Agent SDK has no formal memory interface, so the system-prompt path is the idiomatic Tier-1
+ * integration (§2.1). Structural, so `@anthropic-ai/claude-agent-sdk` stays an optional peer dependency.
+ */
+export function claudeAgentMemory(mm: MemoryManager, ref: ConversationRef): {
+  appendToSystemPrompt: (baseSystemPrompt: string, query: string, tokenBudget?: number) => Promise<string>;
+  remember: (userMessage: string, assistantMessage: string) => Promise<string>;
+} {
+  const helper = memoryFor(mm, ref.agentId, ref.sessionId);
+  return {
+    appendToSystemPrompt: async (baseSystemPrompt, query, tokenBudget) => {
+      const { systemPrompt } = await helper.recall(query, tokenBudget);
+      if (!systemPrompt) return baseSystemPrompt;
+      return baseSystemPrompt ? `${baseSystemPrompt}\n\n${systemPrompt}` : systemPrompt;
+    },
     remember: (userMessage, assistantMessage) => helper.remember(userMessage, assistantMessage),
   };
 }

@@ -1,0 +1,18 @@
+{
+  "//": "Framework compatibility — SINGLE SOURCE OF TRUTH for @actrone/memory. Authoritative for the optional peerDependencies (package.json) + the README compatibility matrix. scripts/check-compat.mjs fails CI on drift. The adapters are structural (no runtime framework import), so 'range' is the tested peer range npm warns on; 'readme' is the label in the README matrix row.",
+  "schema": 1,
+  "non_framework_peers": ["fastembed"],
+  "frameworks": {
+    "vercel": { "peer": "ai", "range": ">=5.0.0 <6", "readme": "Vercel AI SDK" },
+    "langchain": { "peer": "@langchain/core", "range": ">=0.2.0 <2", "readme": "LangChain.js" },
+    "langgraph": { "peer": "@langchain/langgraph", "range": ">=0.1.0 <2", "readme": "LangGraph.js" },
+    "mastra": { "peer": "@mastra/core", "range": ">=0.10.0 <1", "readme": "Mastra" },
+    "llamaindex": { "peer": "llamaindex", "range": ">=0.8.0 <1", "readme": "LlamaIndex.TS" },
+    "openai-agents": { "peer": "@openai/agents", "range": ">=0.1.0 <1", "readme": "OpenAI Agents JS" },
+    "genkit": { "peer": "genkit", "range": ">=1.0.0 <2", "readme": "Firebase Genkit" },
+    "voltagent": { "peer": "@voltagent/core", "range": ">=0.1.0 <2", "readme": "VoltAgent" },
+    "claude-agent-sdk": { "peer": "@anthropic-ai/claude-agent-sdk", "range": ">=0.1.0 <1", "readme": "Claude Agent SDK" },
+    "cloudflare-agents": { "peer": "agents", "range": ">=0.0.1 <1", "readme": "Cloudflare Agents" },
+    "inngest-agentkit": { "peer": "@inngest/agent-kit", "range": ">=0.5.0 <1", "readme": "Inngest AgentKit" }
+  }
+}

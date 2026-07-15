@@ -17,8 +17,19 @@ export {
 export {
   type Embedder,
   LocalEmbedder,
+  FastEmbedEmbedder,
+  buildLocalEmbedder,
   cosineSimilarity,
 } from "./embedder.js";
+export {
+  tokenize,
+  bm25Scores,
+  reciprocalRankFusion,
+  fuseChannels,
+  hybridRank,
+  DEFAULT_RRF_K,
+} from "./retrieval.js";
+export { type Reranker, applyReranker } from "./rerank.js";
 export {
   type L1Store,
   type L2Store,
@@ -95,6 +106,10 @@ export {
   llamaindexMemory,
   openaiAgentsMemory,
   genkitMemory,
+  voltagentMemory,
+  claudeAgentMemory,
+  cloudflareAgentsMemory,
+  inngestAgentKitMemory,
   loadMessages,
   langchainChatHistory,
   llamaindexChatMemory,

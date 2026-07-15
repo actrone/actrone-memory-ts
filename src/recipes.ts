@@ -121,6 +121,50 @@ export const RECIPES: Readonly<Record<string, Recipe>> = {
       "// ...ai.generate({ system, prompt: userInput })...\n" +
       "await memory.remember(userInput, answer);",
   ),
+  voltagent: recipe(
+    "voltagent",
+    "VoltAgent",
+    "@voltagent/core",
+    CORE_HEADER +
+      'import { voltagentMemory } from "@actrone/memory/adapters";\n\n' +
+      "const memory = voltagentMemory(mm, { agentId, sessionId });\n" +
+      "const instructions = await memory.withInstructions(baseInstructions, userInput);\n" +
+      "// ...new Agent({ instructions }).generateText(userInput)...\n" +
+      "await memory.remember(userInput, answer);",
+  ),
+  "claude-agent-sdk": recipe(
+    "claude-agent-sdk",
+    "Claude Agent SDK",
+    "@anthropic-ai/claude-agent-sdk",
+    CORE_HEADER +
+      'import { claudeAgentMemory } from "@actrone/memory/adapters";\n\n' +
+      "const memory = claudeAgentMemory(mm, { agentId, sessionId });\n" +
+      "const systemPrompt = await memory.appendToSystemPrompt(baseSystemPrompt, userInput);\n" +
+      "// ...query({ prompt: userInput, options: { systemPrompt } })...\n" +
+      "await memory.remember(userInput, answer);",
+  ),
+  "cloudflare-agents": recipe(
+    "cloudflare-agents",
+    "Cloudflare Agents",
+    "agents",
+    CORE_HEADER +
+      'import { cloudflareAgentsMemory } from "@actrone/memory/adapters";\n\n' +
+      "const memory = cloudflareAgentsMemory(mm, { agentId, sessionId });\n" +
+      "const system = await memory.getSystem(userInput);\n" +
+      "// ...generateText({ model, system, prompt: userInput })...\n" +
+      "await memory.remember(userInput, answer);",
+  ),
+  "inngest-agentkit": recipe(
+    "inngest-agentkit",
+    "Inngest AgentKit",
+    "@inngest/agent-kit",
+    CORE_HEADER +
+      'import { inngestAgentKitMemory } from "@actrone/memory/adapters";\n\n' +
+      "const memory = inngestAgentKitMemory(mm, { agentId, sessionId });\n" +
+      "const system = await memory.withSystem(baseSystem, userInput);\n" +
+      "// ...createAgent({ name, system, model })...\n" +
+      "await memory.remember(userInput, answer);",
+  ),
 };
 
 /** The framework slugs, sorted, for `--list` and validation. */

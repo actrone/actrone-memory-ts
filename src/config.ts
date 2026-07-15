@@ -18,6 +18,18 @@ export interface MemoryConfig {
   readonly relevanceWeight: number;
   /** Weight on recency in the blended rank score. */
   readonly recencyWeight: number;
+  /**
+   * Hybrid retrieval (Axis A3): among the threshold-admitted candidates, fuse the embedding (dense)
+   * ranking with a BM25 (lexical) ranking and recency via Reciprocal Rank Fusion, so an exact-keyword
+   * match the embedder under-ranks still surfaces. Admission (cosine ≥ threshold) is unchanged. Set
+   * false for the classic single-channel dense+recency blend.
+   */
+  readonly hybridRetrieval: boolean;
+  /**
+   * Cross-encoder rerank window (Axis A4): how many of the over-fetched candidates a configured
+   * {@link Reranker} rescores. Only takes effect when a reranker is passed to the manager.
+   */
+  readonly rerankTopK: number;
   /** Cap on retained turns per session in L1. */
   readonly maxSessionTurns: number;
   /** Whether to auto-summarise a session to L2 once it grows large. */
@@ -38,6 +50,8 @@ export const DEFAULT_CONFIG: MemoryConfig = {
   maxEpisodicMemories: 10,
   relevanceWeight: 0.7,
   recencyWeight: 0.3,
+  hybridRetrieval: true,
+  rerankTopK: 20,
   maxSessionTurns: 50,
   autoSummarise: false,
   summariseAfterTurns: 20,

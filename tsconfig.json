@@ -25,7 +25,13 @@
 
     "types": ["node"],
     "outDir": "dist",
-    "rootDir": "src"
+    // The package is bundled by tsup (entry-based, `dts: true`); tsc is never run to emit
+    // from this config, so `rootDir` is only used for the IDE's program shape. It must be the
+    // repo-package root (".") — not "src" — so the co-located `test/` files (which the IDE
+    // type-checks) don't trip TS6059 "not under rootDir". `noEmit` makes that explicit and
+    // guards against an accidental `tsc -p tsconfig.json` emitting test files into dist.
+    "rootDir": ".",
+    "noEmit": true
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]

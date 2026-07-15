@@ -4,6 +4,7 @@ import { type MemoryConfig, resolveConfig } from "./config.js";
 import { type Embedder, LocalEmbedder } from "./embedder.js";
 import { ConfigurationError, TokenBudgetError, ValidationError } from "./errors.js";
 import type { FactExtractor } from "./extraction.js";
+import { applyReranker, type Reranker } from "./rerank.js";
 import type {
   MemoryEntry,
   MemorySource,
@@ -39,6 +40,8 @@ export interface MemoryManagerParts {
   readonly config: MemoryConfig;
   /** Optional LLM fact extractor (turns → durable facts). LLM-gated, opt-in. */
   readonly extractor?: FactExtractor;
+  /** Optional cross-encoder reranker (Axis A4). Reorders the top-K of an over-fetched set. */
+  readonly reranker?: Reranker;
 }
 
 /**
@@ -60,6 +63,7 @@ export class MemoryManager {
   private readonly embedder: Embedder;
   private readonly cfg: MemoryConfig;
   private readonly extractor: FactExtractor | undefined;
+  private readonly reranker: Reranker | undefined;
 
   constructor(parts: MemoryManagerParts) {
     this.l1 = parts.l1;
@@ -67,6 +71,7 @@ export class MemoryManager {
     this.embedder = parts.embedder;
     this.cfg = parts.config;
     this.extractor = parts.extractor;
+    this.reranker = parts.reranker;
   }
 
   /**
@@ -80,6 +85,7 @@ export class MemoryManager {
     l2?: L2Store;
     embedder?: Embedder;
     extractor?: FactExtractor;
+    reranker?: Reranker;
   } = {}): Promise<MemoryManager> {
     const config = resolveConfig(options.config);
     // A single in-memory store backs both tiers by default; it is unused when
@@ -91,6 +97,7 @@ export class MemoryManager {
       embedder: options.embedder ?? new LocalEmbedder(),
       config,
       ...(options.extractor !== undefined ? { extractor: options.extractor } : {}),
+      ...(options.reranker !== undefined ? { reranker: options.reranker } : {}),
     });
   }
 
@@ -149,15 +156,24 @@ export class MemoryManager {
       this.l1.getRecentTurns(agentId, sessionId),
     ]);
 
-    // Phase 3 — semantic search against L2 (needs the embedding from Phase 1).
-    const episodicMemories = await this.l2.search({
+    // Phase 3 — semantic search against L2 (needs the embedding from Phase 1). Hybrid RRF (A3)
+    // fuses the query text's lexical signal when enabled.
+    const episodicCandidates = await this.l2.search({
       agentId,
       queryEmbedding,
       threshold: this.cfg.relevanceThreshold,
       limit: this.cfg.maxEpisodicMemories,
       relevanceWeight: this.cfg.relevanceWeight,
       recencyWeight: this.cfg.recencyWeight,
+      ...(this.cfg.hybridRetrieval ? { queryText: query } : {}),
     });
+    // Phase 3b — optional cross-encoder rerank over the top-K (precision lift; A4).
+    const episodicMemories = await applyReranker(
+      this.reranker,
+      query,
+      episodicCandidates,
+      this.cfg.rerankTopK,
+    );
 
     // Phase 2 — budget allocation.
     const episodicBudget = Math.floor(tokenBudget * this.cfg.budgetFractionEpisodic);
@@ -262,14 +278,19 @@ export class MemoryManager {
     if (limit < 1) throw new ValidationError("limit", "must be ≥ 1");
 
     const embedding = await this.embedder.embed(query);
-    return this.l2.search({
+    // Over-fetch when reranking so the cross-encoder has a candidate pool to reorder (A4).
+    const fetchLimit = this.reranker ? Math.max(limit, this.cfg.rerankTopK) : limit;
+    const candidates = await this.l2.search({
       agentId,
       queryEmbedding: embedding,
       threshold: this.cfg.relevanceThreshold,
-      limit,
+      limit: fetchLimit,
       relevanceWeight: this.cfg.relevanceWeight,
       recencyWeight: this.cfg.recencyWeight,
+      ...(this.cfg.hybridRetrieval ? { queryText: query } : {}),
     });
+    const reranked = await applyReranker(this.reranker, query, candidates, this.cfg.rerankTopK);
+    return reranked.slice(0, limit);
   }
 
   /** Session stats, or null when the session does not exist / has expired. */

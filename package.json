@@ -49,7 +49,8 @@
     "docs:api": "typedoc",
     "typecheck:examples": "tsc -p examples/tsconfig.json",
     "snippets": "node scripts/extract-snippets.mjs",
-    "snippets:check": "node scripts/extract-snippets.mjs --check"
+    "snippets:check": "node scripts/extract-snippets.mjs --check",
+    "check-compat": "node scripts/check-compat.mjs"
   },
   "keywords": [
     "ai",
@@ -62,6 +63,59 @@
   ],
   "dependencies": {
     "zod": "4.4.3"
+  },
+  "//peerDependencies": "Framework adapters (src/adapters.ts) are structural — none is imported at runtime. These optional peers only make the version each recipe is tested against machine-legible so npm warns on a mismatch; install just the one your app uses.",
+  "peerDependencies": {
+    "fastembed": ">=2 <3",
+    "@anthropic-ai/claude-agent-sdk": ">=0.1.0 <1",
+    "@inngest/agent-kit": ">=0.5.0 <1",
+    "@langchain/core": ">=0.2.0 <2",
+    "@langchain/langgraph": ">=0.1.0 <2",
+    "@mastra/core": ">=0.10.0 <1",
+    "@openai/agents": ">=0.1.0 <1",
+    "@voltagent/core": ">=0.1.0 <2",
+    "agents": ">=0.0.1 <1",
+    "ai": ">=5.0.0 <6",
+    "genkit": ">=1.0.0 <2",
+    "llamaindex": ">=0.8.0 <1"
+  },
+  "peerDependenciesMeta": {
+    "fastembed": {
+      "optional": true
+    },
+    "@anthropic-ai/claude-agent-sdk": {
+      "optional": true
+    },
+    "@inngest/agent-kit": {
+      "optional": true
+    },
+    "@langchain/core": {
+      "optional": true
+    },
+    "@langchain/langgraph": {
+      "optional": true
+    },
+    "@mastra/core": {
+      "optional": true
+    },
+    "@openai/agents": {
+      "optional": true
+    },
+    "@voltagent/core": {
+      "optional": true
+    },
+    "agents": {
+      "optional": true
+    },
+    "ai": {
+      "optional": true
+    },
+    "genkit": {
+      "optional": true
+    },
+    "llamaindex": {
+      "optional": true
+    }
   },
   "devDependencies": {
     "@types/node": "25.9.3",

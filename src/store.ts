@@ -1,6 +1,6 @@
-import { cosineSimilarity } from "./embedder.js";
 import { MemoryNotFoundError } from "./errors.js";
 import type { MemoryEntry, SessionMetadata, Turn } from "./models.js";
+import { hybridRank } from "./retrieval.js";
 
 /**
  * Store seams. L1 is the hot session tier (recent turns); L2 is the cold
@@ -28,6 +28,12 @@ export interface L2SearchParams {
   /** Blend weights for `relevanceWeight·sim + recencyWeight·recency`. */
   readonly relevanceWeight: number;
   readonly recencyWeight: number;
+  /**
+   * Raw query text for hybrid retrieval (Axis A3). When provided, the threshold-admitted candidates
+   * are re-ranked by fusing embedding cosine with BM25 (lexical) and recency via RRF. Omit for the
+   * classic single-channel dense+recency blend.
+   */
+  readonly queryText?: string;
 }
 
 /** Cold semantic store (long-term memories). */
@@ -118,24 +124,15 @@ export class InMemoryStore implements L1Store, L2Store {
   async search(params: L2SearchParams): Promise<MemoryEntry[]> {
     const list = this.memories.get(params.agentId) ?? [];
     if (list.length === 0) return [];
-
-    const now = Date.now();
-    // Recency normalisation window: 30 days. Newer → closer to 1.
-    const recencyWindowMs = 30 * 24 * 60 * 60 * 1000;
-
-    const scored: Array<{ entry: MemoryEntry; score: number; sim: number }> = [];
-    for (const entry of list) {
-      const sim = entry.embedding ? cosineSimilarity(params.queryEmbedding, entry.embedding) : 0;
-      if (sim < params.threshold) continue;
-      const ageMs = Math.max(0, now - Date.parse(entry.timestamp));
-      const recency = Math.max(0, 1 - ageMs / recencyWindowMs);
-      const score = params.relevanceWeight * sim + params.recencyWeight * recency;
-      scored.push({ entry, score, sim });
-    }
-    scored.sort((a, b) => b.score - a.score);
-    return scored
-      .slice(0, params.limit)
-      .map(({ entry, sim }) => ({ ...entry, relevanceScore: sim }));
+    return hybridRank({
+      entries: list,
+      queryEmbedding: params.queryEmbedding,
+      queryText: params.queryText,
+      threshold: params.threshold,
+      relevanceWeight: params.relevanceWeight,
+      recencyWeight: params.recencyWeight,
+      limit: params.limit,
+    });
   }
 
   async delete(memoryId: string): Promise<void> {

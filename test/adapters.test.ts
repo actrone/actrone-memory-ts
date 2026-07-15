@@ -2,8 +2,11 @@ import { beforeEach, describe, expect, it } from "vitest";
 
 import { MemoryManager } from "../src/index.js";
 import {
+  claudeAgentMemory,
+  cloudflareAgentsMemory,
   formatContext,
   genkitMemory,
+  inngestAgentKitMemory,
   langchainChatHistory,
   langchainMemory,
   langgraphMemory,
@@ -16,6 +19,7 @@ import {
   recall,
   remember,
   vercelMemory,
+  voltagentMemory,
 } from "../src/adapters.js";
 
 describe("memory adapters", () => {
@@ -141,6 +145,62 @@ describe("memory adapters", () => {
     const sys = await gk.getSystem("deploy approvals");
     expect(sys).toContain("approvals");
     await gk.remember("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("voltagentMemory prepends memory to base instructions (and returns base when empty)", async () => {
+    const va = voltagentMemory(mm, { agentId: agent, sessionId: session });
+    expect(await va.withInstructions("You are a support agent.", "nothing here")).toBe(
+      "You are a support agent.",
+    );
+
+    await mm.injectMemory(agent, "The customer is on the Enterprise plan.", 0.9);
+    const merged = await va.withInstructions("You are a support agent.", "enterprise plan");
+    expect(merged).toContain("Enterprise");
+    expect(merged).toContain("You are a support agent.");
+    expect(merged.indexOf("Enterprise")).toBeLessThan(merged.indexOf("You are a support agent."));
+
+    await va.remember("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("cloudflareAgentsMemory exposes getSystem + remember", async () => {
+    const cf = cloudflareAgentsMemory(mm, { agentId: agent, sessionId: session });
+    await mm.injectMemory(agent, "Workers deploy via wrangler.", 0.9);
+    const sys = await cf.getSystem("workers deploy wrangler");
+    expect(sys).toContain("wrangler");
+    await cf.remember("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("inngestAgentKitMemory appends memory to the base system (and returns base when empty)", async () => {
+    const ak = inngestAgentKitMemory(mm, { agentId: agent, sessionId: session });
+    expect(await ak.withSystem("You are support.", "nothing")).toBe("You are support.");
+
+    await mm.injectMemory(agent, "Runs are durable and retried.", 0.9);
+    const merged = await ak.withSystem("You are support.", "durable runs retried");
+    expect(merged).toContain("durable");
+    expect(merged).toContain("You are support.");
+    expect(merged.indexOf("You are support.")).toBeLessThan(merged.indexOf("durable"));
+
+    await ak.remember("q", "a");
+    expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
+  });
+
+  it("claudeAgentMemory appends memory to the base system prompt (and returns base when empty)", async () => {
+    const ca = claudeAgentMemory(mm, { agentId: agent, sessionId: session });
+    expect(await ca.appendToSystemPrompt("You are a support agent.", "nothing here")).toBe(
+      "You are a support agent.",
+    );
+
+    await mm.injectMemory(agent, "Refunds over $500 need a manager approval.", 0.9);
+    const merged = await ca.appendToSystemPrompt("You are a support agent.", "refunds manager approval");
+    expect(merged).toContain("Refunds");
+    expect(merged).toContain("You are a support agent.");
+    // Memory is APPENDED after the base system prompt (Claude-SDK convention).
+    expect(merged.indexOf("You are a support agent.")).toBeLessThan(merged.indexOf("Refunds"));
+
+    await ca.remember("q", "a");
     expect((await mm.getSessionMetadata(agent, session))?.turnCount).toBe(1);
   });
 

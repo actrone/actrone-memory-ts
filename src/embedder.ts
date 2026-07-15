@@ -40,6 +40,65 @@ export class LocalEmbedder implements Embedder {
   }
 }
 
+/**
+ * In-process ONNX dense embedder via `fastembed` (fastembed-js, onnxruntime — no torch/GPU). The
+ * preferred "real" recall tier (Axis A1): local-first, zero-egress after a one-time model download,
+ * no API key. Default model `bge-small-en-v1.5` (384-dim). `fastembed` is an optional peer — install
+ * it (`npm i fastembed`) to enable dense recall; without it {@link buildLocalEmbedder} degrades to
+ * the dependency-free hashing embedder.
+ */
+export class FastEmbedEmbedder implements Embedder {
+  readonly dimensions: number;
+  readonly #model: { queryEmbed(text: string): Promise<number[]> };
+
+  private constructor(model: { queryEmbed(text: string): Promise<number[]> }, dimensions: number) {
+    this.#model = model;
+    this.dimensions = dimensions;
+  }
+
+  /** Load the model (downloads + caches on first call), resolving its dimension by a probe embed. */
+  static async create(opts: { modelName?: string; cacheDir?: string } = {}): Promise<FastEmbedEmbedder> {
+    // Variable specifier so tsc does not statically resolve the optional peer at build time.
+    const pkg = "fastembed";
+    const mod = (await import(pkg)) as {
+      FlagEmbedding: {
+        init(o: { model?: string; cacheDir?: string }): Promise<{
+          queryEmbed(text: string): Promise<number[]>;
+        }>;
+      };
+      EmbeddingModel: Record<string, string>;
+    };
+    const model = await mod.FlagEmbedding.init({
+      model: opts.modelName ?? mod.EmbeddingModel["BGESmallEN"] ?? "BGESmallEN",
+      ...(opts.cacheDir !== undefined ? { cacheDir: opts.cacheDir } : {}),
+    });
+    const probe = await model.queryEmbed("probe");
+    return new FastEmbedEmbedder(model, probe.length);
+  }
+
+  async embed(text: string): Promise<number[]> {
+    return this.#model.queryEmbed(text);
+  }
+}
+
+/**
+ * Return the best available local, offline, zero-egress embedder, degrading gracefully (Axis A2):
+ * in-process ONNX ({@link FastEmbedEmbedder}, the `fastembed` peer) → dependency-free hashing
+ * ({@link LocalEmbedder}). An import failure (peer absent) or a model-fetch failure (air-gapped
+ * first run) falls through to hashing, so this never throws and never makes an unavoidable network
+ * call — the model download is one-time and the hashing tier needs none.
+ */
+export async function buildLocalEmbedder(
+  opts: { modelName?: string; cacheDir?: string; hashingDimensions?: number } = {},
+): Promise<Embedder> {
+  try {
+    return await FastEmbedEmbedder.create(opts);
+  } catch {
+    // fastembed peer absent or the model could not be fetched — fall back to lexical hashing.
+    return new LocalEmbedder(opts.hashingDimensions ?? 256);
+  }
+}
+
 /** FNV-1a 32-bit hash, returned as a non-negative integer. */
 function hash32(s: string): number {
   let h = 0x811c9dc5;

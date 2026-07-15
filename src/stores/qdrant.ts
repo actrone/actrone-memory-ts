@@ -1,5 +1,6 @@
 import { StoreConnectionError } from "../errors.js";
 import type { ContentType, MemoryEntry, MemorySource, Sensitivity } from "../models.js";
+import { fuseChannels } from "../retrieval.js";
 import type { L2SearchParams, L2Store } from "../store.js";
 
 /** A single scored hit from a vector search. */
@@ -109,15 +110,42 @@ export class QdrantL2Store implements L2Store {
 
     const now = Date.now();
     const recencyWindowMs = 30 * 24 * 60 * 60 * 1000;
-    const scored = hits.map((h) => {
-      const entry = payloadToEntry(String(h.id), h.payload ?? {}, h.score);
+    const entries = new Map<string, MemoryEntry>();
+    const documents = new Map<string, string>();
+    const recency = new Map<string, number>();
+    const denseScore = new Map<string, number>();
+    for (const h of hits) {
+      const id = String(h.id);
+      const entry = payloadToEntry(id, h.payload ?? {}, h.score);
       const ageMs = Math.max(0, now - Date.parse(entry.timestamp));
-      const recency = Math.max(0, 1 - ageMs / recencyWindowMs);
-      const blended = this.relevanceWeight * h.score + this.recencyWeight * recency;
-      return { entry, blended };
+      entries.set(id, entry);
+      documents.set(id, entry.content);
+      recency.set(id, Math.max(0, 1 - ageMs / recencyWindowMs));
+      denseScore.set(id, h.score);
+    }
+    if (entries.size === 0) return [];
+
+    const denseRanking = [...denseScore.keys()].sort(
+      (a, b) => (denseScore.get(b) ?? 0) - (denseScore.get(a) ?? 0),
+    );
+    // Hybrid RRF (A3) fuses the server cosine with BM25 + recency when query text is provided.
+    const fusedOrder = fuseChannels({
+      ids: [...entries.keys()],
+      denseRanking,
+      documents,
+      recency,
+      queryText: params.queryText,
+      relevanceWeight: this.relevanceWeight,
+      recencyWeight: this.recencyWeight,
     });
-    scored.sort((a, b) => b.blended - a.blended);
-    return scored.slice(0, params.limit).map((s) => s.entry);
+    const order =
+      fusedOrder ??
+      [...entries.keys()].sort((a, b) => {
+        const sa = this.relevanceWeight * (denseScore.get(a) ?? 0) + this.recencyWeight * (recency.get(a) ?? 0);
+        const sb = this.relevanceWeight * (denseScore.get(b) ?? 0) + this.recencyWeight * (recency.get(b) ?? 0);
+        return sb - sa;
+      });
+    return order.slice(0, params.limit).map((id) => entries.get(id) as MemoryEntry);
   }
 
   async delete(memoryId: string): Promise<void> {

@@ -46,3 +46,7 @@ jobs:
         run: npm run typecheck:examples
       - name: Verify extracted snippets are in sync
         run: npm run snippets:check
+      - name: check-compat — framework peer/README drift gate
+        # Fails if optional peerDependencies / the README compatibility matrix drift from
+        # compatibility.json (the SSOT).
+        run: npm run check-compat
