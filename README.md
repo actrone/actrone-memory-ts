@@ -86,6 +86,23 @@ const mm = await MemoryManager.create({
 `L1Store`, `L2Store`, and `Embedder` are small interfaces — implement them against
 any backend without touching the manager.
 
+## Privacy & PII — local-first by default, cloud-capable
+
+This library is **local-first by default**: the built-in embedder runs in-process and fact extraction is
+opt-in, so with the defaults **nothing leaves your machine** — no API key, no egress. It is also
+**cloud-capable** — inject any OpenAI-compatible embedder/extractor (e.g. a cloud provider).
+
+**Important — where PII protection holds:** the sensitivity classification (`none/low/pii/sensitive`) is
+produced *by* the extraction step, and that step (and any real embedder) sees the **raw** text. So PII
+protection here holds **only for local models** (in-process or a local Ollama endpoint — zero-egress). If you
+point extraction or embeddings at a **cloud** provider, the raw text — including PII-classified content — is
+sent to that provider; this library does **not** tokenise it first.
+
+Actrone's **hosted** platform adds **MAL (Memory Abstraction Layer)**, which tokenises PII *before* any
+inference — a structural guarantee that makes **cloud** models safe. Same API (`MemoryManager`), so migrating
+is a one-import change. Short form: **local-first by default; cloud-capable; PII stays protected only on local
+models; MAL (hosted) makes cloud safe.**
+
 ## Framework compatibility
 
 Adapters live in `@actrone/memory/adapters` and are **structural** — none imports its framework at
