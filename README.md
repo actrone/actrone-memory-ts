@@ -1,5 +1,11 @@
 # @actrone/memory
 
+![A fact landing in the memory inspector, tagged by sensitivity](https://raw.githubusercontent.com/actrone/actrone-memory-ts/main/media/oss-launch-loop.gif)
+
+*[Watch the 60-second walkthrough, narrated](https://raw.githubusercontent.com/actrone/actrone-memory-ts/main/media/oss-launch-16x9.mp4)*
+*([1:1](https://raw.githubusercontent.com/actrone/actrone-memory-ts/main/media/oss-launch-1x1.mp4) and
+[9:16](https://raw.githubusercontent.com/actrone/actrone-memory-ts/main/media/oss-launch-9x16.mp4) cuts.)*
+
 **Give your JS/TS agent a memory in three lines.** Two-tier persistent memory —
 short-term session turns + long-term semantic recall — with a pluggable store
 (in-memory by default; Redis/Qdrant adapters) and embeddings. Zero required
