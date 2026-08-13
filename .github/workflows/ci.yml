@@ -50,3 +50,16 @@ jobs:
         # Fails if optional peerDependencies / the README compatibility matrix drift from
         # compatibility.json (the SSOT).
         run: npm run check-compat
+
+  security:
+    name: Dependency Security Audit
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+          cache: npm
+      - run: npm ci
+      - name: Audit dependencies for known vulnerabilities
+        run: npm audit --audit-level=high

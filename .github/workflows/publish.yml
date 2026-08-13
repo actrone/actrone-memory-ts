@@ -21,7 +21,7 @@ on:
       - "v*"
 
 permissions:
-  contents: read
+  contents: write # OIDC trusted publishing + provenance, and creating the GitHub Release for this tag
   id-token: write # OIDC trusted publishing + provenance — no signing key, no token
 
 jobs:
@@ -49,3 +49,14 @@ jobs:
       # authentication is via the OIDC trusted publisher.
       - name: Publish
         run: npm publish --provenance --access public
+
+      - name: Create GitHub Release
+        # Publishing to npm on a tag push was previously the only artifact of a release: no
+        # GitHub Release object, so the repo's Releases tab stayed empty and there was nowhere to
+        # read what changed between versions without diffing CHANGELOG.md by hand. Auto-generated
+        # notes (from merged PRs since the previous tag) need no extra maintenance.
+        uses: softprops/action-gh-release@v2
+        with:
+          name: ${{ github.ref_name }}
+          generate_release_notes: true
+          prerelease: ${{ contains(github.ref_name, '-') }} # SemVer pre-release suffix, e.g. v1.0.0-rc.1
