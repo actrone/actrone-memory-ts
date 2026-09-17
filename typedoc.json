@@ -6,6 +6,7 @@
   "name": "@actrone/memory",
   "readme": "none",
   "githubPages": false,
+  "hostedBaseUrl": "https://actrone.com/reference/memory-ts/",
   "hideGenerator": true,
   "excludePrivate": true,
   "excludeInternal": true,

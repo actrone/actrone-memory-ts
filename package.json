@@ -1,7 +1,7 @@
 {
   "name": "@actrone/memory",
   "version": "0.1.0",
-  "description": "Two-tier persistent agent memory for TypeScript/JS — short-term session turns + long-term semantic recall, with a pluggable store (in-memory default, Redis/Qdrant adapters) and embeddings. The open-source on-ramp to Actrone's governed hosted memory.",
+  "description": "Two-tier persistent agent memory for TypeScript/JS: short-term session turns + long-term semantic recall, with a pluggable store (in-memory default, Redis/Qdrant adapters) and embeddings. The open-source on-ramp to Actrone's governed hosted memory.",
   "license": "MIT",
   "author": "Actrone",
   "homepage": "https://actrone.com",

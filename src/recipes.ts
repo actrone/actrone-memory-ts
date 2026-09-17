@@ -184,7 +184,7 @@ export function renderRecipe(r: Recipe): string {
     `1) Install\n   ${r.install}\n\n` +
     `2) Paste into your agent (or a new file)\n\n${r.snippet}\n\n` +
     "Every framework recipe is typechecked in CI against the current adapter API " +
-    "(examples/frameworks/). Docs: https://docs.actrone.com/memory"
+    "(examples/frameworks/). Docs: https://actrone.com/docs/memory/overview"
   );
 }
 
