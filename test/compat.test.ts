@@ -3,7 +3,7 @@ import { dirname, resolve } from "node:path";
 
 import { describe, expect, it } from "vitest";
 
-// @ts-expect-error — .mjs tooling script, no types (validated by this test).
+// @ts-expect-error: .mjs tooling script, no types (validated by this test).
 import { check, checkAgainst } from "../scripts/check-compat.mjs";
 
 const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");

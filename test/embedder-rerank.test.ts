@@ -40,7 +40,7 @@ describe("buildLocalEmbedder (A2 graceful chain)", () => {
   });
 });
 
-describe("applyReranker (A4)", () => {
+describe("applyReranker", () => {
   const reverse: Reranker = {
     rerank: async (_query, entries) => [...entries].reverse(),
   };
@@ -63,7 +63,7 @@ describe("applyReranker (A4)", () => {
   });
 });
 
-describe("MemoryManager reranker wiring (A4)", () => {
+describe("MemoryManager reranker wiring", () => {
   it("routes search through the injected reranker", async () => {
     const reverse: Reranker = { rerank: async (_q, entries) => [...entries].reverse() };
     const mm = await MemoryManager.create({

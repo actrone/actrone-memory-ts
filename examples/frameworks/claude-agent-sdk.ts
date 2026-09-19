@@ -1,4 +1,4 @@
-/** Claude Agent SDK recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** Claude Agent SDK recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region claude-agent-sdk
 import { MemoryManager } from '@actrone/memory'
 import { claudeAgentMemory } from '@actrone/memory/adapters'

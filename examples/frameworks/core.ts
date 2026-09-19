@@ -1,5 +1,5 @@
 /**
- * Framework-agnostic core recipe — CI-typechecked against the current @actrone/memory adapter
+ * Framework-agnostic core recipe, CI-typechecked against the current @actrone/memory adapter
  * API. The `#region` block is extracted into the docs/CLI snippets, so a break here fails CI.
  */
 // #region core

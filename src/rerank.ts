@@ -1,9 +1,9 @@
 /**
- * Optional cross-encoder reranking over the top-K candidates (Axis A4).
+ * Optional cross-encoder reranking over the top-K candidates.
  *
  * A bi-encoder (the embedder) scores query and document independently; a cross-encoder scores the
- * pair jointly and is markedly more precise — but O(K) model calls, so it only runs over a small
- * over-fetched candidate set. **Honest constraint:** reranking lifts precision, not recall — it can
+ * pair jointly and is markedly more precise: but O(K) model calls, so it only runs over a small
+ * over-fetched candidate set. **Honest constraint:** reranking lifts precision, not recall, it can
  * only reorder what retrieval already fetched.
  *
  * The concrete cross-encoder is injected (e.g. a transformers.js / onnxruntime model), keeping the

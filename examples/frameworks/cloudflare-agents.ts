@@ -1,4 +1,4 @@
-/** Cloudflare Agents recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** Cloudflare Agents recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region cloudflare-agents
 import { MemoryManager } from '@actrone/memory'
 import { cloudflareAgentsMemory } from '@actrone/memory/adapters'

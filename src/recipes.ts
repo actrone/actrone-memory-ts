@@ -1,8 +1,8 @@
 /**
- * Framework recipes — the "install → paste → run" onboarding surface (§4b of the
+ * Framework recipes: the "install → paste → run" onboarding surface (of the
  * memory roadmap). Selection, not detection: the developer picks a framework and
  * gets a short, runnable, identical-shape recipe. These are the single source of
- * truth for the `actrone-memory add` CLI, the docs, and the CI-tested examples —
+ * truth for the `actrone-memory add` CLI, the docs, and the CI-tested examples,
  * so what we print is exactly what CI runs.
  */
 
@@ -180,7 +180,7 @@ export function getRecipe(framework: string): Recipe | undefined {
 /** Render a recipe as a readable "install → paste → run" block for stdout. */
 export function renderRecipe(r: Recipe): string {
   return (
-    `# ${r.label} — memory in a few lines\n\n` +
+    `# ${r.label}: memory in a few lines\n\n` +
     `1) Install\n   ${r.install}\n\n` +
     `2) Paste into your agent (or a new file)\n\n${r.snippet}\n\n` +
     "Every framework recipe is typechecked in CI against the current adapter API " +
@@ -191,7 +191,7 @@ export function renderRecipe(r: Recipe): string {
 /** Render a recipe as a self-contained new file for `--write` (never edits yours). */
 export function renderStandaloneFile(r: Recipe): string {
   return (
-    `// actrone-memory — ${r.label} recipe (generated; safe to edit).\n` +
+    `// actrone-memory: ${r.label} recipe (generated; safe to edit).\n` +
     `// Install: ${r.install}\n` +
     "// This is a NEW self-contained file. Import what you need from it into your agent.\n\n" +
     `${r.snippet}\n`

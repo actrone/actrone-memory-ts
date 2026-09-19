@@ -9,7 +9,7 @@ import {
   parseFacts,
 } from "../src/index.js";
 
-/** Deterministic extractor for tests — no LLM. */
+/** Deterministic extractor for tests: no LLM. */
 class FakeExtractor implements FactExtractor {
   calls = 0;
   constructor(private readonly facts: ExtractedFact[]) {}

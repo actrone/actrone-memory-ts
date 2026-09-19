@@ -43,7 +43,7 @@ npm run test:watch  # re-run on file change while you work
 
 ```bash
 npm run typecheck   # tsc --noEmit, strict mode
-npm run build       # tsup — must succeed cleanly
+npm run build       # tsup, must succeed cleanly
 ```
 
 Both must pass with zero errors before your PR will be reviewed. There's no separate lint step: the type checker in strict mode is the primary static gate.

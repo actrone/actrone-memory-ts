@@ -1,4 +1,4 @@
-/** LangChain.js recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** LangChain.js recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region langchain
 import { MemoryManager } from '@actrone/memory'
 import { langchainMemory } from '@actrone/memory/adapters'

@@ -2,7 +2,7 @@ import { MemoryManager } from "./manager.js";
 import type { Sensitivity } from "./models.js";
 
 /**
- * Shipped memory-quality benchmark + eval harness — the TS counterpart of the
+ * Shipped memory-quality benchmark + eval harness, the TS counterpart of the
  * Python `actrone_memory.benchmark`, over the **same** LongMemEval-style dataset.
  * Runs offline (in-memory store + local embedder), so memory quality is a
  * measurable, CI-gated property in both libs (the "one shared eval" decision).

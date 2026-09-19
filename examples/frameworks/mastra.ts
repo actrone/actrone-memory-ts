@@ -1,4 +1,4 @@
-/** Mastra recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** Mastra recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region mastra
 import { MemoryManager } from '@actrone/memory'
 import { mastraMemory } from '@actrone/memory/adapters'

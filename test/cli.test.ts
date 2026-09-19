@@ -10,7 +10,7 @@ import {
 } from "../src/index.js";
 import { type CliIO, runCli } from "../src/cli.js";
 
-/** Recording IO fake — no disk, no process. */
+/** Recording IO fake: no disk, no process. */
 function makeIO(existing: Set<string> = new Set()): CliIO & {
   out: string[];
   err: string[];

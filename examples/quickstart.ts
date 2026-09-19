@@ -1,8 +1,7 @@
 /**
- * Compiled, type-checked docs examples for @actrone/memory (Public-Domain Cutover Runbook Phase 6,
- * item 5). CI type-checks this file against the CURRENT package source, so an API change that breaks
+ * Compiled, type-checked docs examples for @actrone/memory (rendered in the docs by id). CI type-checks this file against the CURRENT package source, so an API change that breaks
  * a documented snippet fails the build. The marked `#region` blocks are extracted verbatim into the
- * docs by `scripts/extract-snippets.mjs` — the guide never hand-types these, so they cannot drift.
+ * docs by `scripts/extract-snippets.mjs`, the guide never hand-types these, so they cannot drift.
  *
  * The import path resolves to the package source via the examples tsconfig `paths` mapping, so the
  * snippet reads exactly as a consumer would write it (`@actrone/memory`) while type-checking against
@@ -11,7 +10,7 @@
 // #region memory-ts-quickstart
 import { MemoryManager } from '@actrone/memory'
 
-// In-memory + local embedder by default — no Redis/Qdrant required to start
+// In-memory + local embedder by default: no Redis/Qdrant required to start
 const memory = await MemoryManager.create()
 
 await memory.storeTurn(
@@ -28,10 +27,10 @@ const context = await memory.retrieveContext(
   2000,
 )
 
-// context.recentTurns          – recent session turns (L1)
-// context.episodicMemories     – semantically relevant long-term memories (L2)
-// context.totalTokensUsed      – tokens consumed across both tiers
-// context.retrievalDurationMs  – retrieval latency in milliseconds
+// context.recentTurns          : recent session turns (L1)
+// context.episodicMemories     : semantically relevant long-term memories (L2)
+// context.totalTokensUsed      : tokens consumed across both tiers
+// context.retrievalDurationMs  : retrieval latency in milliseconds
 // #endregion memory-ts-quickstart
 
 // Keep the compiler honest that the retrieved context is actually consumed.

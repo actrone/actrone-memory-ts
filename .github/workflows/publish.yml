@@ -1,19 +1,19 @@
 name: Publish to npm
 
 # Publishes @actrone/memory to the npm registry on a version tag (vX.Y.Z). The tag's
-# version MUST match package.json "version" (npm publish refuses a duplicate, so a
-# mismatched/rerun tag fails loudly rather than double-publishing).
+# version must match package.json "version"; the "Verify tag matches package.json
+# version" step below enforces that before anything is uploaded.
 #
-# Supply-chain posture (mirrors the CLI's cosign signing + the Python libs' PyPI
-# trusted publishing): uses npm OIDC **Trusted Publishing** — no long-lived NPM_TOKEN.
-# GitHub's OIDC identity authenticates the publish with short-lived, workflow-scoped
-# credentials, and npm provenance attaches a Sigstore-signed attestation linking the
-# tarball to this repo + commit + workflow (public transparency log). Requires a public
-# repo + `id-token: write` + a Trusted Publisher configured on npmjs.com for this package
-# (see docs/Actrone_SDK_OSS_Publishing_Runbook.md §2).
+# Supply-chain posture: npm OIDC Trusted Publishing, so there is no long-lived
+# NPM_TOKEN. GitHub's OIDC identity authenticates the publish with short-lived,
+# workflow-scoped credentials, and npm provenance attaches a Sigstore-signed
+# attestation linking the tarball to this repo, commit and workflow (public
+# transparency log). Requires a public repo, `id-token: write`, and a Trusted
+# Publisher configured for this package on npmjs.com.
 #
 # NOTE (CI hardening): third-party actions are pinned to release tags for
-# readability; repin to exact commit SHAs per workspace policy before enabling.
+# readability. Repin them to exact commit SHAs to fully close the
+# compromised-tag risk, which matters here because this job holds `id-token: write`.
 
 on:
   push:
@@ -22,16 +22,33 @@ on:
 
 permissions:
   contents: write # OIDC trusted publishing + provenance, and creating the GitHub Release for this tag
-  id-token: write # OIDC trusted publishing + provenance — no signing key, no token
+  id-token: write # OIDC trusted publishing + provenance, no signing key, no token
+  actions: read # read the CI run's conclusion for this commit
 
 jobs:
   publish:
     name: Build & Publish
     runs-on: ubuntu-latest
     steps:
-      - uses: actions/checkout@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
-      - uses: actions/setup-node@v4
+      # `prepublishOnly` re-runs typecheck + test + build, but not CodeQL or the
+      # dependency audit. Without this gate, tagging a commit whose CI went red still
+      # publishes. Require the CI run for this exact commit to have concluded green.
+      - name: Require CI to have passed for this commit
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: |
+          CONCLUSION=$(gh api \
+            "repos/${GITHUB_REPOSITORY}/actions/workflows/ci.yml/runs?head_sha=${GITHUB_SHA}&per_page=1" \
+            --jq '.workflow_runs[0].conclusion // "missing"')
+          if [ "$CONCLUSION" != "success" ]; then
+            echo "::error::CI for ${GITHUB_SHA} is '${CONCLUSION}', refusing to publish. Tag a commit whose CI passed on main."
+            exit 1
+          fi
+          echo "CI passed for ${GITHUB_SHA}."
+
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
@@ -42,6 +59,18 @@ jobs:
 
       - name: Install dependencies (clean, from lockfile)
         run: npm ci
+
+      # `npm publish` only refuses a version that is ALREADY on the registry; a tag that drifted
+      # from package.json (e.g. someone forgot to bump it) would otherwise publish silently under
+      # the wrong version while the GitHub Release still claims the tag name. Fail loudly instead.
+      - name: Verify tag matches package.json version
+        run: |
+          TAG_VERSION="${GITHUB_REF_NAME#v}"
+          PKG_VERSION="$(node -p "require('./package.json').version")"
+          if [ "$TAG_VERSION" != "$PKG_VERSION" ]; then
+            echo "::error::Tag $GITHUB_REF_NAME (version $TAG_VERSION) does not match package.json version $PKG_VERSION"
+            exit 1
+          fi
 
       # `prepublishOnly` (typecheck + test + build) runs automatically as the publish
       # gate, so a failing check aborts the publish. --access public is required for a
@@ -55,7 +84,7 @@ jobs:
         # GitHub Release object, so the repo's Releases tab stayed empty and there was nowhere to
         # read what changed between versions without diffing CHANGELOG.md by hand. Auto-generated
         # notes (from merged PRs since the previous tag) need no extra maintenance.
-        uses: softprops/action-gh-release@v2
+        uses: softprops/action-gh-release@3bb12739c298aeb8a4eeaf626c5b8d85266b0e65 # v2.6.2
         with:
           name: ${{ github.ref_name }}
           generate_release_notes: true

@@ -3,7 +3,7 @@ node_modules/
 .pnp
 .pnp.*
 
-# Build output — rebuilt on `prepublishOnly` and shipped via package.json "files";
+# Build output: rebuilt on `prepublishOnly` and shipped via package.json "files";
 # never source-controlled (the hashed dist chunks change on every build).
 dist/
 build/
@@ -18,7 +18,7 @@ coverage/
 .eslintcache
 .cache/
 
-# Env files — only the example is committed
+# Env files: only the example is committed
 .env
 .env.*
 !.env.example

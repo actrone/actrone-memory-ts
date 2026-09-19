@@ -1,9 +1,9 @@
 /**
- * Hybrid retrieval — dense + lexical + recency fused with Reciprocal Rank Fusion (Axis A3).
+ * Hybrid retrieval: dense + lexical + recency fused with Reciprocal Rank Fusion.
  *
  * A single ranking channel (embedding cosine) under-recalls with a weak default embedder and misses
  * exact-keyword matches even with a strong one. Reciprocal Rank Fusion (RRF) combines several
- * rankings without needing their scores on the same scale — the standard, parameter-light way to do
+ * rankings without needing their scores on the same scale, the standard, parameter-light way to do
  * hybrid (dense + lexical) retrieval. Pure and dependency-free (BM25 implemented here, no external
  * index), and re-ranks *within* the dense-threshold-admitted set, so the "only sufficiently-relevant
  * memories are returned" contract is unchanged. Mirrors the Python `actrone_memory.retrieval`.
@@ -16,7 +16,7 @@ import type { MemoryEntry } from "./models.js";
 export const DEFAULT_RRF_K = 60;
 const RECENCY_WINDOW_MS = 30 * 24 * 60 * 60 * 1000;
 
-/** Lowercase alphanumeric word tokens — the shared tokenisation for lexical scoring. */
+/** Lowercase alphanumeric word tokens: the shared tokenisation for lexical scoring. */
 export function tokenize(text: string): string[] {
   return text.toLowerCase().match(/[a-z0-9]+/g) ?? [];
 }

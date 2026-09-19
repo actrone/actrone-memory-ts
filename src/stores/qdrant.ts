@@ -101,7 +101,14 @@ export class QdrantL2Store implements L2Store {
         score_threshold: params.threshold,
         with_payload: true,
         filter: {
-          must: [{ key: "agentId", match: { value: params.agentId } }],
+          must: [
+            { key: "agentId", match: { value: params.agentId } },
+            // Filter server-side rather than after the fact, so `limit` still returns a
+            // full page when most of the collection is a different content type.
+            ...(params.contentTypes && params.contentTypes.length > 0
+              ? [{ key: "contentType", match: { any: [...params.contentTypes] } }]
+              : []),
+          ],
         },
       });
     } catch (err) {
@@ -128,7 +135,7 @@ export class QdrantL2Store implements L2Store {
     const denseRanking = [...denseScore.keys()].sort(
       (a, b) => (denseScore.get(b) ?? 0) - (denseScore.get(a) ?? 0),
     );
-    // Hybrid RRF (A3) fuses the server cosine with BM25 + recency when query text is provided.
+    // Hybrid RRF fuses the server cosine with BM25 + recency when query text is provided.
     const fusedOrder = fuseChannels({
       ids: [...entries.keys()],
       denseRanking,

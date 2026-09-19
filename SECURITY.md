@@ -21,7 +21,7 @@ Instead, email us privately at **[security@actrone.com](mailto:security@actrone.
 | Timeline | What we do |
 | --- | --- |
 | Within 72 hours | We acknowledge your report and confirm we received it |
-| Days 1–14 | We investigate, develop a fix, and review it internally |
+| Days 1-14 | We investigate, develop a fix, and review it internally |
 | Day 15 | We publish a patched release and a public advisory |
 
 We will not take legal action against researchers who follow this policy. We consider responsible disclosure a service to the community.

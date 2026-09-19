@@ -1,15 +1,15 @@
 import type { Sensitivity } from "./models.js";
 
 /**
- * Turns → durable facts, conforming to the shared extraction spec v1
- * (canonical: `docs/memory-spec/extraction.v1.md`). Kept in lockstep with the
- * Python `actrone_memory.extraction` — "improve once" = update the spec + eval.
+ * Turns → durable facts, conforming to the shared extraction spec v1. Kept in lockstep with the
+ * Python `actrone_memory.extraction` module: "improve once" means updating the prompt/schema and
+ * the eval together in both libraries.
  *
  * Extraction is best-effort, LLM-gated enrichment: a failure yields no facts and
  * never breaks the write path.
  */
 
-/** Spec version — bump on any prompt/schema change; keep the two libs aligned. */
+/** Spec version: bump on any prompt/schema change; keep the two libs aligned. */
 export const EXTRACTION_SPEC_VERSION = "1.0";
 
 /** Canonical system prompt (identical wording to the Python lib). */
@@ -19,7 +19,7 @@ export const EXTRACTION_SYSTEM_PROMPT =
   "stable user attributes, preferences, decisions, commitments, and key entities. " +
   "Ignore small talk, transient state, and anything already obvious.\n" +
   "For each fact, classify its sensitivity: 'none' (non-personal), 'low' (mild " +
-  "preference), 'pii' (personally identifiable — names, emails, phone, address, " +
+  "preference), 'pii' (personally identifiable, names, emails, phone, address, " +
   "account numbers), or 'sensitive' (health, financial, credentials, special " +
   "category). Assign an importance from 0.0 to 1.0.\n" +
   'Respond with strict JSON of the form {"facts": [{"content": "...", ' +
@@ -32,7 +32,7 @@ export interface ExtractedFact {
   readonly content: string;
   readonly sensitivity: Sensitivity;
   readonly topicTags: readonly string[];
-  /** Importance 0.0–1.0. */
+  /** Importance 0.0-1.0. */
   readonly importance: number;
 }
 

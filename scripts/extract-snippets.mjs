@@ -1,9 +1,10 @@
-#!/usr/bin/env node
+// Run with `node scripts/extract-snippets.mjs` (see package.json). No `#!` shebang: this module is
+// also imported by the test suite, and a shebang makes Node's ESM loader reject it.
 /**
- * extract-snippets — pull the `#region`-marked blocks out of the type-checked example files into a
- * `snippets.json` map (Public-Domain Cutover Runbook Phase 6, item 5). The docs render these by id
+ * extract-snippets: pull the `#region`-marked blocks out of the type-checked example files into a
+ * `snippets.json` map (rendered in the docs by id). The docs render these by id
  * instead of hand-typing code, so a documented snippet is always real, compiled code from the current
- * SDK — an example that stops compiling fails CI before it can be published stale.
+ * SDK: an example that stops compiling fails CI before it can be published stale.
  *
  * Markers (matching TypeDoc/VS Code region syntax):
  *   // #region <id>
@@ -42,7 +43,10 @@ function extract() {
   /** @type {Record<string,string>} */
   const snippets = {}
   for (const file of tsFiles()) {
-    const src = readFileSync(file, 'utf8')
+    // Normalise CRLF so the output does not depend on the checkout's line endings.
+    // Without this, regenerating on Windows embeds \r\n in every snippet string and the
+    // `--check` gate then fails on Linux CI (and vice versa) with no real change.
+    const src = readFileSync(file, 'utf8').replace(/\r\n/g, '\n')
     let m
     while ((m = REGION.exec(src)) !== null) {
       const [, id, body] = m

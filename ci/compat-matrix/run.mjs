@@ -1,11 +1,11 @@
 #!/usr/bin/env node
 /**
- * compat-matrix (runner) — verify ONE framework at ONE version boundary, in isolation.
+ * compat-matrix (runner), verify ONE framework at ONE version boundary, in isolation.
  *
  * In a fresh temp project it installs the BUILT @actrone/memory (from the repo root) + the framework
  * peer at the pinned spec + a TypeScript toolchain, then type-checks a canary against the REAL peer.
  * The canary is the framework's own examples/frameworks/<name>.ts (already checked against our adapter
- * API) with a peer install-smoke import prepended — so `tsc` fails if the peer no longer exists,
+ * API) with a peer install-smoke import prepended, so `tsc` fails if the peer no longer exists,
  * resolves, or type-checks at that version. Isolated per job (frameworks never share a dep graph).
  *
  *   node ci/compat-matrix/run.mjs --peer ai --spec ">=5.0.0 <6" --framework vercel \
@@ -74,13 +74,13 @@ try {
     ),
   );
 
-  // A dedicated canary already imports the framework and asserts our output against its typed call site —
+  // A dedicated canary already imports the framework and asserts our output against its typed call site,
   // use it verbatim. Otherwise the example only exercises our adapter API, so prepend a peer install-smoke
   // import (module + types must resolve at this version). Either way `tsc` runs against the REAL peer.
   const src = readFileSync(resolve(repoRoot, canaryPath), "utf8");
   const canary = dedicated
     ? src
-    : `// GENERATED compat canary — ${framework} @ ${spec} (do not edit)\n` +
+    : `// GENERATED compat canary: ${framework} @ ${spec} (do not edit)\n` +
       `import * as _compatPeer from ${JSON.stringify(peer)};\n` +
       `void _compatPeer;\n\n` +
       src;

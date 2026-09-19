@@ -1,4 +1,4 @@
-/** LangGraph.js recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** LangGraph.js recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region langgraph
 import { MemoryManager } from '@actrone/memory'
 import { langgraphMemory } from '@actrone/memory/adapters'

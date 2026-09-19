@@ -1,3 +1,4 @@
+import { ConfigurationError } from "./errors.js";
 import { heuristicTokenCounter, type TokenCounter } from "./tokens.js";
 
 /**
@@ -10,7 +11,7 @@ export interface MemoryConfig {
   readonly budgetFractionEpisodic: number;
   /** Fraction of the token budget reserved for recent session (L1) turns. */
   readonly budgetFractionSession: number;
-  /** Minimum cosine similarity for an L2 memory to be admitted (0–1). */
+  /** Minimum cosine similarity for an L2 memory to be admitted (0-1). */
   readonly relevanceThreshold: number;
   /** Maximum episodic memories to pull from L2 before budget pruning. */
   readonly maxEpisodicMemories: number;
@@ -19,23 +20,19 @@ export interface MemoryConfig {
   /** Weight on recency in the blended rank score. */
   readonly recencyWeight: number;
   /**
-   * Hybrid retrieval (Axis A3): among the threshold-admitted candidates, fuse the embedding (dense)
+   * Hybrid retrieval: among the threshold-admitted candidates, fuse the embedding (dense)
    * ranking with a BM25 (lexical) ranking and recency via Reciprocal Rank Fusion, so an exact-keyword
    * match the embedder under-ranks still surfaces. Admission (cosine ≥ threshold) is unchanged. Set
    * false for the classic single-channel dense+recency blend.
    */
   readonly hybridRetrieval: boolean;
   /**
-   * Cross-encoder rerank window (Axis A4): how many of the over-fetched candidates a configured
+   * Cross-encoder rerank window: how many of the over-fetched candidates a configured
    * {@link Reranker} rescores. Only takes effect when a reranker is passed to the manager.
    */
   readonly rerankTopK: number;
   /** Cap on retained turns per session in L1. */
   readonly maxSessionTurns: number;
-  /** Whether to auto-summarise a session to L2 once it grows large. */
-  readonly autoSummarise: boolean;
-  /** Turn count at which auto-summarisation triggers. */
-  readonly summariseAfterTurns: number;
   /** How token counts are computed. Defaults to a dependency-free heuristic. */
   readonly tokenCounter: TokenCounter;
 }
@@ -53,12 +50,61 @@ export const DEFAULT_CONFIG: MemoryConfig = {
   hybridRetrieval: true,
   rerankTopK: 20,
   maxSessionTurns: 50,
-  autoSummarise: false,
-  summariseAfterTurns: 20,
   tokenCounter: heuristicTokenCounter,
 };
 
-/** Merge partial overrides over the defaults into a complete config. */
+/** Bounds for the numeric knobs, checked when a config is resolved. */
+const RANGES: ReadonlyArray<
+  readonly [keyof MemoryConfig, number, number, "fraction" | "positive-int"]
+> = [
+  ["budgetFractionEpisodic", 0, 1, "fraction"],
+  ["budgetFractionSession", 0, 1, "fraction"],
+  ["relevanceThreshold", 0, 1, "fraction"],
+  ["relevanceWeight", 0, 1, "fraction"],
+  ["recencyWeight", 0, 1, "fraction"],
+  ["maxEpisodicMemories", 1, Number.MAX_SAFE_INTEGER, "positive-int"],
+  ["maxSessionTurns", 1, Number.MAX_SAFE_INTEGER, "positive-int"],
+  ["rerankTopK", 1, Number.MAX_SAFE_INTEGER, "positive-int"],
+];
+
+/**
+ * Merge partial overrides over the defaults into a complete config.
+ *
+ * Out-of-range values are rejected here rather than silently producing a manager
+ * that never recalls anything (a threshold above 1) or prunes every memory (a
+ * negative budget fraction). Mirrors the Python library's startup validation.
+ *
+ * @throws {ConfigurationError} When a knob is outside its documented range, or
+ * the episodic + session budget fractions together exceed the whole budget.
+ */
 export function resolveConfig(overrides: Partial<MemoryConfig> = {}): MemoryConfig {
-  return { ...DEFAULT_CONFIG, ...overrides };
+  const config: MemoryConfig = { ...DEFAULT_CONFIG, ...overrides };
+
+  for (const [key, min, max, kind] of RANGES) {
+    const value = config[key] as number;
+    if (typeof value !== "number" || !Number.isFinite(value)) {
+      throw new ConfigurationError(`${key} must be a finite number, got ${String(value)}`);
+    }
+    if (kind === "positive-int" && !Number.isInteger(value)) {
+      throw new ConfigurationError(`${key} must be an integer, got ${value}`);
+    }
+    if (value < min || value > max) {
+      throw new ConfigurationError(`${key} must be between ${min} and ${max}, got ${value}`);
+    }
+  }
+
+  const allocated = config.budgetFractionEpisodic + config.budgetFractionSession;
+  if (allocated > 1) {
+    throw new ConfigurationError(
+      "budgetFractionEpisodic + budgetFractionSession must not exceed 1.0, got " +
+        `${allocated.toFixed(4)}. The remainder is reserved for the system prompt ` +
+        "and the current turn.",
+    );
+  }
+
+  if (typeof config.tokenCounter !== "function") {
+    throw new ConfigurationError("tokenCounter must be a function");
+  }
+
+  return config;
 }

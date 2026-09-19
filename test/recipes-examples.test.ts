@@ -7,10 +7,10 @@ import { describe, expect, it } from "vitest";
 import { listFrameworks } from "../src/index.js";
 
 /**
- * Trust gate (§4b.3): every framework recipe must be backed by a real, CI-typechecked example
+ * Trust gate: every framework recipe must be backed by a real, CI-typechecked example
  * under examples/frameworks/ whose `#region <fw>` snippet is extracted into examples/snippets.json.
  * `typecheck:examples` compiles those examples against the current adapter API in CI, so a recipe
- * whose wiring stops compiling fails the build — the recipes are verified, not just strings.
+ * whose wiring stops compiling fails the build: the recipes are verified, not just strings.
  */
 const here = dirname(fileURLToPath(import.meta.url));
 const snippets = JSON.parse(

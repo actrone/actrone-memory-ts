@@ -40,7 +40,7 @@ export interface MemoryManagerParts {
   readonly config: MemoryConfig;
   /** Optional LLM fact extractor (turns → durable facts). LLM-gated, opt-in. */
   readonly extractor?: FactExtractor;
-  /** Optional cross-encoder reranker (Axis A4). Reorders the top-K of an over-fetched set. */
+  /** Optional cross-encoder reranker. Reorders the top-K of an over-fetched set. */
   readonly reranker?: Reranker;
 }
 
@@ -76,7 +76,7 @@ export class MemoryManager {
 
   /**
    * Build a ready manager. With no arguments it uses the in-memory store + the
-   * dependency-free local embedder — the zero-config on-ramp. Pass stores /
+   * dependency-free local embedder: the zero-config on-ramp. Pass stores /
    * embedder to back it with Redis + Qdrant + a real embedding model.
    */
   static async create(options: {
@@ -150,13 +150,13 @@ export class MemoryManager {
 
     const start = performance.now();
 
-    // Phase 1 — parallel fetch: embed the query and pull recent L1 turns concurrently.
+    // Phase 1: parallel fetch: embed the query and pull recent L1 turns concurrently.
     const [queryEmbedding, recentTurns] = await Promise.all([
       this.embedder.embed(query),
       this.l1.getRecentTurns(agentId, sessionId),
     ]);
 
-    // Phase 3 — semantic search against L2 (needs the embedding from Phase 1). Hybrid RRF (A3)
+    // Phase 3: semantic search against L2 (needs the embedding from Phase 1). Hybrid RRF
     // fuses the query text's lexical signal when enabled.
     const episodicCandidates = await this.l2.search({
       agentId,
@@ -167,7 +167,7 @@ export class MemoryManager {
       recencyWeight: this.cfg.recencyWeight,
       ...(this.cfg.hybridRetrieval ? { queryText: query } : {}),
     });
-    // Phase 3b — optional cross-encoder rerank over the top-K (precision lift; A4).
+    // Phase 3b: optional cross-encoder rerank over the top-K (precision lift; A4).
     const episodicMemories = await applyReranker(
       this.reranker,
       query,
@@ -175,11 +175,11 @@ export class MemoryManager {
       this.cfg.rerankTopK,
     );
 
-    // Phase 2 — budget allocation.
+    // Phase 2: budget allocation.
     const episodicBudget = Math.floor(tokenBudget * this.cfg.budgetFractionEpisodic);
     const sessionBudget = Math.floor(tokenBudget * this.cfg.budgetFractionSession);
 
-    // Phase 4 — priority-weighted pruning.
+    // Phase 4: priority-weighted pruning.
     const prunedTurns = this.pruneTurns(recentTurns, sessionBudget);
     const prunedMemories = this.pruneMemories(episodicMemories, episodicBudget);
 
@@ -250,7 +250,7 @@ export class MemoryManager {
   }
 
   /**
-   * Local right-to-erasure — irreversibly delete an agent's long-term memories.
+   * Local right-to-erasure: irreversibly delete an agent's long-term memories.
    * The governance seed that graduates to hosted *provable* erasure. When
    * `sessionId` is given, the session's hot-tier turns are cleared too; otherwise
    * only the durable L2 store is wiped (hot-tier turns are ephemeral).
@@ -278,7 +278,7 @@ export class MemoryManager {
     if (limit < 1) throw new ValidationError("limit", "must be ≥ 1");
 
     const embedding = await this.embedder.embed(query);
-    // Over-fetch when reranking so the cross-encoder has a candidate pool to reorder (A4).
+    // Over-fetch when reranking so the cross-encoder has a candidate pool to reorder.
     const fetchLimit = this.reranker ? Math.max(limit, this.cfg.rerankTopK) : limit;
     const candidates = await this.l2.search({
       agentId,
@@ -323,7 +323,7 @@ export class MemoryManager {
     validateId(sessionId, "sessionId");
     if (this.extractor === undefined) {
       throw new ConfigurationError(
-        "Fact extraction is not enabled — pass an `extractor` to MemoryManager.create().",
+        "Fact extraction is not enabled: pass an `extractor` to MemoryManager.create().",
       );
     }
     const turns = await this.l1.getRecentTurns(agentId, sessionId, n);
@@ -368,10 +368,22 @@ export class MemoryManager {
     return ids;
   }
 
-  /** Release any resources. In-memory mode is a no-op; adapters override the stores. */
+  /**
+   * Release resources the stores own, by calling their optional `close()`.
+   *
+   * The built-in adapters take an already-connected client the caller constructed, so they
+   * do not implement `close()` and nothing is torn down here: disconnecting an injected
+   * client stays the application's job. A custom store that opens its own connection should
+   * implement `close()`, and this is what calls it. Mirrors the Python manager, which closes
+   * both tiers on shutdown.
+   */
   async close(): Promise<void> {
-    // In-memory store holds no external connections. Redis/Qdrant adapters that
-    // implement a `close()` are drained by their own lifecycle wiring.
+    await this.l1.close?.();
+    // Guard against the common case of one object serving both tiers (InMemoryStore does),
+    // which would otherwise be closed twice.
+    if (this.l2 !== (this.l1 as unknown as L2Store)) {
+      await this.l2.close?.();
+    }
   }
 
   // ── Internal pruning ────────────────────────────────────────────────────────

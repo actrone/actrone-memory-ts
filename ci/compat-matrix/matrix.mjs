@@ -1,18 +1,18 @@
 #!/usr/bin/env node
 /**
- * compat-matrix (emitter) — expand @actrone/memory's compatibility.json into a version-matrix job list.
+ * compat-matrix (emitter), expand @actrone/memory's compatibility.json into a version-matrix job list.
  *
  * The adapters are STRUCTURAL (no runtime framework import), so the drift gate (scripts/check-compat.mjs)
  * can only prove the *declared* peer range is self-consistent. This matrix goes further: for each framework
- * it installs the REAL peer at three boundaries of its declared range and type-checks a canary against it —
+ * it installs the REAL peer at three boundaries of its declared range and type-checks a canary against it,
  * so a peer that no longer exists / resolves / type-checks at a boundary is caught here, not by a user.
  *
  *   node ci/compat-matrix/matrix.mjs emit
  *
  * Boundaries per framework (derived from the manifest `range`, e.g. ">=5.0.0 <6"):
- *   floor    — the exact `>=` version (oldest supported)         → hard gate
- *   current  — the whole range (npm resolves the latest in it)   → hard gate
- *   next     — `>=<cap>` (the next major we exclude; may not exist yet) → allow_fail (early warning)
+ *   floor: the exact `>=` version (oldest supported)         → hard gate
+ *   current: the whole range (npm resolves the latest in it)   → hard gate
+ *   next: `>=<cap>` (the next major we exclude; may not exist yet) → allow_fail (early warning)
  *
  * Each job: { framework, peer, spec, example, which, allow_fail }. `example` is the framework's own
  * examples/frameworks/<name>.ts (already type-checked against our adapter); the runner prepends a peer
@@ -25,9 +25,9 @@ import { fileURLToPath } from "node:url";
 /**
  * Derive the { floor, current, next } install specs for one framework's declared range. Handles the two
  * manifest range styles: an explicit ">=<floor> <<cap>" and npm caret "^<x.y.z>".
- *   floor   — the exact oldest supported version
- *   current — the whole declared range (npm resolves the latest satisfying it)
- *   next    — ">=<next-major-boundary>" (the version line we exclude; may not exist yet → allow_fail)
+ *   floor: the exact oldest supported version
+ *   current: the whole declared range (npm resolves the latest satisfying it)
+ *   next: ">=<next-major-boundary>" (the version line we exclude; may not exist yet → allow_fail)
  */
 export function specsForRange(range) {
   const r = String(range).trim();

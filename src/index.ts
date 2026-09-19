@@ -1,11 +1,11 @@
 /**
- * `@actrone/memory` — two-tier persistent agent memory for TypeScript/JS.
+ * `@actrone/memory`: two-tier persistent agent memory for TypeScript/JS.
  *
  * The dependency-free, self-hosted on-ramp: short-term session turns + long-term
  * semantic recall over a pluggable store (in-memory by default; Redis/Qdrant
  * adapters implement the same {@link L1Store}/{@link L2Store} seams). When you
  * outgrow self-hosting, swap `MemoryManager` for `@actrone/sdk`'s
- * `ActroneMemoryManager` — same API, backed by the governed hosted Orchestrator.
+ * `ActroneMemoryManager`: same API, backed by the governed hosted Orchestrator.
  */
 
 export { MemoryManager, type MemoryManagerParts } from "./manager.js";
@@ -47,6 +47,15 @@ export {
   type QdrantHit,
   type QdrantL2Options,
 } from "./stores/qdrant.js";
+export {
+  PgVectorL2Store,
+  type PgLike,
+  type PgVectorL2Options,
+} from "./stores/pgvector.js";
+export {
+  PostgresL1Store,
+  type PostgresL1Options,
+} from "./stores/postgres.js";
 export { type TokenCounter, heuristicTokenCounter } from "./tokens.js";
 export {
   type ExtractedFact,

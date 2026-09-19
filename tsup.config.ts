@@ -3,12 +3,12 @@ import { defineConfig } from "tsup";
 /**
  * Build configuration for `@actrone/memory`.
  *
- * ESM-only, with type declarations. `zod` is bundled as a dependency (not
- * externalised) consumers already resolve it; keeping it external avoids a
- * duplicate copy when used alongside `@actrone/sdk`.
+ * ESM-only, with type declarations. `zod` is a regular `dependency` (package.json),
+ * not bundled into `dist`: consumers already resolve it via npm, and keeping it
+ * external avoids a duplicate copy when used alongside `@actrone/sdk`.
  */
 export default defineConfig({
-  entry: ["src/index.ts", "src/adapters.ts", "src/cli.ts"],
+  entry: ["src/index.ts", "src/adapters.ts", "src/testing.ts", "src/cli.ts"],
   format: ["esm"],
   dts: true,
   sourcemap: true,

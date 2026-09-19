@@ -1,5 +1,5 @@
 {
-  "//": "Type-checks the docs examples against the CURRENT package source. The paths mapping lets the examples import the package by its published name (@actrone/memory) — so the extracted snippets read exactly as a consumer's code — while resolving to ../src for the check.",
+  "//": "Type-checks the docs examples against the CURRENT package source. The paths mapping lets the examples import the package by its published name (@actrone/memory), so the extracted snippets read exactly as a consumer's code, while resolving to ../src for the check.",
   "extends": "../tsconfig.json",
   "compilerOptions": {
     "noEmit": true,

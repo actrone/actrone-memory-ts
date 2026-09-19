@@ -1,4 +1,4 @@
-/** OpenAI Agents JS recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** OpenAI Agents JS recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region openai-agents
 import { MemoryManager } from '@actrone/memory'
 import { openaiAgentsMemory } from '@actrone/memory/adapters'

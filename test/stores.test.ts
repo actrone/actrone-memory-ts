@@ -47,6 +47,17 @@ class FakeRedis implements RedisLike {
     const i = index < 0 ? l.length + index : index;
     return l[i] ?? null;
   }
+  // ioredis-style `SET key val EX n NX`: returns "OK" when set, null when NX blocked it.
+  private readonly strings = new Map<string, number>();
+  async set(key: string, _value: string, ...args: readonly unknown[]): Promise<string | null> {
+    const nx = args.includes("NX");
+    const exIndex = args.indexOf("EX");
+    const ttl = exIndex >= 0 ? Number(args[exIndex + 1]) : 0;
+    const held = this.strings.get(key);
+    if (nx && held !== undefined && held > Date.now()) return null;
+    this.strings.set(key, Date.now() + ttl * 1000);
+    return "OK";
+  }
 }
 
 /** In-memory fake of the QdrantLike surface (cosine over stored points). */
@@ -94,6 +105,42 @@ class FakeQdrant implements QdrantLike {
     return "OK";
   }
 }
+
+describe("RedisL1Store summary lock", () => {
+  it("admits exactly one holder per window via SET NX EX", async () => {
+    const store = new RedisL1Store(new FakeRedis());
+
+    expect(await store.tryAcquireSummaryLock("agent-1", "s1", 60)).toBe(true);
+    expect(await store.tryAcquireSummaryLock("agent-1", "s1", 60)).toBe(false);
+  });
+
+  it("scopes the lock per session", async () => {
+    const store = new RedisL1Store(new FakeRedis());
+
+    expect(await store.tryAcquireSummaryLock("agent-1", "s1", 60)).toBe(true);
+    expect(await store.tryAcquireSummaryLock("agent-1", "s2", 60)).toBe(true);
+  });
+
+  it("refuses to fake a lock when the client cannot SET", async () => {
+    // Silently returning true here would let every worker summarise at once.
+    const withoutSet = new FakeRedis() as RedisLike;
+    delete (withoutSet as { set?: unknown }).set;
+    const noSet: RedisLike = {
+      rpush: withoutSet.rpush.bind(withoutSet),
+      lrange: withoutSet.lrange.bind(withoutSet),
+      ltrim: withoutSet.ltrim.bind(withoutSet),
+      llen: withoutSet.llen.bind(withoutSet),
+      del: withoutSet.del.bind(withoutSet),
+      expire: withoutSet.expire.bind(withoutSet),
+      lindex: withoutSet.lindex.bind(withoutSet),
+    };
+    const store = new RedisL1Store(noSet);
+
+    await expect(store.tryAcquireSummaryLock("agent-1", "s1", 60)).rejects.toThrow(
+      /no set\(\)/,
+    );
+  });
+});
 
 describe("RedisL1Store", () => {
   it("appends, caps, reads recent, counts, clears, and reports metadata", async () => {

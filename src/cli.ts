@@ -5,8 +5,8 @@ import { pathToFileURL } from "node:url";
 import { getRecipe, listFrameworks, renderRecipe, renderStandaloneFile } from "./recipes.js";
 
 /**
- * `actrone-memory` CLI — the non-destructive, existing-project onboarding path
- * (§4b). It only **prints** a framework recipe or **creates one new file**; it
+ * `actrone-memory` CLI: the non-destructive, existing-project onboarding path
+ *. It only **prints** a framework recipe or **creates one new file**; it
  * never reads or edits your existing code. `create-actrone-app` is the greenfield
  * counterpart.
  *
@@ -24,7 +24,7 @@ export interface CliIO {
 }
 
 const USAGE =
-  "actrone-memory — add memory to your agent (non-destructive)\n\n" +
+  "actrone-memory: add memory to your agent (non-destructive)\n\n" +
   "Usage:\n" +
   "  actrone-memory add <framework> [--write <file>]   print a recipe, or write ONE new file\n" +
   "  actrone-memory list                               list supported frameworks\n\n" +
@@ -82,7 +82,7 @@ export function runCli(args: readonly string[], io: CliIO): number {
     io.log(
       `Wrote ${target} (a new self-contained file).\n` +
         `Install: ${recipe.install}\n` +
-        "Import what you need from it into your agent — nothing in your project was modified.",
+        "Import what you need from it into your agent; nothing in your project was modified.",
     );
     return 0;
   }

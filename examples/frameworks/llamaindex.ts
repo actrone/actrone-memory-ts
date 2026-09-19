@@ -1,4 +1,4 @@
-/** LlamaIndex.TS recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** LlamaIndex.TS recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region llamaindex
 import { MemoryManager } from '@actrone/memory'
 import { llamaindexMemory } from '@actrone/memory/adapters'

@@ -1,6 +1,7 @@
-#!/usr/bin/env node
+// Run with `node scripts/check-compat.mjs` (see package.json). No `#!` shebang: this module is
+// also imported by the test suite, and a shebang makes Node's ESM loader reject it.
 /**
- * check-compat — the framework-compatibility drift gate for @actrone/memory.
+ * check-compat: the framework-compatibility drift gate for @actrone/memory.
  *
  * Makes compatibility.json the single source of truth: fails if the optional `peerDependencies` in
  * package.json or the framework compatibility matrix in README.md drift from it.
@@ -33,7 +34,7 @@ export function checkAgainst(manifest, pkg, readme) {
     if (!meta[peer]?.optional) {
       errors.push(`[${name}] peer '${peer}' must be optional in peerDependenciesMeta`);
     }
-    // README rows read `<Label> | <adapter> | `<peer> <range>` …` — assert the label row exists and
+    // README rows read `<Label> | <adapter> | `<peer> <range>` …`, assert the label row exists and
     // carries this peer at the start of a code span (`` `<peer> ``), so it can't reference the wrong
     // package (works for both `>=x <y` and `^x` range styles).
     if (!readme.includes(label)) {
@@ -45,7 +46,7 @@ export function checkAgainst(manifest, pkg, readme) {
   }
 
   // reverse: every optional peer must be a manifest framework's peer OR a known supporting/infra peer
-  // (e.g. @ai-sdk/openai, openai, @temporalio/* — declared in `non_framework_peers`).
+  // (e.g. @ai-sdk/openai, openai, @temporalio/*: declared in `non_framework_peers`).
   const known = new Set(Object.values(frameworks).map((f) => f.peer));
   const nonFramework = new Set(manifest.non_framework_peers ?? []);
   for (const peer of Object.keys(meta)) {
@@ -72,12 +73,12 @@ if (import.meta.url === `file://${process.argv[1]}` || process.argv[1]?.endsWith
   const root = resolve(dirname(fileURLToPath(import.meta.url)), "..");
   const { errors, count } = check(root);
   if (errors.length > 0) {
-    console.error("[check-compat] DRIFT — package.json/README disagree with compatibility.json:\n");
+    console.error("[check-compat] DRIFT: package.json/README disagree with compatibility.json:\n");
     for (const e of errors) console.error(`  x ${e}`);
     console.error("\nUpdate compatibility.json (the source of truth) or fix the drift, then re-run.");
     process.exit(1);
   }
   console.log(
-    `[check-compat] in sync — ${count} frameworks; peerDependencies + README matrix agree OK`,
+    `[check-compat] in sync: ${count} frameworks; peerDependencies + README matrix agree OK`,
   );
 }

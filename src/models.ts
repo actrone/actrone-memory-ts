@@ -13,7 +13,7 @@ export type ContentType = "turn" | "summary" | "tool_result" | "injected" | "fac
 /**
  * Provenance-typing v1 (the governance seed that graduates to hosted). Every
  * stored fact carries *where it came from* and *how sensitive it is*, so a memory
- * can be filtered, attributed, and erased by policy — even in the free library.
+ * can be filtered, attributed, and erased by policy, even in the free library.
  * These vocabularies are the language-neutral memory spec shared with the Python
  * lib and the hosted engine; keep the two enums in lockstep.
  *
@@ -58,7 +58,7 @@ export interface MemoryEntry {
   readonly contentType: ContentType;
   /** The embedding vector, when the entry has been embedded. */
   readonly embedding?: readonly number[];
-  /** Importance 0.0–1.0; higher surfaces more readily. */
+  /** Importance 0.0-1.0; higher surfaces more readily. */
   readonly importanceScore: number;
   readonly topicTags: readonly string[];
   readonly tokenCount: number;
@@ -66,11 +66,11 @@ export interface MemoryEntry {
   readonly timestamp: string;
   /** Turn IDs this entry was summarised from, when applicable. */
   readonly sourceTurnIds: readonly string[];
-  /** Provenance attribution — where this fact originated. Default `"unknown"`. */
+  /** Provenance attribution: where this fact originated. Default `"unknown"`. */
   readonly source: MemorySource;
   /** PII/sensitivity classification for governance. Default `"none"`. */
   readonly sensitivity: Sensitivity;
-  /** Relevance score attached by a search (0–1); absent outside search results. */
+  /** Relevance score attached by a search (0-1); absent outside search results. */
   readonly relevanceScore?: number;
 }
 

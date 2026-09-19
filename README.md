@@ -101,8 +101,84 @@ const mm = await MemoryManager.create({
 });
 ```
 
-`L1Store`, `L2Store`, and `Embedder` are small interfaces. Implement them against
-any backend without touching the manager.
+`L1Store`, `L2Store`, and `Embedder` are small interfaces, so you can implement them
+against any backend without touching the manager. What ships:
+
+| Tier | Adapters |
+| --- | --- |
+| Hot session (L1) | `InMemoryStore` (default), `RedisL1Store`, `PostgresL1Store` |
+| Long-term semantic (L2) | `InMemoryStore` (default), `QdrantL2Store`, `PgVectorL2Store` |
+
+Every adapter takes an **injected client**, so this package has no hard `ioredis`,
+`@qdrant/js-client-rest` or `pg` dependency.
+
+**Redis-compatible servers need no separate adapter.** `RedisL1Store` uses only standard
+commands, so **Valkey**, DragonflyDB, ElastiCache and Upstash work with it as-is.
+
+**Postgres runs both tiers**, which is the "no new infrastructure" option: if you already run
+Postgres with the [pgvector](https://github.com/pgvector/pgvector) extension, memory needs no
+extra service at all. One pool serves both.
+
+```ts
+import { Pool } from "pg";
+import { MemoryManager, PostgresL1Store, PgVectorL2Store } from "@actrone/memory";
+
+const pool = new Pool({ connectionString: process.env.DATABASE_URL });
+const l1 = new PostgresL1Store(pool);
+const l2 = new PgVectorL2Store(pool, { dimensions: 1536 });
+await l1.ensureSchema();
+await l2.ensureSchema();
+
+const mm = await MemoryManager.create({ l1, l2, embedder: myEmbedder });
+```
+
+### Bring your own store
+
+The built-in adapters have no privileged access: they implement `L1Store` and `L2Store` like
+anything else would. Any engine that can satisfy those interfaces plugs in without touching
+the manager, and the store you pass is used as-is, so no built-in backend is constructed or
+connected behind it.
+
+```ts
+import { MemoryManager } from "@actrone/memory";
+
+class MyWeaviateStore implements L2Store {
+  async upsert(entry) { /* ... */ }
+  async search(params) { /* ... */ }
+  async delete(memoryId) { /* ... */ }
+  async deleteAgentMemories(agentId) { /* ... */ }
+}
+
+const mm = await MemoryManager.create({ l2: new MyWeaviateStore(client) });
+```
+
+Two things worth knowing before you write one:
+
+- **Return the embedding with each search hit** if you rank with the bundled `hybridRank`
+  helper, which recomputes cosine locally. If your database ranks server-side and does not
+  return vectors (Pinecone needs `includeValues`), use `fuseChannels` with its own scores
+  instead, the way `QdrantL2Store` does.
+- **`close()` and `tryAcquireSummaryLock()` are optional.** Implement `close()` if your store
+  opens its own connection; `MemoryManager.close()` calls it. Implement the lock with a
+  single atomic operation if you want fleet-wide background-job coordination.
+
+### Verifying your own store
+
+To make that a supported extension point rather than a claim, the package ships the same
+conformance suite the built-in stores are held to:
+
+```ts
+import { checkL1Store, checkL2Store } from "@actrone/memory/testing";
+
+await checkL2Store(() => new MyWeaviateStore(client), { dimensions: 1536 });
+```
+
+It checks the behaviours the type system cannot: turns come back oldest-first, `n` windows
+from the end, a search never returns another agent's memories, `threshold`, `limit` and
+`contentTypes` are honoured, an upsert replaces rather than duplicates, erasure is scoped,
+and a summary lock admits one holder. Each failure throws `ConformanceError` naming the
+requirement. The Python library ships the same suite as `actrone_memory.testing` against the
+same contract, so an adapter in either language is held to the same bar.
 
 ## Privacy and PII: local-first by default, cloud-capable
 

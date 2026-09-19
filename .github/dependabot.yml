@@ -1,0 +1,34 @@
+version: 2
+
+# Every action in .github/workflows is pinned to an exact commit SHA, which stops a
+# retagged release from silently changing what runs in CI. The trade-off is that a
+# pinned SHA never picks up a security fix on its own, so Dependabot owns bumping them
+# (it rewrites the SHA and the trailing `# vX.Y.Z` comment together). Without this,
+# pinning would quietly turn into running known-stale actions.
+updates:
+  - package-ecosystem: github-actions
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore"
+    groups:
+      actions:
+        patterns: ["*"]
+
+  - package-ecosystem: npm
+    directory: "/"
+    schedule:
+      interval: weekly
+    commit-message:
+      prefix: "chore"
+    # devDependencies are pinned exactly (see package.json), so security fixes such as
+    # the vitest/esbuild advisories need an explicit bump rather than a floating range.
+    # Grouping them keeps that to one reviewable PR a week.
+    groups:
+      dev-dependencies:
+        dependency-type: development
+        patterns: ["*"]
+    # The package ships with `zod` as its only runtime dependency; surface those
+    # individually so a breaking change is never batched into a tooling PR.
+    open-pull-requests-limit: 5

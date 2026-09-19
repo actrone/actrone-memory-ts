@@ -1,4 +1,4 @@
-/** VoltAgent recipe — CI-typechecked against the current @actrone/memory adapter API. */
+/** VoltAgent recipe, CI-typechecked against the current @actrone/memory adapter API. */
 // #region voltagent
 import { MemoryManager } from '@actrone/memory'
 import { voltagentMemory } from '@actrone/memory/adapters'

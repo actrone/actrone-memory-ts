@@ -1,22 +1,22 @@
 name: Framework Compatibility (version matrix)
 
-# The DEEP compat layer. The fast per-PR drift gate (scripts/check-compat.mjs — peer range / README
+# The DEEP compat layer. The fast per-PR drift gate (scripts/check-compat.mjs, peer range / README
 # consistency) runs in ci.yml. This workflow goes further: on a schedule it installs each declared
 # framework peer at its range boundaries (floor / current / next) in ISOLATED jobs and type-checks our
-# documented integration (examples/frameworks/<fw>.ts) against the REAL peer — so a peer that no longer
+# documented integration (examples/frameworks/<fw>.ts) against the REAL peer, so a peer that no longer
 # exists, resolves, or type-checks at a boundary is caught here, not by a user. `next` (the excluded
-# next-major) jobs are allow_fail — early warning, not a gate.
+# next-major) jobs are allow_fail: early warning, not a gate.
 #
 # Why this exists: the adapters are STRUCTURAL (no runtime framework import), so the drift gate alone
 # can't prove real-SDK compatibility. This matches the Python repos' ci/compat-matrix version matrix.
 
 on:
   schedule:
-    - cron: "0 6 * * 1" # Mondays 06:00 UTC — catch new framework releases within a week
+    - cron: "0 6 * * 1" # Mondays 06:00 UTC: catch new framework releases within a week
   workflow_dispatch: {}
   pull_request:
     # On a PR that only touches the tooling, validate the emitter (fast). The heavy version-matrix
-    # (an npm install per framework/boundary) stays scheduled — see the `if` guards below.
+    # (an npm install per framework/boundary) stays scheduled, see the `if` guards below.
     paths:
       - "ci/compat-matrix/**"
       - ".github/workflows/compat-matrix.yml"
@@ -31,8 +31,8 @@ jobs:
     outputs:
       jobs: ${{ steps.emit.outputs.jobs }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
       - id: emit
@@ -41,7 +41,7 @@ jobs:
   version-matrix:
     name: ${{ matrix.job.framework }}@${{ matrix.job.which }}
     needs: emit-matrix
-    # Heavy (an install per job) — scheduled/dispatch only, never on a PR.
+    # Heavy (an install per job), scheduled/dispatch only, never on a PR.
     if: github.event_name != 'pull_request'
     runs-on: ubuntu-latest
     continue-on-error: ${{ matrix.job.allow_fail }}
@@ -50,15 +50,15 @@ jobs:
       matrix:
         job: ${{ fromJson(needs.emit-matrix.outputs.jobs) }}
     steps:
-      - uses: actions/checkout@v4
-      - uses: actions/setup-node@v4
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020 # v4.4.0
         with:
           node-version: "22"
           cache: npm
       # Build @actrone/memory so the runner installs the real dist (what npm publishes).
       - run: npm ci
       - run: npm run build
-      - name: canary — ${{ matrix.job.framework }} @ ${{ matrix.job.spec }}
+      - name: "canary: ${{ matrix.job.framework }} @ ${{ matrix.job.spec }}"
         run: >-
           node ci/compat-matrix/run.mjs
           --peer "${{ matrix.job.peer }}"
