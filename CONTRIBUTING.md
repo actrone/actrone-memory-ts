@@ -1,4 +1,4 @@
-# Contributing to @actrone/memory
+# Contributing to actrone-memory
 
 First off, thank you for wanting to help. Whether it's fixing a typo, improving a code example, or building a new integration, every contribution matters.
 

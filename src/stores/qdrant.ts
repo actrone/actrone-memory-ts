@@ -10,31 +10,52 @@ export interface QdrantHit {
   readonly payload?: Record<string, unknown> | null;
 }
 
-/**
- * Minimal structural interface for a Qdrant client (`@qdrant/js-client-rest`
- * compatible). Injected so `@actrone/memory` needs no hard Qdrant dependency and
- * the store is unit-testable with an in-memory fake.
- */
-export interface QdrantLike {
+/** The payload filter this store sends: every condition must match a value, or any of a list. */
+export interface QdrantFilter {
+  must: Array<{ key: string; match: { value: string } | { any: string[] } }>;
+}
+
+/** The search options both Qdrant search calls take. */
+export interface QdrantSearchOptions {
+  limit: number;
+  score_threshold?: number;
+  filter?: QdrantFilter;
+  with_payload?: boolean;
+}
+
+export interface QdrantWriteClient {
   upsert(
     collection: string,
     args: { points: Array<{ id: string; vector: number[]; payload: Record<string, unknown> }> },
   ): Promise<unknown>;
-  search(
-    collection: string,
-    args: {
-      vector: number[];
-      limit: number;
-      score_threshold?: number;
-      filter?: unknown;
-      with_payload?: boolean;
-    },
-  ): Promise<QdrantHit[]>;
   delete(
     collection: string,
-    args: { points: string[] } | { filter: unknown },
+    args: { points: string[] } | { filter: QdrantFilter },
   ): Promise<unknown>;
 }
+
+/** The Query API: `@qdrant/js-client-rest` 1.10 and later, and the only search call from 1.16. */
+export interface QdrantQueryClient extends QdrantWriteClient {
+  query(
+    collection: string,
+    args: QdrantSearchOptions & { query: number[] },
+  ): Promise<{ points: QdrantHit[] }>;
+}
+
+/** The legacy search call of clients older than 1.10 (and simple test fakes). */
+export interface QdrantSearchClient extends QdrantWriteClient {
+  search(collection: string, args: QdrantSearchOptions & { vector: number[] }): Promise<QdrantHit[]>;
+}
+
+/**
+ * Minimal structural interface for a Qdrant client: a current `@qdrant/js-client-rest`
+ * (which searches with `query`) or an older one (`search`). Injected so `actrone-memory` needs
+ * no hard Qdrant dependency and the store is unit-testable with an in-memory fake.
+ *
+ * The store does not create its collection: create it first, with a vector size equal to the
+ * embedder's `dimensions` and cosine distance.
+ */
+export type QdrantLike = QdrantQueryClient | QdrantSearchClient;
 
 export interface QdrantL2Options {
   /** Collection name. Default "actrone_memory". */
@@ -93,24 +114,28 @@ export class QdrantL2Store implements L2Store {
 
   async search(params: L2SearchParams): Promise<MemoryEntry[]> {
     let hits: QdrantHit[];
+    const vector = [...params.queryEmbedding];
+    const options: QdrantSearchOptions = {
+      // Over-fetch a little so the recency re-rank has candidates to reorder.
+      limit: Math.max(params.limit * 2, params.limit),
+      score_threshold: params.threshold,
+      with_payload: true,
+      filter: {
+        must: [
+          { key: "agentId", match: { value: params.agentId } },
+          // Filter server-side rather than after the fact, so `limit` still returns a
+          // full page when most of the collection is a different content type.
+          ...(params.contentTypes && params.contentTypes.length > 0
+            ? [{ key: "contentType", match: { any: [...params.contentTypes] } }]
+            : []),
+        ],
+      },
+    };
     try {
-      hits = await this.client.search(this.collection, {
-        vector: [...params.queryEmbedding],
-        // Over-fetch a little so the recency re-rank has candidates to reorder.
-        limit: Math.max(params.limit * 2, params.limit),
-        score_threshold: params.threshold,
-        with_payload: true,
-        filter: {
-          must: [
-            { key: "agentId", match: { value: params.agentId } },
-            // Filter server-side rather than after the fact, so `limit` still returns a
-            // full page when most of the collection is a different content type.
-            ...(params.contentTypes && params.contentTypes.length > 0
-              ? [{ key: "contentType", match: { any: [...params.contentTypes] } }]
-              : []),
-          ],
-        },
-      });
+      hits =
+        "query" in this.client
+          ? (await this.client.query(this.collection, { ...options, query: vector })).points
+          : await this.client.search(this.collection, { ...options, vector });
     } catch (err) {
       throw new StoreConnectionError("qdrant search failed", { cause: String(err) });
     }

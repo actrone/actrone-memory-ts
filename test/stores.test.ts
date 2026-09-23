@@ -6,6 +6,8 @@ import {
   QdrantL2Store,
   type QdrantHit,
   type QdrantLike,
+  type QdrantQueryClient,
+  type QdrantSearchClient,
   RedisL1Store,
   type RedisLike,
 } from "../src/index.js";
@@ -60,8 +62,8 @@ class FakeRedis implements RedisLike {
   }
 }
 
-/** In-memory fake of the QdrantLike surface (cosine over stored points). */
-class FakeQdrant implements QdrantLike {
+/** In-memory fake of a legacy (`search`) Qdrant client: cosine over stored points. */
+class FakeQdrant implements QdrantSearchClient {
   private readonly points = new Map<
     string,
     { vector: number[]; payload: Record<string, unknown> }
@@ -218,6 +220,38 @@ describe("QdrantL2Store", () => {
       recencyWeight: 0.3,
     });
     expect(after).toHaveLength(0);
+  });
+
+  it("searches with the Query API when the client has it, as current @qdrant/js-client-rest does", async () => {
+    // Clients from 1.16 on have no `search` at all; before this, the store only called `search`
+    // and could not be used with the client users install today.
+    const inner = new FakeQdrant();
+    const calls: Array<Parameters<QdrantQueryClient["query"]>[1]> = [];
+    const current: QdrantQueryClient = {
+      upsert: (c, args) => inner.upsert(c, args),
+      delete: (c, args) => inner.delete(c, args),
+      async query(c, args) {
+        calls.push(args);
+        const { query, ...options } = args;
+        return { points: await inner.search(c, { ...options, vector: query }) };
+      },
+    };
+    const store = new QdrantL2Store(current);
+    const vector = hashVec("refunds take five days", 8);
+    await store.upsert({
+      id: "m1", agentId: "bot", sessionId: "s", content: "refunds take five days", contentType: "injected",
+      importanceScore: 0.9, topicTags: [], tokenCount: 3, timestamp: new Date().toISOString(),
+      sourceTurnIds: [], source: "injected", sensitivity: "none", embedding: vector,
+    });
+
+    const hits = await store.search({
+      agentId: "bot", queryEmbedding: vector, threshold: 0.4, limit: 5, relevanceWeight: 0.7, recencyWeight: 0.3,
+    });
+    expect(hits.map((h) => h.id)).toEqual(["m1"]);
+    expect(calls).toHaveLength(1);
+    expect(calls[0]).toMatchObject({ query: vector, score_threshold: 0.4, with_payload: true });
+    expect(JSON.stringify(calls[0]?.filter)).toContain('"agentId"');
+    expect("search" in current).toBe(false);
   });
 
   it("persists and reads back provenance (source + sensitivity)", async () => {

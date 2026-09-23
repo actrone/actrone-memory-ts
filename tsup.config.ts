@@ -1,7 +1,7 @@
 import { defineConfig } from "tsup";
 
 /**
- * Build configuration for `@actrone/memory`.
+ * Build configuration for `actrone-memory`.
  *
  * ESM-only, with type declarations. `zod` is a regular `dependency` (package.json),
  * not bundled into `dist`: consumers already resolve it via npm, and keeping it

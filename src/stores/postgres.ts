@@ -58,7 +58,7 @@ function parseTurn(row: TurnRow): Turn {
  * two machines agreeing on the time.
  *
  * Mirrors the Python `actrone_memory.l1.postgres_store.PostgresStore` and passes the same
- * published conformance suite (`@actrone/memory/testing`).
+ * published conformance suite (`actrone-memory/testing`).
  */
 export class PostgresL1Store implements L1Store {
   private readonly db: PgLike;

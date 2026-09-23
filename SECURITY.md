@@ -1,10 +1,10 @@
-# Security Policy
+# Security policy
 
-`@actrone/memory` stores raw conversation history, semantic memory vectors, and session metadata. A vulnerability in this library could expose real user data, so we take security reports seriously and act on them quickly.
+`actrone-memory` stores raw conversation history, semantic memory vectors, and session metadata. A vulnerability in this library could expose real user data, so we take security reports seriously and act on them quickly. The library is maintained by Apocalypse Technologies ("we", "us"), the company behind Actrone.
 
 ---
 
-## How to Report a Vulnerability
+## How to report a vulnerability
 
 **Please do not open a public GitHub issue for security vulnerabilities.** A public issue lets everyone see the problem before a fix exists, which puts all users at risk.
 
@@ -28,7 +28,7 @@ We will not take legal action against researchers who follow this policy. We con
 
 ---
 
-## Known Areas of Risk
+## Known areas of risk
 
 These are the parts of the library where security matters most. Understanding them helps you deploy safely.
 
@@ -69,7 +69,7 @@ All dependencies are pinned in `package-lock.json`. We run `npm audit` in CI and
 
 ---
 
-## Supported Versions
+## Supported versions
 
 We only maintain the latest release. Older versions do not receive security patches.
 

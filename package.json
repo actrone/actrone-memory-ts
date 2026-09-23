@@ -1,13 +1,13 @@
 {
-  "name": "@actrone/memory",
+  "name": "actrone-memory",
   "version": "0.1.0",
   "description": "Two-tier persistent agent memory for TypeScript/JS: short-term session turns + long-term semantic recall, with a pluggable store (in-memory default, Redis/Qdrant adapters) and embeddings. The open-source on-ramp to Actrone's governed hosted memory.",
   "license": "MIT",
-  "author": "Actrone",
+  "author": "Apocalypse Technologies <hello@actrone.com> (https://actrone.com)",
   "homepage": "https://actrone.com",
   "repository": {
     "type": "git",
-    "url": "https://github.com/actrone/actrone-memory-ts.git"
+    "url": "git+https://github.com/actrone/actrone-memory-ts.git"
   },
   "bugs": {
     "url": "https://github.com/actrone/actrone-memory-ts/issues"
@@ -42,7 +42,7 @@
   "module": "./dist/index.js",
   "types": "./dist/index.d.ts",
   "bin": {
-    "actrone-memory": "./dist/cli.js"
+    "actrone-memory": "dist/cli.js"
   },
   "scripts": {
     "build": "tsup",

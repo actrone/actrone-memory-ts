@@ -1,7 +1,7 @@
-/** Cloudflare Agents recipe, CI-typechecked against the current @actrone/memory adapter API. */
+/** Cloudflare Agents recipe, CI-typechecked against the current actrone-memory adapter API. */
 // #region cloudflare-agents
-import { MemoryManager } from '@actrone/memory'
-import { cloudflareAgentsMemory } from '@actrone/memory/adapters'
+import { MemoryManager } from 'actrone-memory'
+import { cloudflareAgentsMemory } from 'actrone-memory/adapters'
 
 const mm = await MemoryManager.create()
 const memory = cloudflareAgentsMemory(mm, { agentId: 'support-bot', sessionId: 'session-1' })

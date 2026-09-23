@@ -1,7 +1,7 @@
-/** OpenAI Agents JS recipe, CI-typechecked against the current @actrone/memory adapter API. */
+/** OpenAI Agents JS recipe, CI-typechecked against the current actrone-memory adapter API. */
 // #region openai-agents
-import { MemoryManager } from '@actrone/memory'
-import { openaiAgentsMemory } from '@actrone/memory/adapters'
+import { MemoryManager } from 'actrone-memory'
+import { openaiAgentsMemory } from 'actrone-memory/adapters'
 
 const mm = await MemoryManager.create()
 const memory = openaiAgentsMemory(mm, { agentId: 'support-bot', sessionId: 'session-1' })

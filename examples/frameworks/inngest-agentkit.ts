@@ -1,7 +1,7 @@
-/** Inngest AgentKit recipe, CI-typechecked against the current @actrone/memory adapter API. */
+/** Inngest AgentKit recipe, CI-typechecked against the current actrone-memory adapter API. */
 // #region inngest-agentkit
-import { MemoryManager } from '@actrone/memory'
-import { inngestAgentKitMemory } from '@actrone/memory/adapters'
+import { MemoryManager } from 'actrone-memory'
+import { inngestAgentKitMemory } from 'actrone-memory/adapters'
 
 const mm = await MemoryManager.create()
 const memory = inngestAgentKitMemory(mm, { agentId: 'support-bot', sessionId: 'session-1' })

@@ -96,7 +96,7 @@ export function parseFacts(raw: string): ExtractedFact[] {
 
 /**
  * Minimal structural interface for an OpenAI-compatible chat client (the
- * `openai` SDK's `AsyncOpenAI` satisfies it), injected so `@actrone/memory` needs
+ * `openai` SDK's `AsyncOpenAI` satisfies it), injected so `actrone-memory` needs
  * no hard `openai` dependency.
  */
 export interface ChatCompleterLike {

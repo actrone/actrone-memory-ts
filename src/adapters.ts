@@ -1,5 +1,5 @@
 /**
- * Framework adapters: wire `@actrone/memory` into a JS agent in a few lines.
+ * Framework adapters: wire `actrone-memory` into a JS agent in a few lines.
  *
  * The core here is framework-agnostic and dependency-free: `recall` assembles a
  * context string to prepend to a prompt, and `remember` persists a completed
@@ -104,9 +104,15 @@ export function memoryFor(
  * and an `onFinish` callback that persists the turn. Frameworks stay optional,
  * this returns plain values you spread into the SDK call.
  *
+ * `onFinish` is a `streamText` option; `generateText` has none, so call the callback yourself
+ * with the result, or the turn is never saved.
+ *
  * ```ts
  * const mem = await vercelMemory(mm, { agentId, sessionId, query: prompt });
- * const res = await generateText({ model, system: mem.system, prompt, onFinish: mem.onFinish(prompt) });
+ * const stream = streamText({ model, system: mem.system, prompt, onFinish: mem.onFinish(prompt) });
+ * // or, with generateText:
+ * const res = await generateText({ model, system: mem.system, prompt });
+ * await mem.onFinish(prompt)({ text: res.text });
  * ```
  */
 export async function vercelMemory(

@@ -1,5 +1,5 @@
 {
-  "//": "Framework compatibility: SINGLE SOURCE OF TRUTH for @actrone/memory. Authoritative for the optional peerDependencies (package.json) + the README compatibility matrix. scripts/check-compat.mjs fails CI on drift. The adapters are structural (no runtime framework import), so 'range' is the tested peer range npm warns on; 'readme' is the label in the README matrix row.",
+  "//": "Framework compatibility: SINGLE SOURCE OF TRUTH for actrone-memory. Authoritative for the optional peerDependencies (package.json) + the README compatibility matrix. scripts/check-compat.mjs fails CI on drift. The adapters are structural (no runtime framework import), so 'range' is the tested peer range npm warns on; 'readme' is the label in the README matrix row.",
   "schema": 1,
   "non_framework_peers": ["fastembed"],
   "frameworks": {

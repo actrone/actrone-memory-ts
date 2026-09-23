@@ -6,7 +6,7 @@ import type { L2SearchParams, L2Store } from "../store.js";
 /**
  * Minimal structural interface for a Postgres client (`pg` Pool/Client compatible).
  *
- * Injected, like the Redis and Qdrant adapters, so `@actrone/memory` needs no hard `pg`
+ * Injected, like the Redis and Qdrant adapters, so `actrone-memory` needs no hard `pg`
  * dependency and the store is unit-testable without a database. Anything exposing this
  * `query` shape works, including a `pg.Pool`, a `pg.Client`, or a pooled wrapper.
  */
@@ -84,7 +84,7 @@ function asStringArray(value: unknown): string[] {
  * reimplementing BM25 in SQL and drifting from the others.
  *
  * Mirrors the Python `actrone_memory.l2.pgvector_store.PgVectorStore` and passes the same
- * published conformance suite (`@actrone/memory/testing`).
+ * published conformance suite (`actrone-memory/testing`).
  */
 export class PgVectorL2Store implements L2Store {
   private readonly db: PgLike;

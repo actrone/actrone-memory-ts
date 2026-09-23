@@ -1,6 +1,6 @@
 name: Publish to npm
 
-# Publishes @actrone/memory to the npm registry on a version tag (vX.Y.Z). The tag's
+# Publishes actrone-memory to the npm registry on a version tag (vX.Y.Z). The tag's
 # version must match package.json "version"; the "Verify tag matches package.json
 # version" step below enforces that before anything is uploaded.
 #
@@ -53,9 +53,11 @@ jobs:
           node-version: "22"
           registry-url: "https://registry.npmjs.org"
 
-      # Trusted publishing requires npm CLI >= 11.5.1; Node 22 ships an older npm.
+      # Trusted publishing requires npm CLI >= 11.5.1; Node 22 ships an older npm. Pinned exactly,
+      # not @latest: `latest` moved to npm 12 in 2026, and the job that holds publish rights should
+      # not pick up a new major on release day. Bump deliberately.
       - name: Upgrade npm (trusted publishing)
-        run: npm install -g npm@latest
+        run: npm install -g npm@11.19.1
 
       - name: Install dependencies (clean, from lockfile)
         run: npm ci
@@ -73,11 +75,11 @@ jobs:
           fi
 
       # `prepublishOnly` (typecheck + test + build) runs automatically as the publish
-      # gate, so a failing check aborts the publish. --access public is required for a
-      # scoped package; --provenance attaches the signed attestation. No NODE_AUTH_TOKEN:
-      # authentication is via the OIDC trusted publisher.
+      # gate, so a failing check aborts the publish. The package is unscoped (`actrone-memory`),
+      # so it is public by default and needs no --access flag; --provenance attaches the signed
+      # attestation. No NODE_AUTH_TOKEN: authentication is via the OIDC trusted publisher.
       - name: Publish
-        run: npm publish --provenance --access public
+        run: npm publish --provenance
 
       - name: Create GitHub Release
         # Publishing to npm on a tag push was previously the only artifact of a release: no

@@ -1,7 +1,7 @@
-/** Firebase Genkit recipe, CI-typechecked against the current @actrone/memory adapter API. */
+/** Firebase Genkit recipe, CI-typechecked against the current actrone-memory adapter API. */
 // #region genkit
-import { MemoryManager } from '@actrone/memory'
-import { genkitMemory } from '@actrone/memory/adapters'
+import { MemoryManager } from 'actrone-memory'
+import { genkitMemory } from 'actrone-memory/adapters'
 
 const mm = await MemoryManager.create()
 const memory = genkitMemory(mm, { agentId: 'support-bot', sessionId: 'session-1' })

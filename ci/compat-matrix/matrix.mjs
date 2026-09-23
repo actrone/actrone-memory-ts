@@ -1,6 +1,6 @@
 #!/usr/bin/env node
 /**
- * compat-matrix (emitter), expand @actrone/memory's compatibility.json into a version-matrix job list.
+ * compat-matrix (emitter), expand actrone-memory's compatibility.json into a version-matrix job list.
  *
  * The adapters are STRUCTURAL (no runtime framework import), so the drift gate (scripts/check-compat.mjs)
  * can only prove the *declared* peer range is self-consistent. This matrix goes further: for each framework

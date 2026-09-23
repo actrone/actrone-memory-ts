@@ -1,6 +1,6 @@
 /**
  * Vercel AI SDK: TYPED-CALL-SITE compat canary. Unlike examples/frameworks/vercel.ts (which only
- * exercises our adapter API), this imports the REAL `ai` package and asserts that @actrone/memory's
+ * exercises our adapter API), this imports the REAL `ai` package and asserts that actrone-memory's
  * `vercelMemory()` output still fits `generateText`'s option types (`system` + `onFinish`) at the
  * installed version. A future `ai` release that changes those shapes fails HERE, not for a user.
  *
@@ -9,8 +9,8 @@
  */
 import { generateText, streamText } from "ai";
 
-import { MemoryManager } from "@actrone/memory";
-import { vercelMemory } from "@actrone/memory/adapters";
+import { MemoryManager } from "actrone-memory";
+import { vercelMemory } from "actrone-memory/adapters";
 
 const mm = await MemoryManager.create();
 const prompt = "summarise the account status";

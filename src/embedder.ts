@@ -1,22 +1,41 @@
 /**
- * Embedding seam. The default {@link LocalEmbedder} is dependency-free and
- * deterministic: it hashes words into a fixed-dimension bag-of-words vector and
- * L2-normalises it, so cosine similarity reflects word overlap. That is enough
- * for the self-hosted on-ramp and makes the whole test suite run offline.
+ * Embedding seam. `MemoryManager.create()` picks the best local embedder available
+ * ({@link buildLocalEmbedder}): {@link FastEmbedEmbedder} (bge-small-en-v1.5, semantic) when the
+ * optional `fastembed` package is installed, otherwise the dependency-free {@link LocalEmbedder},
+ * which hashes words into a bag-of-words vector so cosine similarity reflects shared keywords only.
+ * The lexical embedder is deterministic and offline, which also makes the test suite run anywhere.
  *
- * For production semantic quality, pass an {@link Embedder} backed by a real
- * model (e.g. OpenAI `text-embedding-3-small`) when constructing a MemoryManager.
+ * To use a hosted model, pass your own {@link Embedder} (for example one backed by OpenAI
+ * `text-embedding-3-small`) and set `relevanceThreshold` for it.
  */
 export interface Embedder {
   /** The dimensionality of vectors this embedder produces. */
   readonly dimensions: number;
+  /**
+   * The cosine similarity at which this model's results turn from unrelated to relevant, used as
+   * the admission threshold when {@link MemoryConfig.relevanceThreshold} is not set. Declare it for
+   * a custom embedder once you have measured it; leave it out to use the library default.
+   */
+  readonly relevanceThreshold?: number | undefined;
   /** Embed a single text into a dense vector. */
   embed(text: string): Promise<number[]>;
 }
 
+/**
+ * Calibrated admission thresholds for the built-in embedders, kept identical to the Python library.
+ * Measured on a labelled set of 48 relevant and 528 unrelated query and memory pairs (2026-09-22).
+ * The lexical embedder only matches shared words, so no threshold makes it semantic: 0.30 is where
+ * it still recalls about 42% of relevant memories while admitting about 7% of unrelated ones.
+ * bge-small-en-v1.5 at 0.63 recalls about 88% with about 84% precision, admitting 1.5% of unrelated
+ * pairs. The old single default (0.7) recalled 4% with the lexical embedder and 71% with bge-small.
+ */
+export const LEXICAL_RELEVANCE_THRESHOLD = 0.3;
+export const BGE_SMALL_RELEVANCE_THRESHOLD = 0.63;
+
 /** Deterministic, dependency-free hashing embedder (a "hashing vectorizer"). */
 export class LocalEmbedder implements Embedder {
   readonly dimensions: number;
+  readonly relevanceThreshold = LEXICAL_RELEVANCE_THRESHOLD;
 
   constructor(dimensions = 256) {
     if (dimensions <= 0) throw new Error("dimensions must be > 0");
@@ -40,61 +59,149 @@ export class LocalEmbedder implements Embedder {
   }
 }
 
+/** The fastembed-js model id of the default dense model, the same model the Python library uses. */
+export const DEFAULT_FASTEMBED_MODEL = "fast-bge-small-en-v1.5";
+
+/** The subset of a fastembed-js `FlagEmbedding` this library uses. */
+export interface FastEmbedModel {
+  embed(texts: string[], batchSize?: number): AsyncGenerator<ArrayLike<number>[], void, unknown>;
+}
+
+/** The subset of the `fastembed` module this library uses. */
+export interface FastEmbedModule {
+  FlagEmbedding: { init(options: { model?: string; cacheDir?: string }): Promise<FastEmbedModel> };
+}
+
+async function importFastEmbed(): Promise<FastEmbedModule> {
+  // Variable specifier so tsc and bundlers do not statically resolve the optional peer.
+  const pkg = "fastembed";
+  return (await import(pkg)) as FastEmbedModule;
+}
+
+let loadFastEmbed: () => Promise<FastEmbedModule> = importFastEmbed;
+
+/**
+ * Test seam: replace how the optional `fastembed` peer is loaded, so a test suite never depends on
+ * whether the package happens to be resolvable (and never downloads a model). Call with no
+ * argument to restore the real import.
+ */
+export function setFastEmbedLoaderForTests(loader?: () => Promise<FastEmbedModule>): void {
+  loadFastEmbed = loader ?? importFastEmbed;
+}
+
 /**
  * In-process ONNX dense embedder via `fastembed` (fastembed-js, onnxruntime, no torch/GPU). The
- * preferred "real" recall tier: local-first, zero-egress after a one-time model download,
- * no API key. Default model `bge-small-en-v1.5` (384-dim). `fastembed` is an optional peer, install
- * it (`npm i fastembed`) to enable dense recall; without it {@link buildLocalEmbedder} degrades to
- * the dependency-free hashing embedder.
+ * preferred "real" recall tier: local-first, zero-egress after a one-time model download (about
+ * 130 MB), no API key. Default model `bge-small-en-v1.5` (384-dim), the same model the Python
+ * library uses. `fastembed` is an optional peer: install it (`npm i fastembed`) and
+ * `MemoryManager.create()` picks it up automatically; without it {@link buildLocalEmbedder} degrades
+ * to the dependency-free lexical {@link LocalEmbedder}.
  */
 export class FastEmbedEmbedder implements Embedder {
   readonly dimensions: number;
-  readonly #model: { queryEmbed(text: string): Promise<number[]> };
+  readonly relevanceThreshold: number | undefined;
+  readonly #model: FastEmbedModel;
 
-  private constructor(model: { queryEmbed(text: string): Promise<number[]> }, dimensions: number) {
+  private constructor(model: FastEmbedModel, dimensions: number, relevanceThreshold: number | undefined) {
     this.#model = model;
     this.dimensions = dimensions;
+    this.relevanceThreshold = relevanceThreshold;
   }
 
-  /** Load the model (downloads + caches on first call), resolving its dimension by a probe embed. */
+  /**
+   * Load the model, resolving its dimension by a probe embed. The first call downloads the model
+   * into `cacheDir`; every later call loads it from there, offline.
+   *
+   * @param opts.modelName A fastembed-js model id. Defaults to {@link DEFAULT_FASTEMBED_MODEL}. Only
+   *   the default model carries a calibrated `relevanceThreshold`; set one in your config for others.
+   * @param opts.cacheDir Where model files are kept. Defaults to `FASTEMBED_CACHE_PATH`, else
+   *   `~/.cache/actrone-memory/fastembed`, never the current directory.
+   * @throws When `fastembed` is not installed or the model cannot be loaded or downloaded.
+   */
   static async create(opts: { modelName?: string; cacheDir?: string } = {}): Promise<FastEmbedEmbedder> {
-    // Variable specifier so tsc does not statically resolve the optional peer at build time.
-    const pkg = "fastembed";
-    const mod = (await import(pkg)) as {
-      FlagEmbedding: {
-        init(o: { model?: string; cacheDir?: string }): Promise<{
-          queryEmbed(text: string): Promise<number[]>;
-        }>;
-      };
-      EmbeddingModel: Record<string, string>;
-    };
+    const mod = await loadFastEmbed();
+    const modelName = opts.modelName ?? DEFAULT_FASTEMBED_MODEL;
     const model = await mod.FlagEmbedding.init({
-      model: opts.modelName ?? mod.EmbeddingModel["BGESmallEN"] ?? "BGESmallEN",
-      ...(opts.cacheDir !== undefined ? { cacheDir: opts.cacheDir } : {}),
+      model: modelName,
+      cacheDir: opts.cacheDir ?? (await defaultModelCacheDir()),
     });
-    const probe = await model.queryEmbed("probe");
-    return new FastEmbedEmbedder(model, probe.length);
+    const probe = await embedOne(model, "probe");
+    const threshold = modelName === DEFAULT_FASTEMBED_MODEL ? BGE_SMALL_RELEVANCE_THRESHOLD : undefined;
+    return new FastEmbedEmbedder(model, probe.length, threshold);
   }
 
   async embed(text: string): Promise<number[]> {
-    return this.#model.queryEmbed(text);
+    return embedOne(this.#model, text);
   }
 }
 
 /**
+ * Embed one text with fastembed's plain `embed`, the same call the Python library makes. Its
+ * `queryEmbed` prepends "query: ", which would make the two libraries score identical text
+ * differently and break the shared calibration.
+ */
+async function embedOne(model: FastEmbedModel, text: string): Promise<number[]> {
+  for await (const batch of model.embed([text], 1)) {
+    const vector = batch[0];
+    if (vector !== undefined) return Array.from(vector);
+  }
+  throw new Error("fastembed returned no embedding");
+}
+
+/** `FASTEMBED_CACHE_PATH`, else a per-user cache directory. Resolved lazily so edge runtimes never load node:os. */
+async function defaultModelCacheDir(): Promise<string> {
+  const fromEnv = typeof process !== "undefined" ? process.env["FASTEMBED_CACHE_PATH"] : undefined;
+  if (fromEnv) return fromEnv;
+  const [{ homedir }, { join }] = await Promise.all([import("node:os"), import("node:path")]);
+  return join(homedir(), ".cache", "actrone-memory", "fastembed");
+}
+
+/** Warning code for the lexical fallback, so an application can filter it with `process.on("warning")`. */
+export const LEXICAL_FALLBACK_WARNING_CODE = "ACTRONE_MEMORY_LEXICAL_EMBEDDER";
+
+let lexicalFallbackWarned = false;
+
+/** Say once per process that recall is keyword-only, and why, the same notice the Python library logs. */
+function warnLexicalFallback(error: unknown): void {
+  if (lexicalFallbackWarned) return;
+  lexicalFallbackWarned = true;
+  const code = (error as { code?: unknown } | null)?.code;
+  const text = error instanceof Error ? error.message : String(error);
+  // Node sets a code; bundlers and test runners word it differently, so accept either signal.
+  const missing =
+    code === "ERR_MODULE_NOT_FOUND" ||
+    code === "MODULE_NOT_FOUND" ||
+    /(cannot find (package|module)|could not resolve|failed to (load|resolve)[^\n]*)\W+fastembed\b/i.test(text);
+  const reason = missing
+    ? "Install fastembed (npm install fastembed) for semantic recall that still runs on this machine."
+    : `fastembed is installed, but its model could not be loaded (${text}). ` +
+      "The first run downloads about 130 MB; check network access, or set FASTEMBED_CACHE_PATH to a directory that already holds the model.";
+  const message = `actrone-memory is using the lexical LocalEmbedder, which recalls memories by shared keywords only. ${reason}`;
+  // Edge runtimes may have no `process`; there the fallback still happens, just without the notice.
+  if (typeof process !== "undefined" && typeof process.emitWarning === "function") {
+    process.emitWarning(message, { code: LEXICAL_FALLBACK_WARNING_CODE });
+  }
+}
+
+/** Test seam: let the next fallback warn again. */
+export function resetLexicalFallbackWarningForTests(): void {
+  lexicalFallbackWarned = false;
+}
+
+/**
  * Return the best available local, offline, zero-egress embedder, degrading gracefully:
- * in-process ONNX ({@link FastEmbedEmbedder}, the `fastembed` peer) → dependency-free hashing
- * ({@link LocalEmbedder}). An import failure (peer absent) or a model-fetch failure (air-gapped
- * first run) falls through to hashing, so this never throws and never makes an unavoidable network
- * call: the model download is one-time and the hashing tier needs none.
+ * in-process ONNX ({@link FastEmbedEmbedder}, the `fastembed` peer) → dependency-free lexical
+ * hashing ({@link LocalEmbedder}). An import failure (peer absent) or a model-fetch failure
+ * (air-gapped first run) falls through to hashing, with a one-time process warning that says why,
+ * so this never throws and never makes an unavoidable network call.
  */
 export async function buildLocalEmbedder(
   opts: { modelName?: string; cacheDir?: string; hashingDimensions?: number } = {},
 ): Promise<Embedder> {
   try {
     return await FastEmbedEmbedder.create(opts);
-  } catch {
-    // fastembed peer absent or the model could not be fetched, fall back to lexical hashing.
+  } catch (error) {
+    warnLexicalFallback(error);
     return new LocalEmbedder(opts.hashingDimensions ?? 256);
   }
 }

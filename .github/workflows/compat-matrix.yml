@@ -55,7 +55,7 @@ jobs:
         with:
           node-version: "22"
           cache: npm
-      # Build @actrone/memory so the runner installs the real dist (what npm publishes).
+      # Build actrone-memory so the runner installs the real dist (what npm publishes).
       - run: npm ci
       - run: npm run build
       - name: "canary: ${{ matrix.job.framework }} @ ${{ matrix.job.spec }}"

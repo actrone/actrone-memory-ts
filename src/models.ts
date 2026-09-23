@@ -1,7 +1,7 @@
 import { z } from "zod";
 
 /**
- * Domain models for `@actrone/memory`, mirroring the Python `actrone_memory`
+ * Domain models for `actrone-memory`, mirroring the Python `actrone_memory`
  * models with idiomatic TypeScript (camelCase) field names. Timestamps are ISO
  * 8601 strings so entries are trivially JSON-serialisable and align with the
  * hosted Orchestrator's wire format.

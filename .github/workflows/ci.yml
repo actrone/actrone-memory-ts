@@ -1,6 +1,6 @@
 name: CI
 
-# Type-check, test, and build @actrone/memory on every push/PR to main, the same gate
+# Type-check, test, and build actrone-memory on every push/PR to main, the same gate
 # `prepublishOnly` enforces at publish time, run early so a break is caught on the PR.
 #
 # NOTE (CI hardening): third-party actions are pinned to release tags for readability;

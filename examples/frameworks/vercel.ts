@@ -1,7 +1,7 @@
-/** Vercel AI SDK recipe, CI-typechecked against the current @actrone/memory adapter API. */
+/** Vercel AI SDK recipe, CI-typechecked against the current actrone-memory adapter API. */
 // #region vercel
-import { MemoryManager } from '@actrone/memory'
-import { vercelMemory } from '@actrone/memory/adapters'
+import { MemoryManager } from 'actrone-memory'
+import { vercelMemory } from 'actrone-memory/adapters'
 
 const mm = await MemoryManager.create()
 const prompt = 'summarise the account status'

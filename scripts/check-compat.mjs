@@ -1,7 +1,7 @@
 // Run with `node scripts/check-compat.mjs` (see package.json). No `#!` shebang: this module is
 // also imported by the test suite, and a shebang makes Node's ESM loader reject it.
 /**
- * check-compat: the framework-compatibility drift gate for @actrone/memory.
+ * check-compat: the framework-compatibility drift gate for actrone-memory.
  *
  * Makes compatibility.json the single source of truth: fails if the optional `peerDependencies` in
  * package.json or the framework compatibility matrix in README.md drift from it.

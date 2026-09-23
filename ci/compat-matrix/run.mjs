@@ -2,7 +2,7 @@
 /**
  * compat-matrix (runner), verify ONE framework at ONE version boundary, in isolation.
  *
- * In a fresh temp project it installs the BUILT @actrone/memory (from the repo root) + the framework
+ * In a fresh temp project it installs the BUILT actrone-memory (from the repo root) + the framework
  * peer at the pinned spec + a TypeScript toolchain, then type-checks a canary against the REAL peer.
  * The canary is the framework's own examples/frameworks/<name>.ts (already checked against our adapter
  * API) with a peer install-smoke import prepended, so `tsc` fails if the peer no longer exists,

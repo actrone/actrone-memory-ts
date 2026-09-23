@@ -3,9 +3,11 @@ import type { SessionMetadata, Turn } from "../models.js";
 import type { L1Store } from "../store.js";
 
 /**
- * Minimal structural interface for a Redis client (ioredis / node-redis compatible).
- * Injecting the client keeps `@actrone/memory` free of a hard `ioredis` dependency
- * and makes the store unit-testable with an in-memory fake.
+ * Minimal structural interface for a Redis client, shaped like ioredis (`new Redis(url)`), which
+ * satisfies it directly. node-redis v4 names its commands in camelCase (`rPush`, `lRange`), so it
+ * needs a thin wrapper mapping these methods onto its own. Injecting the client keeps
+ * `actrone-memory` free of a hard `ioredis` dependency and makes the store unit-testable with an
+ * in-memory fake.
  */
 export interface RedisLike {
   rpush(key: string, value: string): Promise<number>;

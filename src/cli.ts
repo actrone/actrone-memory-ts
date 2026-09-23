@@ -10,9 +10,9 @@ import { getRecipe, listFrameworks, renderRecipe, renderStandaloneFile } from ".
  * never reads or edits your existing code. `create-actrone-app` is the greenfield
  * counterpart.
  *
- *   npx @actrone/memory add langgraph              # print install + recipe
- *   npx @actrone/memory add langgraph --write memory.ts   # write ONE new file
- *   npx @actrone/memory list                       # list frameworks
+ *   npx actrone-memory add langgraph              # print install + recipe
+ *   npx actrone-memory add langgraph --write memory.ts   # write ONE new file
+ *   npx actrone-memory list                       # list frameworks
  */
 
 /** Injected IO so the command logic is unit-testable without touching disk. */

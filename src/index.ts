@@ -1,5 +1,5 @@
 /**
- * `@actrone/memory`: two-tier persistent agent memory for TypeScript/JS.
+ * `actrone-memory`: two-tier persistent agent memory for TypeScript/JS.
  *
  * The dependency-free, self-hosted on-ramp: short-term session turns + long-term
  * semantic recall over a pluggable store (in-memory by default; Redis/Qdrant
@@ -12,7 +12,9 @@ export { MemoryManager, type MemoryManagerParts } from "./manager.js";
 export {
   type MemoryConfig,
   DEFAULT_CONFIG,
+  DEFAULT_RELEVANCE_THRESHOLD,
   resolveConfig,
+  resolveRelevanceThreshold,
 } from "./config.js";
 export {
   type Embedder,
@@ -20,6 +22,10 @@ export {
   FastEmbedEmbedder,
   buildLocalEmbedder,
   cosineSimilarity,
+  BGE_SMALL_RELEVANCE_THRESHOLD,
+  DEFAULT_FASTEMBED_MODEL,
+  LEXICAL_FALLBACK_WARNING_CODE,
+  LEXICAL_RELEVANCE_THRESHOLD,
 } from "./embedder.js";
 export {
   tokenize,
@@ -44,6 +50,11 @@ export {
 export {
   QdrantL2Store,
   type QdrantLike,
+  type QdrantQueryClient,
+  type QdrantSearchClient,
+  type QdrantFilter,
+  type QdrantSearchOptions,
+  type QdrantWriteClient,
   type QdrantHit,
   type QdrantL2Options,
 } from "./stores/qdrant.js";

@@ -3,7 +3,7 @@
   "entryPoints": ["src/index.ts", "src/adapters.ts"],
   "tsconfig": "tsconfig.typedoc.json",
   "out": "docs/api",
-  "name": "@actrone/memory",
+  "name": "actrone-memory",
   "readme": "none",
   "githubPages": false,
   "hostedBaseUrl": "https://actrone.com/reference/memory-ts/",

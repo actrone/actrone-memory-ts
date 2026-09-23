@@ -1,10 +1,10 @@
 /**
- * Framework-agnostic core recipe, CI-typechecked against the current @actrone/memory adapter
+ * Framework-agnostic core recipe, CI-typechecked against the current actrone-memory adapter
  * API. The `#region` block is extracted into the docs/CLI snippets, so a break here fails CI.
  */
 // #region core
-import { MemoryManager } from '@actrone/memory'
-import { memoryFor } from '@actrone/memory/adapters'
+import { MemoryManager } from 'actrone-memory'
+import { memoryFor } from 'actrone-memory/adapters'
 
 const mm = await MemoryManager.create() // zero services, local by default
 const memory = memoryFor(mm, 'support-bot', 'session-1')

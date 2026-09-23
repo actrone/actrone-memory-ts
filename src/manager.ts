@@ -1,7 +1,7 @@
 import { randomUUID } from "node:crypto";
 
-import { type MemoryConfig, resolveConfig } from "./config.js";
-import { type Embedder, LocalEmbedder } from "./embedder.js";
+import { type MemoryConfig, resolveConfig, resolveRelevanceThreshold } from "./config.js";
+import { buildLocalEmbedder, type Embedder } from "./embedder.js";
 import { ConfigurationError, TokenBudgetError, ValidationError } from "./errors.js";
 import type { FactExtractor } from "./extraction.js";
 import { applyReranker, type Reranker } from "./rerank.js";
@@ -64,6 +64,7 @@ export class MemoryManager {
   private readonly cfg: MemoryConfig;
   private readonly extractor: FactExtractor | undefined;
   private readonly reranker: Reranker | undefined;
+  private readonly threshold: number;
 
   constructor(parts: MemoryManagerParts) {
     this.l1 = parts.l1;
@@ -72,12 +73,23 @@ export class MemoryManager {
     this.cfg = parts.config;
     this.extractor = parts.extractor;
     this.reranker = parts.reranker;
+    this.threshold = resolveRelevanceThreshold(parts.config, parts.embedder);
   }
 
   /**
-   * Build a ready manager. With no arguments it uses the in-memory store + the
-   * dependency-free local embedder: the zero-config on-ramp. Pass stores /
-   * embedder to back it with Redis + Qdrant + a real embedding model.
+   * The admission threshold this manager applies to long-term memories: `config.relevanceThreshold`
+   * when set, else the embedder's calibrated threshold, else the library default.
+   */
+  get relevanceThreshold(): number {
+    return this.threshold;
+  }
+
+  /**
+   * Build a ready manager. With no arguments it uses the in-memory store and the best local
+   * embedder available ({@link buildLocalEmbedder}): bge-small-en-v1.5 through `fastembed` when that
+   * package is installed (the first run downloads the model, about 130 MB), otherwise the
+   * dependency-free lexical `LocalEmbedder`, with a one-time warning that recall is keyword-only.
+   * Pass stores / an embedder to back it with Redis + Qdrant + a model of your choice.
    */
   static async create(options: {
     config?: Partial<MemoryConfig>;
@@ -94,7 +106,7 @@ export class MemoryManager {
     return new MemoryManager({
       l1: options.l1 ?? shared,
       l2: options.l2 ?? shared,
-      embedder: options.embedder ?? new LocalEmbedder(),
+      embedder: options.embedder ?? (await buildLocalEmbedder()),
       config,
       ...(options.extractor !== undefined ? { extractor: options.extractor } : {}),
       ...(options.reranker !== undefined ? { reranker: options.reranker } : {}),
@@ -161,7 +173,7 @@ export class MemoryManager {
     const episodicCandidates = await this.l2.search({
       agentId,
       queryEmbedding,
-      threshold: this.cfg.relevanceThreshold,
+      threshold: this.threshold,
       limit: this.cfg.maxEpisodicMemories,
       relevanceWeight: this.cfg.relevanceWeight,
       recencyWeight: this.cfg.recencyWeight,
@@ -283,7 +295,7 @@ export class MemoryManager {
     const candidates = await this.l2.search({
       agentId,
       queryEmbedding: embedding,
-      threshold: this.cfg.relevanceThreshold,
+      threshold: this.threshold,
       limit: fetchLimit,
       relevanceWeight: this.cfg.relevanceWeight,
       recencyWeight: this.cfg.recencyWeight,

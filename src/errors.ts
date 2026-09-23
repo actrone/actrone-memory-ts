@@ -1,5 +1,5 @@
 /**
- * Structured error hierarchy for `@actrone/memory`, mirroring the Python
+ * Structured error hierarchy for `actrone-memory`, mirroring the Python
  * `actrone_memory.exceptions` contract so cross-language docs and behaviour
  * line up. Every error carries a machine-readable {@link MemoryError.code}.
  */

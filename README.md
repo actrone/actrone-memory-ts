@@ -1,10 +1,10 @@
-# @actrone/memory
+# actrone-memory
 
 > **Persistent memory for AI agents, so they never forget who you are.**
 
-[![npm version](https://img.shields.io/npm/v/@actrone/memory?color=brightgreen&label=npm)](https://www.npmjs.com/package/@actrone/memory)
-[![node](https://img.shields.io/node/v/@actrone/memory)](https://www.npmjs.com/package/@actrone/memory)
-[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](LICENSE)
+[![npm version](https://img.shields.io/npm/v/actrone-memory?color=brightgreen&label=npm)](https://www.npmjs.com/package/actrone-memory)
+[![node](https://img.shields.io/node/v/actrone-memory)](https://www.npmjs.com/package/actrone-memory)
+[![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/actrone/actrone-memory-ts/blob/main/LICENSE)
 [![CI](https://github.com/actrone/actrone-memory-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/actrone/actrone-memory-ts/actions)
 
 The TypeScript counterpart to [`actrone-memory`](https://github.com/actrone/actrone-memory-py)
@@ -41,29 +41,40 @@ governed Orchestrator (PII-tokenised, audited, policy-bounded) with the same API
 ```
 
 ```bash
-npm install @actrone/memory
+npm install actrone-memory
 ```
 
 ## Quick start
 
 ```ts
-import { MemoryManager } from "@actrone/memory";
+import { MemoryManager } from "actrone-memory";
 
-const mm = await MemoryManager.create(); // in-memory + local embedder, no services
+const mm = await MemoryManager.create(); // in-memory store, no services, no API key
 
 await mm.storeTurn("support-bot", "sess-1", "What's your refund policy?", "Within 5 days.");
 await mm.injectMemory("support-bot", "The customer is on the Enterprise plan.", 0.9);
 
-const ctx = await mm.retrieveContext("support-bot", "sess-1", "refund enterprise", 4096);
+const ctx = await mm.retrieveContext("support-bot", "sess-1", "Which plan is the customer on?", 4096);
 // ctx.recentTurns      : the recent conversation, pruned to the session budget
-// ctx.episodicMemories : semantically relevant long-term memories
+// ctx.episodicMemories : relevant long-term memories, here the Enterprise plan fact
+```
+
+**Keyword recall or semantic recall.** With nothing else installed, `create()` uses the
+lexical `LocalEmbedder`: it recalls memories that share words with the query, and says so
+once with a process warning. Install `fastembed` and `create()` switches to
+bge-small-en-v1.5, still on your machine, which recalls by meaning: "food allergies" then
+finds "The user is allergic to peanuts." The first run downloads the model (about 130 MB)
+to `~/.cache/actrone-memory/fastembed`, or to `FASTEMBED_CACHE_PATH` if you set it.
+
+```bash
+npm install fastembed
 ```
 
 ## The one-import upgrade to governed hosted memory
 
 ```ts
 // Self-hosted (this library)
-import { MemoryManager } from "@actrone/memory";
+import { MemoryManager } from "actrone-memory";
 const mm = await MemoryManager.create();
 
 // Hosted + governed (Actrone Orchestrator): same methods, same result shapes.
@@ -89,15 +100,14 @@ const mm = new MemoryManager({ apiKey: process.env.ACTRONE_API_KEY! });
 
 ## Pluggable stores & embeddings
 
-The default `InMemoryStore` + `LocalEmbedder` need no services and make the whole
-test suite run offline. Swap them for durability + real semantic quality:
+The defaults, `InMemoryStore` plus the best local embedder, need no services. Swap them
+for durability or a hosted embedding model:
 
 ```ts
 const mm = await MemoryManager.create({
   l1: myRedisStore,       // implements L1Store
   l2: myQdrantStore,      // implements L2Store
-  embedder: myOpenAIEmbedder, // implements Embedder
-  config: { relevanceThreshold: 0.75 },
+  embedder: myOpenAIEmbedder, // implements Embedder; set relevanceThreshold for it (see Configuration)
 });
 ```
 
@@ -121,7 +131,7 @@ extra service at all. One pool serves both.
 
 ```ts
 import { Pool } from "pg";
-import { MemoryManager, PostgresL1Store, PgVectorL2Store } from "@actrone/memory";
+import { MemoryManager, PostgresL1Store, PgVectorL2Store } from "actrone-memory";
 
 const pool = new Pool({ connectionString: process.env.DATABASE_URL });
 const l1 = new PostgresL1Store(pool);
@@ -140,7 +150,7 @@ the manager, and the store you pass is used as-is, so no built-in backend is con
 connected behind it.
 
 ```ts
-import { MemoryManager } from "@actrone/memory";
+import { MemoryManager } from "actrone-memory";
 
 class MyWeaviateStore implements L2Store {
   async upsert(entry) { /* ... */ }
@@ -168,7 +178,7 @@ To make that a supported extension point rather than a claim, the package ships 
 conformance suite the built-in stores are held to:
 
 ```ts
-import { checkL1Store, checkL2Store } from "@actrone/memory/testing";
+import { checkL1Store, checkL2Store } from "actrone-memory/testing";
 
 await checkL2Store(() => new MyWeaviateStore(client), { dimensions: 1536 });
 ```
@@ -199,11 +209,11 @@ models; MAL (hosted) makes cloud safe.**
 
 ## Framework compatibility
 
-Adapters live in `@actrone/memory/adapters` and are **structural**: none imports its framework at
+Adapters live in `actrone-memory/adapters` and are **structural**: none imports its framework at
 runtime, so nothing is bundled and the base install pulls only `zod`. Install the framework you use;
 the versions below are the optional `peerDependencies` each recipe is tested against (npm warns on a
 mismatch). Every framework recipe is CI-typechecked against the current adapter API
-(`examples/frameworks/`); run `npx @actrone/memory add <framework>` for a copy-paste recipe.
+(`examples/frameworks/`); run `npx actrone-memory add <framework>` for a copy-paste recipe.
 
 | Framework | Adapter | Tested peer version |
 | --- | --- | --- |
@@ -236,15 +246,21 @@ framework-agnostic core (`recall` / `remember` / `memoryFor`) works with any fra
 
 | Key | Purpose |
 | --- | --- |
-| `relevanceThreshold` | Minimum L2 similarity for a memory to be recalled. |
+| `relevanceThreshold` | Minimum similarity for a long-term memory to be recalled. Leave unset to use the embedder's calibrated value: `0.3` for the lexical `LocalEmbedder`, `0.63` for bge-small-en-v1.5, and `0.7` for an embedder that declares none. `mm.relevanceThreshold` shows the value in use. |
 | `maxEpisodicMemories` | Cap on long-term memories considered per retrieval. |
 | `budgetFractionSession` / `budgetFractionEpisodic` | How the token budget is split between recent turns and long-term memory. |
 | `hybridRetrieval` | Fuse lexical (BM25) + dense signals via reciprocal-rank fusion. |
 | `relevanceWeight` / `recencyWeight` | Balance semantic relevance against recency in L2 ranking. |
 
 Stores and embeddings are injected, not configured by env. Pass `l1` / `l2` /
-`embedder` / `reranker` to `create()`. The defaults (`InMemoryStore` + `LocalEmbedder`)
-need no services, so the whole test suite runs offline.
+`embedder` / `reranker` to `create()`. The defaults need no services. Pass
+`embedder: new LocalEmbedder()` for deterministic, offline recall in tests even when
+`fastembed` is installed.
+
+Similarity scales differ between models, so a threshold chosen for one model is wrong for
+another: the lexical embedder scores relevant text around 0.24, while bge-small scores
+unrelated text around 0.48. For your own embedder, set `relevanceThreshold` to a value you
+have measured on your data, or declare `relevanceThreshold` on the embedder itself.
 
 ## Architecture
 
@@ -264,10 +280,12 @@ flowchart TD
 
 ## Troubleshooting
 
-- **`retrieveContext` returns no `episodicMemories`.** Nothing cleared the
-  `relevanceThreshold` (default `0.7`) for that query, or you're on the `LocalEmbedder`
-  (a fast, deterministic hash embedder for offline dev; swap in a real `Embedder` for
-  production-quality recall). Lower `relevanceThreshold` or inject real embeddings.
+- **`retrieveContext` returns no `episodicMemories`.** Nothing cleared the admission
+  threshold for that query; `mm.relevanceThreshold` shows the value in use. If you saw the
+  `ACTRONE_MEMORY_LEXICAL_EMBEDDER` warning, recall is keyword-only: the query must share
+  words with the memory. Install `fastembed` for recall by meaning.
+- **`create()` pauses on first run.** With `fastembed` installed, the first `create()`
+  downloads bge-small-en-v1.5 (about 130 MB). Later runs load it from the cache offline.
 - **`TokenBudgetError: tokenBudget must be > 0`.** `retrieveContext` needs a positive
   token budget (e.g. `4096`).
 - **Redis/Qdrant not used.** Stores are *injected*, not auto-detected, so pass
@@ -275,7 +293,7 @@ flowchart TD
 - **`npm warn` about an optional peer version.** Adapters are structural (nothing is
   imported at runtime); the peer ranges only make the tested version machine-legible.
   Install the framework you actually use; ignore the others' warnings.
-- **CLI recipe.** `npx @actrone/memory add <framework>` prints an install plus copy-paste
+- **CLI recipe.** `npx actrone-memory add <framework>` prints an install plus copy-paste
   recipe; `--write <file>` creates one new self-contained file and never overwrites.
 
 ## Development
@@ -285,22 +303,22 @@ npm install
 npm run typecheck && npm test && npm run build
 ```
 
-The default `InMemoryStore` + `LocalEmbedder` need no services, so the whole suite runs
-offline with no key and no Docker.
+`fastembed` is not a dev dependency, so the suite runs on `InMemoryStore` and the lexical
+`LocalEmbedder`: offline, with no key, no model download and no Docker.
 
 ## Documentation
 
 | Page | What's in it |
 | --- | --- |
-| [API reference](docs/api/) | Generated TypeDoc for every export |
-| [Framework recipes](examples/frameworks/) | One CI-typechecked example per adapter |
-| [Changelog](CHANGELOG.md) | What changed in each release |
-| [Contributing](CONTRIBUTING.md) | Dev environment setup and how to submit a PR |
-| [Security policy](SECURITY.md) | How to report a vulnerability privately |
+| [API reference](https://github.com/actrone/actrone-memory-ts/tree/main/docs/api) | Generated TypeDoc for every export |
+| [Framework recipes](https://github.com/actrone/actrone-memory-ts/tree/main/examples/frameworks) | One CI-typechecked example per adapter |
+| [Changelog](https://github.com/actrone/actrone-memory-ts/blob/main/CHANGELOG.md) | What changed in each release |
+| [Contributing](https://github.com/actrone/actrone-memory-ts/blob/main/CONTRIBUTING.md) | Dev environment setup and how to submit a PR |
+| [Security policy](https://github.com/actrone/actrone-memory-ts/blob/main/SECURITY.md) | How to report a vulnerability privately |
 
 ## Part of Actrone
 
-`@actrone/memory` is the open-source memory layer behind [Actrone](https://actrone.com), a
+`actrone-memory` is the open-source memory layer behind [Actrone](https://actrone.com), a
 platform for running AI agents under governance: durable task execution, tool supervision,
 PII tokenisation before inference, and an audit trail.
 
@@ -309,4 +327,4 @@ you do outgrow self-hosting, the migration is the one-import change shown above.
 
 ## License
 
-[MIT](LICENSE). Free to use in any project, commercial or otherwise.
+[MIT](https://github.com/actrone/actrone-memory-ts/blob/main/LICENSE). Free to use in any project, commercial or otherwise.

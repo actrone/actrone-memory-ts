@@ -12,7 +12,7 @@
  * store without vendoring anything:
  *
  * ```ts
- * import { checkL1Store, checkL2Store } from "@actrone/memory/testing";
+ * import { checkL1Store, checkL2Store } from "actrone-memory/testing";
  *
  * await checkL1Store(() => new MyRedisLikeStore(client));
  * await checkL2Store(() => new MyPgVectorStore(pool), { dimensions: 8 });

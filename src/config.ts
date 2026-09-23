@@ -11,8 +11,14 @@ export interface MemoryConfig {
   readonly budgetFractionEpisodic: number;
   /** Fraction of the token budget reserved for recent session (L1) turns. */
   readonly budgetFractionSession: number;
-  /** Minimum cosine similarity for an L2 memory to be admitted (0-1). */
-  readonly relevanceThreshold: number;
+  /**
+   * Minimum cosine similarity for an L2 memory to be admitted (0-1). Leave it unset to use the
+   * threshold the embedder was calibrated for ({@link Embedder.relevanceThreshold}), falling back to
+   * {@link DEFAULT_RELEVANCE_THRESHOLD} for an embedder that declares none. Similarity scales differ
+   * by model, so one fixed number cannot suit them all: the lexical `LocalEmbedder` scores relevant
+   * text near 0.24, while bge-small scores unrelated text near 0.48.
+   */
+  readonly relevanceThreshold?: number | undefined;
   /** Maximum episodic memories to pull from L2 before budget pruning. */
   readonly maxEpisodicMemories: number;
   /** Weight on cosine similarity in the blended rank score. */
@@ -43,7 +49,6 @@ export interface MemoryConfig {
 export const DEFAULT_CONFIG: MemoryConfig = {
   budgetFractionEpisodic: 0.25,
   budgetFractionSession: 0.35,
-  relevanceThreshold: 0.7,
   maxEpisodicMemories: 10,
   relevanceWeight: 0.7,
   recencyWeight: 0.3,
@@ -53,7 +58,24 @@ export const DEFAULT_CONFIG: MemoryConfig = {
   tokenCounter: heuristicTokenCounter,
 };
 
-/** Bounds for the numeric knobs, checked when a config is resolved. */
+/**
+ * Admission threshold for an embedder that declares no calibrated
+ * {@link Embedder.relevanceThreshold}, such as a custom or hosted model you pass in yourself.
+ */
+export const DEFAULT_RELEVANCE_THRESHOLD = 0.7;
+
+/**
+ * The admission threshold a manager applies: the configured value when set, else the embedder's
+ * calibrated value, else {@link DEFAULT_RELEVANCE_THRESHOLD}.
+ */
+export function resolveRelevanceThreshold(
+  config: MemoryConfig,
+  embedder: { readonly relevanceThreshold?: number | undefined },
+): number {
+  return config.relevanceThreshold ?? embedder.relevanceThreshold ?? DEFAULT_RELEVANCE_THRESHOLD;
+}
+
+/** Bounds for the numeric knobs, checked when a config is resolved. Unset optional knobs are skipped. */
 const RANGES: ReadonlyArray<
   readonly [keyof MemoryConfig, number, number, "fraction" | "positive-int"]
 > = [
@@ -81,6 +103,7 @@ export function resolveConfig(overrides: Partial<MemoryConfig> = {}): MemoryConf
   const config: MemoryConfig = { ...DEFAULT_CONFIG, ...overrides };
 
   for (const [key, min, max, kind] of RANGES) {
+    if (key === "relevanceThreshold" && config.relevanceThreshold === undefined) continue;
     const value = config[key] as number;
     if (typeof value !== "number" || !Number.isFinite(value)) {
       throw new ConfigurationError(`${key} must be a finite number, got ${String(value)}`);

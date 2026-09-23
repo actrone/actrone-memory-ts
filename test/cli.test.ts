@@ -38,7 +38,7 @@ describe("recipes registry", () => {
     for (const slug of slugs) {
       const r = RECIPES[slug];
       expect(r?.framework).toBe(slug);
-      expect(r?.install).toContain("@actrone/memory");
+      expect(r?.install).toContain("actrone-memory");
       expect(r?.snippet).toContain("MemoryManager.create()");
       expect(r?.snippet.trimEnd().endsWith(HOSTED_UPGRADE_HINT)).toBe(true);
     }
