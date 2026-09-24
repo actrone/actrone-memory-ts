@@ -31,7 +31,15 @@ describe("recipes are backed by CI-typechecked examples", () => {
   });
 
   it("does not have example snippets for frameworks that are not recipes", () => {
-    const known = new Set([...listFrameworks(), "memory-ts-quickstart"]);
+    // Besides the recipes: the docs quickstart and the three use-case pages on actrone.com, which
+    // render these by id. Listed exactly, so a mistyped id still fails here.
+    const known = new Set([
+      ...listFrameworks(),
+      "memory-ts-quickstart",
+      "memory-ts-use-case-support",
+      "memory-ts-use-case-coding",
+      "memory-ts-use-case-assistant",
+    ]);
     for (const id of Object.keys(snippets)) {
       expect(known.has(id), `orphan snippet id "${id}"`).toBe(true);
     }

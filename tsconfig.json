@@ -31,7 +31,13 @@
     // type-checks) don't trip TS6059 "not under rootDir". `noEmit` makes that explicit and
     // guards against an accidental `tsc -p tsconfig.json` emitting test files into dist.
     "rootDir": ".",
-    "noEmit": true
+    "noEmit": true,
+    // test/use-cases.test.ts runs the examples, which import the package by its published name as a
+    // consumer would. Map that name to the source (as examples/tsconfig.json does), so the check
+    // never falls back to stale or missing `dist/` types. Nothing under src/ imports it.
+    "paths": {
+      "actrone-memory": ["./src/index.ts"]
+    }
   },
   "include": ["src", "test"],
   "exclude": ["dist", "node_modules"]
