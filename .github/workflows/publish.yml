@@ -11,9 +11,9 @@ name: Publish to npm
 # transparency log). Requires a public repo, `id-token: write`, and a Trusted
 # Publisher configured for this package on npmjs.com.
 #
-# NOTE (CI hardening): third-party actions are pinned to release tags for
-# readability. Repin them to exact commit SHAs to fully close the
-# compromised-tag risk, which matters here because this job holds `id-token: write`.
+# Every third-party action is pinned to an exact commit SHA (release tag in the trailing
+# comment), because this job holds `id-token: write`. The `npm` environment adds a required
+# reviewer before anything publishes.
 
 on:
   push:
@@ -29,6 +29,9 @@ jobs:
   publish:
     name: Build & Publish
     runs-on: ubuntu-latest
+    # Waits for a required reviewer before it can publish. The same name must be set as the
+    # trusted publisher's "Environment name" on npmjs.com, so no other job can publish.
+    environment: npm
     steps:
       - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
 
