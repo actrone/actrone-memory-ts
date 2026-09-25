@@ -133,11 +133,11 @@
     }
   },
   "devDependencies": {
-    "@types/node": "25.9.3",
+    "@types/node": "26.6.2",
     "tsup": "8.5.1",
     "typedoc": "^0.28.20",
-    "typescript": "5.9.3",
-    "vitest": "4.1.11"
+    "typescript": "7.0.2",
+    "vitest": "5.0.1"
   },
   "overrides": {
     "esbuild": "^0.28.1"
