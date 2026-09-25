@@ -6,6 +6,17 @@ All notable changes to `actrone-memory` are documented here. The format is based
 
 ---
 
+## [0.1.1] - unreleased
+
+A metadata-only release: no code changes.
+
+### Changed
+
+- **npm listing.** The description now says what the library does today, and no longer describes
+  it as an on-ramp to a hosted product that is not available yet. Keywords now cover what people
+  search for (agent-memory, long-term-memory, semantic-search, the Vercel AI SDK, LangChain.js,
+  Mastra, Qdrant, Redis, pgvector), and the homepage link opens the memory docs.
+
 ## [0.1.0] - 2026-09-25 (initial release)
 
 ### Added

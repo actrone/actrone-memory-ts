@@ -1,10 +1,10 @@
 {
   "name": "actrone-memory",
-  "version": "0.1.0",
-  "description": "Two-tier persistent agent memory for TypeScript/JS: short-term session turns + long-term semantic recall, with a pluggable store (in-memory default, Redis/Qdrant adapters) and embeddings. The open-source on-ramp to Actrone's governed hosted memory.",
+  "version": "0.1.1",
+  "description": "Persistent memory for AI agents in TypeScript: short-term session turns plus long-term semantic recall. In-memory by default, with Redis, Qdrant and pgvector adapters and pluggable embeddings. Works with the Vercel AI SDK, LangChain.js and Mastra.",
   "license": "MIT",
   "author": "Apocalypse Technologies <hello@actrone.com> (https://actrone.com)",
-  "homepage": "https://actrone.com",
+  "homepage": "https://actrone.com/docs/memory/overview",
   "repository": {
     "type": "git",
     "url": "git+https://github.com/actrone/actrone-memory-ts.git"
@@ -58,12 +58,22 @@
     "check-compat": "node scripts/check-compat.mjs"
   },
   "keywords": [
-    "ai",
-    "agents",
-    "llm",
+    "agent-memory",
+    "ai-agents",
     "memory",
+    "long-term-memory",
+    "semantic-search",
     "rag",
+    "llm",
     "vector",
+    "embeddings",
+    "vercel-ai-sdk",
+    "langchain",
+    "mastra",
+    "qdrant",
+    "redis",
+    "pgvector",
+    "typescript",
     "actrone"
   ],
   "dependencies": {
