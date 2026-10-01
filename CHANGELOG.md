@@ -6,7 +6,7 @@ All notable changes to `actrone-memory` are documented here. The format is based
 
 ---
 
-## [Unreleased]
+## [0.1.2] - 2026-10-01
 
 Framework compatibility fixes, found by type-checking every adapter against the real framework at
 the oldest and newest release of its supported range, and fact extraction that works on small
@@ -22,6 +22,11 @@ local models.
   `OpenAIFactExtractor` falls back to JSON mode, for good, only when a server rejects the schema.
   `EXTRACTION_SPEC_VERSION` is now `"1.1"`; `EXTRACTION_RESPONSE_SCHEMA` and
   `formatExtractionInput` are exported for custom extractors.
+- **Passing a real `openai` client to `OpenAIFactExtractor` failed to compile.**
+  `ChatCompleterLike` typed each message's role as a plain `string`, which the `openai` SDK's
+  message types reject, so `new OpenAIFactExtractor(new OpenAI(...))` only worked with a cast. The
+  roles are now the literal ones the extractor sends, and a docs example type-checks the real client
+  in CI.
 - **`npm install actrone-memory` failed next to current framework releases.** The optional peer
   ranges stopped below the versions most projects now run, and npm refuses such installs
   (`ERESOLVE`) rather than warning. For example, a project on the Vercel AI SDK 7 could not install

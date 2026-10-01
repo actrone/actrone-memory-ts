@@ -164,16 +164,18 @@ export function parseFacts(raw: string): ExtractedFact[] {
 }
 
 /**
- * Minimal structural interface for an OpenAI-compatible chat client (the
- * `openai` SDK's `AsyncOpenAI` satisfies it), injected so `actrone-memory` needs
- * no hard `openai` dependency.
+ * Minimal structural interface for an OpenAI-compatible chat client (an `openai`
+ * SDK `OpenAI` instance satisfies it, as examples/local-extraction.ts type-checks),
+ * injected so `actrone-memory` needs no hard `openai` dependency. The roles are
+ * the literal ones the extractor sends: the SDK's message types reject a plain
+ * `string` role, which made a real client fail to compile here.
  */
 export interface ChatCompleterLike {
   readonly chat: {
     readonly completions: {
       create(args: {
         model: string;
-        messages: Array<{ role: string; content: string }>;
+        messages: Array<{ role: "system" | "user"; content: string }>;
         response_format?: ExtractionResponseFormat;
         max_tokens?: number;
         temperature?: number;

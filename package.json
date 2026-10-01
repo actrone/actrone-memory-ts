@@ -1,6 +1,6 @@
 {
   "name": "actrone-memory",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "Persistent memory for AI agents in TypeScript: short-term session turns plus long-term semantic recall. In-memory by default, with Redis, Qdrant and pgvector adapters and pluggable embeddings. Works with the Vercel AI SDK, LangChain.js and Mastra.",
   "license": "MIT",
   "author": "Apocalypse Technologies <hello@actrone.com> (https://actrone.com)",
@@ -81,7 +81,6 @@
   },
   "//peerDependencies": "Framework adapters (src/adapters.ts) are structural, none is imported at runtime. These optional peers record the versions each recipe is type-checked against; npm refuses (ERESOLVE) to install next to a version outside them, so keep them current with the ci/compat-matrix results. Install just the one your app uses.",
   "peerDependencies": {
-    "fastembed": ">=2 <3",
     "@anthropic-ai/claude-agent-sdk": ">=0.1.0 <1",
     "@inngest/agent-kit": ">=0.5.0 <1",
     "@langchain/core": ">=0.2.0 <2",
@@ -91,6 +90,7 @@
     "@voltagent/core": ">=0.1.14 <3",
     "agents": ">=0.0.37 <1",
     "ai": ">=5.0.0 <8",
+    "fastembed": ">=2 <3",
     "genkit": ">=1.0.4 <2",
     "llamaindex": ">=0.8.0 <1"
   },
@@ -134,6 +134,7 @@
   },
   "devDependencies": {
     "@types/node": "25.9.3",
+    "openai": "7.25.0",
     "tsup": "8.5.1",
     "typedoc": "^0.28.20",
     "typescript": "5.9.3",
