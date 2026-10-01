@@ -7,7 +7,7 @@ const mm = await MemoryManager.create()
 const memory = mastraMemory(mm, { agentId: 'support-bot', sessionId: 'session-1' })
 
 const system = await memory.getSystemContext('ticket SLA')
-// ...agent.generate({ ...context, system })...
+// ...agent.generate(userInput, { context: [{ role: 'system', content: system }] })...
 await memory.remember('what is the ticket SLA?', '24 hours')
 // #endregion mastra
 

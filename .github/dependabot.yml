@@ -12,9 +12,12 @@ updates:
       interval: weekly
     commit-message:
       prefix: "chore"
+    # Minor and patch bumps batch into one PR. A major version of an action can change its
+    # runtime or inputs, so each one arrives as its own PR instead of sinking the whole batch.
     groups:
       actions:
         patterns: ["*"]
+        update-types: ["minor", "patch"]
 
   - package-ecosystem: npm
     directory: "/"
@@ -24,11 +27,18 @@ updates:
       prefix: "chore"
     # devDependencies are pinned exactly (see package.json), so security fixes such as
     # the vitest/esbuild advisories need an explicit bump rather than a floating range.
-    # Grouping them keeps that to one reviewable PR a week.
+    # Grouping the minor and patch bumps keeps that to one reviewable PR a week; a major
+    # (a new TypeScript or vitest line) arrives as its own PR so it cannot block the rest.
     groups:
       dev-dependencies:
         dependency-type: development
         patterns: ["*"]
+        update-types: ["minor", "patch"]
+    ignore:
+      # typedoc 0.28 declares a peer range of typescript 5.0.x to 6.0.x, so TypeScript 7
+      # fails `npm ci` with ERESOLVE. Remove this entry once a typedoc release supports 7.
+      - dependency-name: "typescript"
+        versions: [">=7"]
     # The package ships with `zod` as its only runtime dependency; surface those
     # individually so a breaking change is never batched into a tooling PR.
     open-pull-requests-limit: 5

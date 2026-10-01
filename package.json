@@ -79,19 +79,19 @@
   "dependencies": {
     "zod": "4.4.3"
   },
-  "//peerDependencies": "Framework adapters (src/adapters.ts) are structural, none is imported at runtime. These optional peers only make the version each recipe is tested against machine-legible so npm warns on a mismatch; install just the one your app uses.",
+  "//peerDependencies": "Framework adapters (src/adapters.ts) are structural, none is imported at runtime. These optional peers record the versions each recipe is type-checked against; npm refuses (ERESOLVE) to install next to a version outside them, so keep them current with the ci/compat-matrix results. Install just the one your app uses.",
   "peerDependencies": {
     "fastembed": ">=2 <3",
     "@anthropic-ai/claude-agent-sdk": ">=0.1.0 <1",
     "@inngest/agent-kit": ">=0.5.0 <1",
     "@langchain/core": ">=0.2.0 <2",
     "@langchain/langgraph": ">=0.1.0 <2",
-    "@mastra/core": ">=0.10.0 <1",
+    "@mastra/core": ">=0.10.0 <2",
     "@openai/agents": ">=0.1.0 <1",
-    "@voltagent/core": ">=0.1.0 <2",
-    "agents": ">=0.0.1 <1",
-    "ai": ">=5.0.0 <6",
-    "genkit": ">=1.0.0 <2",
+    "@voltagent/core": ">=0.1.14 <3",
+    "agents": ">=0.0.37 <1",
+    "ai": ">=5.0.0 <8",
+    "genkit": ">=1.0.4 <2",
     "llamaindex": ">=0.8.0 <1"
   },
   "peerDependenciesMeta": {

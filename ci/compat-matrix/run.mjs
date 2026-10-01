@@ -34,6 +34,9 @@ const spec = arg("spec");
 const framework = arg("framework");
 const canaryPath = arg("canary");
 const dedicated = arg("dedicated") === "true";
+// Optional for backwards compatibility: which boundary this job tests (floor / current / next).
+const whichIndex = process.argv.indexOf("--which");
+const which = whichIndex >= 0 ? process.argv[whichIndex + 1] : "current";
 
 const repoRoot = process.cwd();
 const dir = mkdtempSync(join(tmpdir(), `compat-${framework}-`));
@@ -50,8 +53,29 @@ try {
   );
 
   // Isolated install: the built local package + the peer at the pinned spec + a TS toolchain.
+  // A `next` job installs a peer ABOVE our declared cap on purpose, which npm rejects as a peer conflict
+  // (ERESOLVE) before anything is type-checked; --legacy-peer-deps lets it through so the job answers
+  // the real question: does our adapter output still type-check against the next major?
+  const peerFlag = which === "next" ? " --legacy-peer-deps" : "";
   console.log(`== install: local package + ${peer}@'${spec}' + typescript ==`);
-  sh(`npm install --no-audit --no-fund "${repoRoot}" "${peer}@${spec}" typescript@5 @types/node@22`);
+  try {
+    execSync(`npm install --no-audit --no-fund${peerFlag} "${repoRoot}" "${peer}@${spec}" typescript@5 @types/node@22`, {
+      cwd: dir,
+      stdio: ["ignore", "pipe", "pipe"],
+      encoding: "utf8",
+    });
+  } catch (error) {
+    const output = `${error.stdout ?? ""}${error.stderr ?? ""}`;
+    process.stdout.write(output);
+    // A `next` job targets the first release beyond the supported cap, which often does not exist
+    // yet. That is not a failure: report it and stop. Any other install error still fails the job.
+    if (which === "next" && /ETARGET|No matching version found/.test(output)) {
+      console.log(`::notice title=compat-matrix ${framework}@next::no release matches ${peer}@${spec} yet; nothing to test`);
+      rmSync(dir, { recursive: true, force: true }); // process.exit skips the finally below
+      process.exit(0);
+    }
+    throw error;
+  }
 
   writeFileSync(
     join(dir, "tsconfig.json"),
@@ -89,6 +113,16 @@ try {
   console.log(`== tsc: canary vs ${peer}@${spec} ==`);
   sh(`npx tsc --noEmit -p tsconfig.json`);
   console.log(`== OK: ${framework} @ ${spec} ==`);
+  // A passing `next` job means a released major works but sits outside the declared range, and npm
+  // refuses (ERESOLVE) to install actrone-memory next to it. Say so loudly: a silent pass is how the
+  // cap fell behind before.
+  if (which === "next") {
+    const installed = JSON.parse(readFileSync(join(dir, "node_modules", peer, "package.json"), "utf8")).version;
+    console.log(
+      `::warning title=compat-matrix ${framework}@next::${peer}@${installed} type-checks but is outside ` +
+        `the declared range, so npm refuses to install actrone-memory next to it. Widen the cap in compatibility.json.`,
+    );
+  }
 } finally {
   rmSync(dir, { recursive: true, force: true });
 }

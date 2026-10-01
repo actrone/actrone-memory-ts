@@ -66,3 +66,4 @@ jobs:
           --framework "${{ matrix.job.framework }}"
           --canary "${{ matrix.job.canary }}"
           --dedicated "${{ matrix.job.dedicated }}"
+          --which "${{ matrix.job.which }}"

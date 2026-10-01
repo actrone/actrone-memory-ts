@@ -7,12 +7,41 @@
  * package.json or the framework compatibility matrix in README.md drift from it.
  *
  * Per framework: the peer package is declared with the manifest `range`, is marked optional in
- * `peerDependenciesMeta`, and has a README matrix row (label + peer). Reverse: every optional peer is
+ * `peerDependenciesMeta`, and has a README matrix row (label + peer + range). Reverse: every optional peer is
  * a framework in the manifest. Exit 0 in sync, else exit 1 with a precise diff. No installs, no network.
  */
 import { readFileSync } from "node:fs";
 import { fileURLToPath } from "node:url";
 import { dirname, resolve } from "node:path";
+
+/**
+ * Normalise a range for comparison. The README writes versions without trailing zero components
+ * (`ai >=5 <6`) while package.json spells them out (`>=5.0.0 <6`); both mean the same range.
+ */
+export function normaliseRange(range) {
+  return String(range)
+    .trim()
+    .replace(/\s+/g, " ")
+    .replace(/\d+(?:\.\d+)*/g, (version) => version.replace(/(?:\.0)+$/, ""));
+}
+
+const escapeRegExp = (text) => text.replace(/[.*+?^${}()|[\]\\/]/g, "\\$&");
+
+/**
+ * Check one framework's README matrix row: it exists (`| <Label> | …`), names this peer at the start
+ * of a code span (so it can't reference the wrong package), and states the manifest range. Returns the
+ * drift errors for that row.
+ */
+function readmeRowErrors(name, { peer, range, readme: label }, readmeLines) {
+  const row = readmeLines.find((line) => line.startsWith(`| ${label} |`));
+  if (!row) return [`[${name}] README compat matrix has no "${label}" row`];
+  const span = new RegExp("`" + escapeRegExp(peer) + " ([^`]+)`").exec(row);
+  if (!span) return [`[${name}] README compat matrix "${label}" row missing \`${peer} …\``];
+  if (normaliseRange(span[1]) !== normaliseRange(range)) {
+    return [`[${name}] README compat matrix "${label}" row says \`${peer} ${span[1]}\` != manifest "${range}"`];
+  }
+  return [];
+}
 
 /**
  * Pure core (unit-testable): validate a package.json + README against the manifest. Returns the list
@@ -22,10 +51,11 @@ export function checkAgainst(manifest, pkg, readme) {
   const peers = pkg.peerDependencies ?? {};
   const meta = pkg.peerDependenciesMeta ?? {};
   const frameworks = manifest.frameworks;
+  const readmeLines = readme.split(/\r?\n/);
   const errors = [];
 
   for (const [name, fw] of Object.entries(frameworks)) {
-    const { peer, range, readme: label } = fw;
+    const { peer, range } = fw;
     if (!(peer in peers)) {
       errors.push(`[${name}] package.json peerDependencies is missing '${peer}'`);
     } else if (peers[peer] !== range) {
@@ -34,15 +64,7 @@ export function checkAgainst(manifest, pkg, readme) {
     if (!meta[peer]?.optional) {
       errors.push(`[${name}] peer '${peer}' must be optional in peerDependenciesMeta`);
     }
-    // README rows read `<Label> | <adapter> | `<peer> <range>` …`, assert the label row exists and
-    // carries this peer at the start of a code span (`` `<peer> ``), so it can't reference the wrong
-    // package (works for both `>=x <y` and `^x` range styles).
-    if (!readme.includes(label)) {
-      errors.push(`[${name}] README compat matrix has no "${label}" row`);
-    }
-    if (!readme.includes("`" + peer)) {
-      errors.push(`[${name}] README compat matrix "${label}" row missing \`${peer} …\``);
-    }
+    errors.push(...readmeRowErrors(name, fw, readmeLines));
   }
 
   // reverse: every optional peer must be a manifest framework's peer OR a known supporting/infra peer

@@ -211,22 +211,25 @@ models; MAL (hosted) makes cloud safe.**
 
 Adapters live in `actrone-memory/adapters` and are **structural**: none imports its framework at
 runtime, so nothing is bundled and the base install pulls only `zod`. Install the framework you use;
-the versions below are the optional `peerDependencies` each recipe is tested against (npm warns on a
-mismatch). Every framework recipe is CI-typechecked against the current adapter API
-(`examples/frameworks/`); run `npx actrone-memory add <framework>` for a copy-paste recipe.
+the versions below are the optional `peerDependencies`, each type-checked against the real framework
+at its oldest and newest release. npm refuses to install next to a framework version outside its range
+(`ERESOLVE`), so a weekly CI job also type-checks each framework's next major, which is how a range
+widens when that major ships. Every framework recipe is CI-typechecked
+against the current adapter API (`examples/frameworks/`); run `npx actrone-memory add <framework>` for
+a copy-paste recipe.
 
 | Framework | Adapter | Tested peer version |
 | --- | --- | --- |
-| Vercel AI SDK | `vercelMemory` | `ai >=5 <6` |
+| Vercel AI SDK | `vercelMemory` | `ai >=5 <8` |
 | LangChain.js | `langchainMemory` / `langchainChatHistory` | `@langchain/core >=0.2 <2` |
 | LangGraph.js | `langgraphMemory` | `@langchain/langgraph >=0.1 <2` |
-| Mastra | `mastraMemory` | `@mastra/core >=0.10 <1` |
+| Mastra | `mastraMemory` | `@mastra/core >=0.10 <2` |
 | LlamaIndex.TS | `llamaindexMemory` / `llamaindexChatMemory` | `llamaindex >=0.8 <1` |
 | OpenAI Agents JS | `openaiAgentsMemory` | `@openai/agents >=0.1 <1` |
-| Firebase Genkit | `genkitMemory` | `genkit >=1 <2` |
-| VoltAgent | `voltagentMemory` | `@voltagent/core >=0.1 <2` |
+| Firebase Genkit | `genkitMemory` | `genkit >=1.0.4 <2` |
+| VoltAgent | `voltagentMemory` | `@voltagent/core >=0.1.14 <3` |
 | Claude Agent SDK | `claudeAgentMemory` | `@anthropic-ai/claude-agent-sdk >=0.1 <1` |
-| Cloudflare Agents | `cloudflareAgentsMemory` | `agents >=0.0.1 <1` |
+| Cloudflare Agents | `cloudflareAgentsMemory` | `agents >=0.0.37 <1` |
 | Inngest AgentKit | `inngestAgentKitMemory` | `@inngest/agent-kit >=0.5 <1` |
 
 **Adapter depth (honest scope).** Most adapters are lightweight, framework-idiomatic

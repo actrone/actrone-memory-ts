@@ -166,11 +166,17 @@ export function langchainMemory(mm: MemoryManager, ref: ConversationRef): {
   };
 }
 
-/** A minimal LangGraph.js system message (structural, no `@langchain/langgraph` import). */
-export interface LangGraphSystemMessage {
+/**
+ * A minimal LangGraph.js system message (structural, no `@langchain/langgraph` import).
+ *
+ * A type alias, not an interface, on purpose: LangGraph's `messages` channel accepts a role/content
+ * object only where it is assignable to `Record<string, unknown>`, which an interface never is. As an
+ * interface it failed to type-check in a node returning `{ messages: [sys] }`.
+ */
+export type LangGraphSystemMessage = {
   readonly role: "system";
   readonly content: string;
-}
+};
 
 /**
  * LangGraph.js: memory for a graph whose state carries a `messages` array (e.g. `MessagesState`).
@@ -195,8 +201,9 @@ export function langgraphMemory(mm: MemoryManager, ref: ConversationRef): {
 
 /**
  * Mastra: a dedicated memory helper (rather than piggybacking the Vercel model path).
- * `getSystemContext` returns the instruction string to prepend to a Mastra agent's context for the
- * turn, and `remember` persists the completed turn, call them around `agent.generate(...)`.
+ * `getSystemContext` returns the instruction string to add as a system message for the turn
+ * (`agent.generate(input, { context: [{ role: "system", content }] })`, which keeps the agent's own
+ * `instructions`), and `remember` persists the completed turn.
  * Structural, so `@mastra/core` stays an optional peer dependency.
  */
 export function mastraMemory(mm: MemoryManager, ref: ConversationRef): {
@@ -211,10 +218,11 @@ export function mastraMemory(mm: MemoryManager, ref: ConversationRef): {
 }
 
 /**
- * LlamaIndex.TS: memory for a `llamaindex` agent / chat engine. `getSystemPrompt` returns the
- * governed context to pass as the agent's `systemPrompt` (or prepend to it) for the turn, and
- * `saveTurn` persists the completed exchange: call them around `agent.chat({ message })`.
- * Structural, so `llamaindex` stays an optional peer dependency.
+ * LlamaIndex.TS: memory for a `llamaindex` chat engine. `getSystemPrompt` returns the governed
+ * context to pass as the leading system message of the turn's history
+ * (`chatEngine.chat({ message, chatHistory: [{ role: "system", content }] })`; `chat()` has no
+ * `systemPrompt` parameter), and `saveTurn` persists the completed exchange. Structural, so
+ * `llamaindex` stays an optional peer dependency.
  */
 export function llamaindexMemory(mm: MemoryManager, ref: ConversationRef): {
   getSystemPrompt: (query: string, tokenBudget?: number) => Promise<string>;

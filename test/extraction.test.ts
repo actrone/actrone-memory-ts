@@ -1,13 +1,96 @@
+import { createHash } from "node:crypto";
+
 import { describe, expect, it } from "vitest";
 
 import {
+  type ChatCompleterLike,
   ConfigurationError,
+  EXTRACTION_RESPONSE_SCHEMA,
   EXTRACTION_SPEC_VERSION,
+  EXTRACTION_SYSTEM_PROMPT,
   type ExtractedFact,
   type FactExtractor,
   MemoryManager,
+  OpenAIFactExtractor,
+  formatExtractionInput,
   parseFacts,
 } from "../src/index.js";
+
+const ONE_FACT =
+  '{"facts": [{"content": "The user\'s name is Alex.", "sensitivity": "pii", "topic_tags": ["identity"], "importance": 0.8}]}';
+
+/** What the openai SDK throws when a server refuses a request (a 4xx status). */
+class Rejected extends Error {
+  constructor(readonly status: number) {
+    super(`status ${status}`);
+  }
+}
+
+type Request = Parameters<ChatCompleterLike["chat"]["completions"]["create"]>[0];
+
+/** A fake OpenAI-compatible client that replays scripted replies and records every request. */
+function fakeClient(replies: Array<string | Error>): { client: ChatCompleterLike; requests: Request[] } {
+  const requests: Request[] = [];
+  const client: ChatCompleterLike = {
+    chat: {
+      completions: {
+        async create(args) {
+          requests.push(args);
+          const reply = replies.shift();
+          if (reply instanceof Error) throw reply;
+          return { choices: [{ message: { content: reply ?? "{}" } }] };
+        },
+      },
+    },
+  };
+  return { client, requests };
+}
+
+describe("OpenAIFactExtractor (any OpenAI-compatible client)", () => {
+  it("frames the conversation per the spec", () => {
+    const framed = formatExtractionInput("User: hi\nAssistant: hello");
+    expect(framed.startsWith("Conversation:\n\nUser: hi\nAssistant: hello")).toBe(true);
+    expect(framed.endsWith("Extract the durable facts from this conversation.")).toBe(true);
+  });
+
+  it("sends the spec request with a JSON schema", async () => {
+    const { client, requests } = fakeClient([ONE_FACT]);
+    const facts = await new OpenAIFactExtractor(client, "small-local-model").extract("User: I'm Alex.\nAssistant: Hi Alex!");
+
+    expect(facts.map((f) => [f.content, f.sensitivity])).toEqual([["The user's name is Alex.", "pii"]]);
+    const request = requests[0]!;
+    expect(request.model).toBe("small-local-model");
+    expect(request.messages[0]).toEqual({ role: "system", content: EXTRACTION_SYSTEM_PROMPT });
+    expect(request.messages[1]?.content).toBe(formatExtractionInput("User: I'm Alex.\nAssistant: Hi Alex!"));
+    expect(request.response_format?.type).toBe("json_schema");
+    expect(request.response_format?.type === "json_schema" && request.response_format.json_schema.schema).toBe(
+      EXTRACTION_RESPONSE_SCHEMA,
+    );
+  });
+
+  it("falls back to JSON mode for good when a server rejects the schema", async () => {
+    const { client, requests } = fakeClient([new Rejected(400), ONE_FACT, ONE_FACT]);
+    const extractor = new OpenAIFactExtractor(client, "m");
+
+    expect(await extractor.extract("User: I'm Alex.")).toHaveLength(1);
+    expect(await extractor.extract("User: I'm Alex.")).toHaveLength(1);
+    expect(requests.map((r) => r.response_format?.type)).toEqual(["json_schema", "json_object", "json_object"]);
+  });
+
+  it("keeps the schema after a transient error", async () => {
+    const { client, requests } = fakeClient([new Rejected(503), ONE_FACT]);
+    const extractor = new OpenAIFactExtractor(client, "m");
+
+    expect(await extractor.extract("User: I'm Alex.")).toEqual([]);
+    expect(await extractor.extract("User: I'm Alex.")).toHaveLength(1);
+    expect(requests.map((r) => r.response_format?.type)).toEqual(["json_schema", "json_schema"]);
+  });
+
+  it("returns nothing when both formats fail", async () => {
+    const { client } = fakeClient([new Rejected(400), new Rejected(400)]);
+    expect(await new OpenAIFactExtractor(client, "m").extract("User: I'm Alex.")).toEqual([]);
+  });
+});
 
 /** Deterministic extractor for tests: no LLM. */
 class FakeExtractor implements FactExtractor {
@@ -21,7 +104,14 @@ class FakeExtractor implements FactExtractor {
 
 describe("parseFacts (shared spec v1)", () => {
   it("pins the spec version", () => {
-    expect(EXTRACTION_SPEC_VERSION).toBe("1.0");
+    expect(EXTRACTION_SPEC_VERSION).toBe("1.1");
+  });
+
+  it("uses the shared spec's prompt, byte for byte", () => {
+    // The same hash is pinned in actrone-memory-py and in the spec doc (extraction.v1.md), so a prompt
+    // edit in one library fails here until the other library and the spec catch up.
+    const digest = createHash("sha256").update(EXTRACTION_SYSTEM_PROMPT, "utf8").digest("hex");
+    expect(digest).toBe("c25f946a45428b327a6983f8d5e7f8052a06736ac6cb1795824fb3e564593b09");
   });
 
   it("parses a facts envelope with provenance", () => {

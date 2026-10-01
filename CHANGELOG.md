@@ -6,7 +6,42 @@ All notable changes to `actrone-memory` are documented here. The format is based
 
 ---
 
-## [0.1.1] - unreleased
+## [Unreleased]
+
+Framework compatibility fixes, found by type-checking every adapter against the real framework at
+the oldest and newest release of its supported range, and fact extraction that works on small
+local models.
+
+### Fixed
+
+- **Fact extraction returned nothing on small models.** With `qwen2.5:3b` on Ollama, extraction
+  came back empty on 12 of 15 real exchanges, because the model read the assistant's reply as part
+  of what to mine. Extraction spec 1.1 frames the conversation, says whose facts to record, asks
+  for a JSON-schema structured output and gives two worked examples (one with facts, one with
+  none). On the same model it found 14 of 14 expected facts and stored nothing for small talk.
+  `OpenAIFactExtractor` falls back to JSON mode, for good, only when a server rejects the schema.
+  `EXTRACTION_SPEC_VERSION` is now `"1.1"`; `EXTRACTION_RESPONSE_SCHEMA` and
+  `formatExtractionInput` are exported for custom extractors.
+- **`npm install actrone-memory` failed next to current framework releases.** The optional peer
+  ranges stopped below the versions most projects now run, and npm refuses such installs
+  (`ERESOLVE`) rather than warning. For example, a project on the Vercel AI SDK 7 could not install
+  0.1.1. The ranges now cover the current majors: `ai >=5 <8`, `@mastra/core >=0.10 <2` and
+  `@voltagent/core >=0.1.14 <3`.
+- **`langgraphMemory().loadMemories()` did not type-check as a LangGraph message.** Its return
+  type was an interface, which TypeScript does not treat as the index-signature record LangGraph's
+  `messagesStateReducer` accepts. It is now a type alias with the same shape, so it merges into
+  `state.messages` without a cast.
+- **Floors that pointed at unrelated packages.** npm's `genkit` 1.0.0 to 1.0.3 and `agents` 0.0.1
+  and 0.0.2 were published by other projects before Firebase and Cloudflare took the names. The
+  floors are now `genkit >=1.0.4` and `agents >=0.0.37`, the first real releases.
+- **VoltAgent floor.** `@voltagent/core` below 0.1.14 has no `instructions` option, which
+  `voltagentMemory().withInstructions()` fills. The floor is now 0.1.14.
+- **Mastra and LlamaIndex.TS recipes showed calls that do not exist.** Mastra's memory goes in
+  `agent.generate(input, { context: [{ role: 'system', content }] })`, and LlamaIndex.TS chat
+  engines take it as the leading message of `chatHistory`; `chat()` has no `systemPrompt`
+  parameter. The recipes, `npx actrone-memory add` output and adapter docs now show these calls.
+
+## [0.1.1] - 2026-09-28
 
 A metadata-only release: no code changes.
 

@@ -72,10 +72,13 @@ export {
   type ExtractedFact,
   type FactExtractor,
   type ChatCompleterLike,
+  type ExtractionResponseFormat,
   OpenAIFactExtractor,
   parseFacts,
+  formatExtractionInput,
   EXTRACTION_SPEC_VERSION,
   EXTRACTION_SYSTEM_PROMPT,
+  EXTRACTION_RESPONSE_SCHEMA,
 } from "./extraction.js";
 export {
   type MemoryItem,

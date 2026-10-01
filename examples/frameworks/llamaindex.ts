@@ -7,7 +7,7 @@ const mm = await MemoryManager.create()
 const memory = llamaindexMemory(mm, { agentId: 'support-bot', sessionId: 'session-1' })
 
 const systemPrompt = await memory.getSystemPrompt('index rebuild schedule')
-// ...agent.chat({ message: userInput, systemPrompt })...
+// ...chatEngine.chat({ message: userInput, chatHistory: [{ role: 'system', content: systemPrompt }] })...
 await memory.saveTurn('when does the index rebuild?', 'nightly at 2am')
 // #endregion llamaindex
 
