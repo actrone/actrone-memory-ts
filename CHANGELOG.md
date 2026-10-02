@@ -6,6 +6,17 @@ All notable changes to `actrone-memory` are documented here. The format is based
 
 ---
 
+## [0.1.3] - 2026-10-02
+
+### Fixed
+
+- **`npx actrone-memory` did nothing on macOS and Linux.** npm installs a package's command as a
+  symlink there, and the CLI compared its own path with the path it was started from without
+  resolving the link, so `npx actrone-memory add <framework>` and `npx actrone-memory list`
+  exited without any output. Both paths are now resolved first. Windows, where npm uses a
+  command shim, was not affected. CI now packs the library, installs it the way a user does and
+  runs the command through npm's own symlink.
+
 ## [0.1.2] - 2026-10-01
 
 Framework compatibility fixes, found by type-checking every adapter against the real framework at

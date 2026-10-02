@@ -1,6 +1,6 @@
 {
   "name": "actrone-memory",
-  "version": "0.1.2",
+  "version": "0.1.3",
   "description": "Persistent memory for AI agents in TypeScript: short-term session turns plus long-term semantic recall. In-memory by default, with Redis, Qdrant and pgvector adapters and pluggable embeddings. Works with the Vercel AI SDK, LangChain.js and Mastra.",
   "license": "MIT",
   "author": "Apocalypse Technologies <hello@actrone.com> (https://actrone.com)",

@@ -1,6 +1,6 @@
 #!/usr/bin/env node
-import { existsSync, writeFileSync } from "node:fs";
-import { pathToFileURL } from "node:url";
+import { existsSync, realpathSync, writeFileSync } from "node:fs";
+import { fileURLToPath } from "node:url";
 
 import { getRecipe, listFrameworks, renderRecipe, renderStandaloneFile } from "./recipes.js";
 
@@ -102,7 +102,32 @@ function main(): void {
   process.exit(runCli(process.argv.slice(2), io));
 }
 
-// Only run when invoked as the binary, not when imported by tests.
-if (process.argv[1] !== undefined && import.meta.url === pathToFileURL(process.argv[1]).href) {
+/**
+ * True when this module is the program being run, so importing it (tests) runs nothing.
+ *
+ * Node resolves symlinks for `import.meta.url` but not for `process.argv[1]`, and on macOS and
+ * Linux npm installs a package's command as a symlink (`node_modules/.bin/actrone-memory`).
+ * Comparing the two as given never matched there, so `npx actrone-memory` exited 0 without doing
+ * anything. Both sides are resolved first. Windows was unaffected: npm uses a command shim there.
+ *
+ * @param entry `process.argv[1]`, the path the program was started with.
+ * @param moduleUrl `import.meta.url` of this module.
+ * @param realpath resolves a path through any symlinks; injectable for tests.
+ * @returns false when either path cannot be resolved.
+ */
+export function isEntryPoint(
+  entry: string | undefined,
+  moduleUrl: string,
+  realpath: (path: string) => string = realpathSync,
+): boolean {
+  if (entry === undefined) return false;
+  try {
+    return realpath(entry) === realpath(fileURLToPath(moduleUrl));
+  } catch {
+    return false;
+  }
+}
+
+if (isEntryPoint(process.argv[1], import.meta.url)) {
   main();
 }

@@ -1,3 +1,8 @@
+import { mkdirSync, mkdtempSync, rmSync, symlinkSync, writeFileSync } from "node:fs";
+import { tmpdir } from "node:os";
+import { join, resolve } from "node:path";
+import { pathToFileURL } from "node:url";
+
 import { describe, expect, it } from "vitest";
 
 import {
@@ -8,7 +13,7 @@ import {
   renderRecipe,
   renderStandaloneFile,
 } from "../src/index.js";
-import { type CliIO, runCli } from "../src/cli.js";
+import { type CliIO, isEntryPoint, runCli } from "../src/cli.js";
 
 /** Recording IO fake: no disk, no process. */
 function makeIO(existing: Set<string> = new Set()): CliIO & {
@@ -103,5 +108,51 @@ describe("cli", () => {
     const io = makeIO();
     expect(runCli([], io)).toBe(1);
     expect(io.out.join("\n")).toContain("Usage:");
+  });
+});
+
+describe("isEntryPoint", () => {
+  // npm installs a package's command as a symlink on macOS and Linux. Node resolves symlinks for
+  // import.meta.url but not for process.argv[1]; 0.1.0 to 0.1.2 compared them as given, so
+  // `npx actrone-memory` exited without doing anything there.
+  const realFile = resolve("/pkg/node_modules/actrone-memory/dist/cli.js");
+  const linkFile = resolve("/pkg/node_modules/.bin/actrone-memory");
+  const links = new Map([[linkFile, realFile]]);
+  const fakeRealpath = (path: string) => links.get(path) ?? path;
+
+  it("is true when started through a symlink to this module", () => {
+    expect(isEntryPoint(linkFile, pathToFileURL(realFile).href, fakeRealpath)).toBe(true);
+  });
+
+  it("is true when started directly", () => {
+    expect(isEntryPoint(realFile, pathToFileURL(realFile).href, fakeRealpath)).toBe(true);
+  });
+
+  it("is false when another program imports this module", () => {
+    expect(isEntryPoint(resolve("/pkg/node_modules/vitest/vitest.mjs"), pathToFileURL(realFile).href, fakeRealpath)).toBe(false);
+    expect(isEntryPoint(undefined, pathToFileURL(realFile).href, fakeRealpath)).toBe(false);
+  });
+
+  it("is false when a path cannot be resolved", () => {
+    const missing = () => {
+      throw new Error("ENOENT");
+    };
+    expect(isEntryPoint(linkFile, pathToFileURL(realFile).href, missing)).toBe(false);
+  });
+
+  it("follows a real link on this filesystem", () => {
+    // A directory link, as npm's layout resolves through: a junction on Windows (no admin
+    // rights needed), a symlink elsewhere.
+    const root = mkdtempSync(join(tmpdir(), "actrone-cli-"));
+    try {
+      const realDir = join(root, "real");
+      mkdirSync(realDir);
+      const real = join(realDir, "cli.js");
+      writeFileSync(real, "");
+      symlinkSync(realDir, join(root, "link"), "junction");
+      expect(isEntryPoint(join(root, "link", "cli.js"), pathToFileURL(real).href)).toBe(true);
+    } finally {
+      rmSync(root, { recursive: true, force: true });
+    }
   });
 });

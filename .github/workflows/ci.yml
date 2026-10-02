@@ -41,6 +41,19 @@ jobs:
         run: npm test
       - name: Build (tsup)
         run: npm run build
+      - name: CLI runs through npm's command symlink
+        # npm installs a package's command as a symlink on Linux and macOS. 0.1.0 to 0.1.2 exited
+        # there without doing anything, which unit tests importing the module could not see. This
+        # installs the packed tarball as a user would and runs the command the way npx does.
+        run: |
+          npm pack --pack-destination "$RUNNER_TEMP"
+          mkdir "$RUNNER_TEMP/consumer"
+          cd "$RUNNER_TEMP/consumer"
+          npm init -y > /dev/null
+          npm install --no-audit --no-fund "$RUNNER_TEMP"/actrone-memory-*.tgz
+          npx --no-install actrone-memory list | tee list.txt
+          grep -qx vercel list.txt
+          npx --no-install actrone-memory add vercel | grep -q "npm i actrone-memory ai"
       - name: Generate API reference (TypeDoc)
         # Gates the docs: a broken doc-comment, @link, or entry point fails the build
         # (API reference generated from the package source).
