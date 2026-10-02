@@ -7,6 +7,8 @@
 [![License: MIT](https://img.shields.io/badge/License-MIT-blue.svg)](https://github.com/actrone/actrone-memory-ts/blob/main/LICENSE)
 [![CI](https://github.com/actrone/actrone-memory-ts/actions/workflows/ci.yml/badge.svg)](https://github.com/actrone/actrone-memory-ts/actions)
 
+**[Documentation](https://actrone.com/docs/memory/overview)** · [Quickstart](https://actrone.com/docs/getting-started/quickstart) · [Framework integrations](https://actrone.com/docs/memory/integrations) · [Changelog](https://actrone.com/changelog) · [Blog](https://actrone.com/blog)
+
 The TypeScript counterpart to [`actrone-memory`](https://github.com/actrone/actrone-memory-py)
 for Python. Same two-tier model, same result shapes, same one-import upgrade path.
 
