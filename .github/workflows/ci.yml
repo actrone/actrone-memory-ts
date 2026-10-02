@@ -32,6 +32,11 @@ jobs:
       - run: npm ci
       - name: Type-check (tsc, strict)
         run: npm run typecheck
+      - name: Type-check with TypeScript 7
+        # The project compiles with TypeScript 6.0, the newest release TypeDoc and tsup's declaration
+        # build support (TypeScript 7 removed the compiler API both use). This keeps the source ready
+        # for 7, so the switch is a version bump once they support it.
+        run: npm run typecheck:ts7
       - name: Test (vitest)
         run: npm test
       - name: Build (tsup)

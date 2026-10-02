@@ -48,6 +48,7 @@
     "build": "tsup",
     "prepare": "npm run build",
     "typecheck": "tsc --noEmit -p tsconfig.typecheck.json",
+    "typecheck:ts7": "npx -y -p typescript@7.0.2 tsc --noEmit -p tsconfig.typecheck.json && npx -y -p typescript@7.0.2 tsc --noEmit -p examples/tsconfig.json",
     "test": "vitest run",
     "test:watch": "vitest",
     "prepublishOnly": "npm run typecheck && npm run test && npm run build",
@@ -137,7 +138,7 @@
     "openai": "7.25.0",
     "tsup": "8.5.1",
     "typedoc": "^0.28.20",
-    "typescript": "5.9.3",
+    "typescript": "6.0.3",
     "vitest": "4.1.11"
   },
   "overrides": {
