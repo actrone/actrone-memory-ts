@@ -78,7 +78,7 @@
     "actrone"
   ],
   "dependencies": {
-    "zod": "4.4.3"
+    "zod": "4.6.5"
   },
   "//peerDependencies": "Framework adapters (src/adapters.ts) are structural, none is imported at runtime. These optional peers record the versions each recipe is type-checked against; npm refuses (ERESOLVE) to install next to a version outside them, so keep them current with the ci/compat-matrix results. Install just the one your app uses.",
   "peerDependencies": {
