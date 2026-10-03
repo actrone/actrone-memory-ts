@@ -33,7 +33,7 @@ jobs:
     # trusted publisher's "Environment name" on npmjs.com, so no other job can publish.
     environment: npm
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262 # v4.4.0
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
 
       # `prepublishOnly` re-runs typecheck + test + build, but not CodeQL or the
       # dependency audit. Without this gate, tagging a commit whose CI went red still
