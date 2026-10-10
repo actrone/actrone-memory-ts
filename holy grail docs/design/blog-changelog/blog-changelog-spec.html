@@ -1,0 +1,808 @@
+<title>Blog and changelog spec</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Token layer, lifted verbatim from ../oss-site/oss-site-redesign.html (itself lifted from
+   frontend/apps/marketing/src/app/globals.css). Dark first; the light "paper" set is redefined
+   for system light and for a stamped data-theme. */
+:root {
+  --bg: #030303; --bg-hero: #000000; --bg-band: #0A0A0A; --surface: #111111; --raised: #121214;
+  --line: #262629; --line-soft: #1C1C1F; --line-hover: #3A3A3E;
+  --ink: #F5F5F7; --ink-2: #E5E5E7; --muted: #A1A1AA; --dim: #84848C; --faint: #6A6A74;
+  --on-accent: #000000;
+  --ok: #22C55E; --warn: #F59E0B; --err: #EF4444; --info: #3B82F6;
+  --ok-bg: rgba(34,197,94,.10); --warn-bg: rgba(245,158,11,.10); --err-bg: rgba(239,68,68,.10); --info-bg: rgba(59,130,246,.10);
+  --f-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px; --s20: 80px; --s24: 96px;
+  --r-sm: 4px; --r-md: 6px; --r-lg: 8px;
+  --z-sticky: 20; --z-overlay: 60;
+  --dur: 200ms; --ease: cubic-bezier(.16,1,.3,1);
+  --glow: 0 0 0 1px rgba(255,255,255,.08);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #FFFFFF; --bg-hero: #FFFFFF; --bg-band: #F5F5F7; --surface: #FAFAFB; --raised: #FFFFFF;
+    --line: #D9D9DE; --line-soft: #E8E8EC; --line-hover: #B9B9C2;
+    --ink: #0A0A0B; --ink-2: #1C1C1F; --muted: #55555C; --dim: #6E6E78; --faint: #7A7A84;
+    --on-accent: #FFFFFF;
+    --ok: #15803D; --warn: #B45309; --err: #DC2626; --info: #2563EB;
+    --ok-bg: rgba(21,128,61,.09); --warn-bg: rgba(180,83,9,.09); --err-bg: rgba(220,38,38,.09); --info-bg: rgba(37,99,235,.09);
+    --glow: 0 0 0 1px rgba(0,0,0,.07);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #FFFFFF; --bg-hero: #FFFFFF; --bg-band: #F5F5F7; --surface: #FAFAFB; --raised: #FFFFFF;
+  --line: #D9D9DE; --line-soft: #E8E8EC; --line-hover: #B9B9C2;
+  --ink: #0A0A0B; --ink-2: #1C1C1F; --muted: #55555C; --dim: #6E6E78; --faint: #7A7A84;
+  --on-accent: #FFFFFF;
+  --ok: #15803D; --warn: #B45309; --err: #DC2626; --info: #2563EB;
+  --ok-bg: rgba(21,128,61,.09); --warn-bg: rgba(180,83,9,.09); --err-bg: rgba(220,38,38,.09); --info-bg: rgba(37,99,235,.09);
+  --glow: 0 0 0 1px rgba(0,0,0,.07);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #030303; --bg-hero: #000000; --bg-band: #0A0A0A; --surface: #111111; --raised: #121214;
+  --line: #262629; --line-soft: #1C1C1F; --line-hover: #3A3A3E;
+  --ink: #F5F5F7; --ink-2: #E5E5E7; --muted: #A1A1AA; --dim: #84848C; --faint: #6A6A74;
+  --on-accent: #000000;
+  --ok: #22C55E; --warn: #F59E0B; --err: #EF4444; --info: #3B82F6;
+  --ok-bg: rgba(34,197,94,.10); --warn-bg: rgba(245,158,11,.10); --err-bg: rgba(239,68,68,.10); --info-bg: rgba(59,130,246,.10);
+  --glow: 0 0 0 1px rgba(255,255,255,.08);
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink-2); font-family: var(--f-sans); font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, p, ul, ol, figure, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+code, pre, .mono { font-family: var(--f-mono); font-variant-ligatures: none; }
+table { border-collapse: collapse; width: 100%; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
+svg { display: block; flex: none; }
+.ico { width: 14px; height: 14px; }
+.ico-16 { width: 16px; height: 16px; }
+[id] { scroll-margin-top: 72px; }
+a, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.skip { position: absolute; left: var(--s4); top: -100px; z-index: 100; background: var(--ink); color: var(--on-accent); padding: 10px var(--s4); border-radius: var(--r-md); font-size: 13.5px; font-weight: 500; text-decoration: none; }
+.skip:focus { top: var(--s3); }
+
+/* Spec chrome: the document that wraps the design. */
+.doc { max-width: 1240px; margin: 0 auto; padding: 0 var(--s6) var(--s24); }
+.spec-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: var(--z-overlay); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); padding: var(--s3) var(--s6); border-bottom: 1px solid var(--line); background: color-mix(in srgb, var(--bg) 88%, transparent); backdrop-filter: saturate(180%) blur(14px); -webkit-backdrop-filter: saturate(180%) blur(14px); font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .04em; color: var(--dim); }
+.spec-bar strong { color: var(--ink); font-weight: 500; }
+.spec-bar .sep { color: var(--faint); }
+.spec-bar-right { margin-left: auto; display: flex; gap: var(--s2); }
+.tgl { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 4px 9px; color: var(--muted); font-family: var(--f-mono); font-size: 11px; letter-spacing: .03em; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.tgl:hover { border-color: var(--line-hover); color: var(--ink); }
+.cover { padding: var(--s24) 0 var(--s20); border-bottom: 1px solid var(--line); }
+.cover-kicker { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; color: var(--dim); margin-bottom: var(--s6); }
+.cover h1 { font-size: clamp(2.5rem, 5.6vw, 4.25rem); line-height: 1.0; letter-spacing: -.038em; font-weight: 500; color: var(--ink); text-wrap: balance; max-width: 17ch; }
+.cover-lede { margin-top: var(--s8); max-width: 64ch; font-size: 1.0625rem; line-height: 1.7; color: var(--muted); }
+.cover-lede + .cover-lede { margin-top: var(--s4); }
+.cover-lede strong, .note strong { color: var(--ink); font-weight: 500; }
+.cover-meta { margin-top: var(--s12); display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); background: var(--line); border: 1px solid var(--line); }
+.cover-meta > div { background: var(--bg); padding: var(--s4) var(--s5); }
+.cover-meta dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.cover-meta dd { margin-top: 6px; font-size: .875rem; color: var(--ink); }
+.part { padding-top: var(--s24); }
+.part-head { display: flex; gap: var(--s6); align-items: baseline; padding-bottom: var(--s8); }
+.part-no { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; color: var(--dim); padding-top: 10px; flex: none; width: 34px; }
+.part-head h2 { font-size: clamp(1.6rem, 3vw, 2.125rem); font-weight: 500; letter-spacing: -.026em; line-height: 1.12; color: var(--ink); text-wrap: balance; }
+.part-head p { margin-top: var(--s3); max-width: 70ch; color: var(--muted); font-size: .9375rem; }
+.note { max-width: 72ch; color: var(--muted); font-size: .9375rem; }
+.note + .note { margin-top: var(--s3); }
+.note code, .find-v code, .audit code, .files code, .dec code { font-size: .8125rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 5px; }
+.finds { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.find { background: var(--bg); padding: var(--s5) var(--s6); display: grid; gap: var(--s3); grid-template-columns: 190px 1fr; }
+.find-k { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .04em; color: var(--dim); padding-top: 3px; }
+.find-v { color: var(--muted); font-size: .9375rem; max-width: 76ch; }
+.find-v b { color: var(--ink); font-weight: 500; }
+@media (max-width: 720px) { .find { grid-template-columns: 1fr; } }
+.render { border: 1px solid var(--line); background: var(--bg); margin-top: var(--s6); }
+.render-bar { display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.render-bar .url { color: var(--muted); }
+.render-body { overflow-x: auto; }
+.render-note { margin-top: var(--s3); font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); letter-spacing: .02em; max-width: 96ch; line-height: 1.7; }
+.render-note b { color: var(--muted); font-weight: 400; }
+.phones { display: flex; flex-wrap: wrap; gap: var(--s8); margin-top: var(--s6); }
+.phone { width: 375px; max-width: 100%; border: 1px solid var(--line); background: var(--bg); }
+.phone .render-body { overflow: hidden; }
+
+/* Audit tables */
+.audit-wrap { border: 1px solid var(--line); overflow-x: auto; margin-top: var(--s4); }
+.audit { font-size: .875rem; min-width: 860px; }
+.audit th { text-align: left; font-family: var(--f-mono); font-weight: 400; font-size: 10.5px; letter-spacing: .06em; color: var(--dim); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); white-space: nowrap; }
+.audit td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line-soft); color: var(--muted); vertical-align: top; line-height: 1.55; }
+.audit tr:last-child td { border-bottom: 0; }
+.audit td:first-child { color: var(--ink-2); width: 30%; }
+.post-h { margin-top: var(--s12); display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s3); }
+.post-h h3 { font-size: 1.125rem; font-weight: 500; color: var(--ink); letter-spacing: -.01em; }
+.verdict { display: inline-block; border: 1px solid; border-radius: var(--r-sm); padding: 0 7px; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .03em; white-space: nowrap; }
+.v-ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: var(--ok-bg); }
+.v-warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-bg); }
+.v-err { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); background: var(--err-bg); }
+.v-none { color: var(--dim); border-color: var(--line); }
+
+/* Decisions and file list */
+.decs { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.dec { background: var(--bg); padding: var(--s5) var(--s6); display: grid; grid-template-columns: 60px 1fr; gap: var(--s4); }
+.dec-no { font-family: var(--f-mono); font-size: 12px; color: var(--dim); padding-top: 2px; }
+.dec h3 { font-size: 1rem; font-weight: 500; color: var(--ink); }
+.dec p { margin-top: var(--s2); color: var(--muted); font-size: .9375rem; max-width: 80ch; }
+.opts { margin-top: var(--s3); display: grid; gap: var(--s2); }
+.opt { display: grid; grid-template-columns: 112px 1fr; gap: var(--s3); font-size: .875rem; color: var(--muted); }
+.opt-k { font-family: var(--f-mono); font-size: 11px; color: var(--dim); padding-top: 2px; }
+.opt-k.rec { color: var(--ink); }
+@media (max-width: 720px) { .dec { grid-template-columns: 1fr; } .opt { grid-template-columns: 1fr; } }
+.files { font-size: .875rem; min-width: 760px; }
+.files td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line-soft); color: var(--muted); vertical-align: top; }
+.files td:first-child { white-space: nowrap; }
+.files th { text-align: left; font-family: var(--f-mono); font-weight: 400; font-size: 10.5px; letter-spacing: .06em; color: var(--dim); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); }
+
+/* The site itself, inside render frames */
+.site { background: var(--bg); color: var(--ink-2); min-width: 0; }
+.wrap { max-width: 1120px; margin: 0 auto; padding: 0 var(--s6); }
+.nav { display: flex; align-items: center; gap: var(--s4); height: 56px; padding: 0 var(--s6); border-bottom: 1px solid var(--line); background: var(--bg-hero); }
+.wordmark { font-size: 15px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); text-decoration: none; }
+.nav-mode { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; color: var(--dim); border-left: 1px solid var(--line); padding-left: var(--s3); margin-left: var(--s1); }
+.nav-links { display: flex; gap: var(--s1); margin-left: var(--s6); }
+.nav-links a { text-decoration: none; font-size: 13.5px; color: var(--dim); padding: 5px 10px; border-radius: var(--r-sm); transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+.nav-links a:hover { color: var(--ink); background: var(--surface); }
+.nav-links a[aria-current="page"] { color: var(--ink); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s2); }
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; border-radius: var(--r-md); padding: 7px 14px; font-size: 13px; font-weight: 500; text-decoration: none; transition: box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.btn-p { background: var(--ink); color: var(--on-accent); border: 1px solid var(--ink); }
+.btn-p:hover { box-shadow: var(--glow); }
+.btn-s { border: 1px solid var(--line); color: var(--ink-2); background: var(--surface); }
+.btn-s:hover { border-color: var(--line-hover); }
+@media (max-width: 860px) { .nav-links { display: none; } }
+
+.page { padding: var(--s16) 0 var(--s20); }
+.kicker { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .05em; color: var(--dim); }
+.page-h { display: flex; flex-wrap: wrap; align-items: flex-end; gap: var(--s6); padding-bottom: var(--s10); border-bottom: 1px solid var(--line); }
+.page-h-text { flex: 1 1 520px; }
+.page-h h1 { margin-top: var(--s3); font-size: clamp(2rem, 4vw, 2.75rem); font-weight: 500; letter-spacing: -.032em; line-height: 1.06; color: var(--ink); text-wrap: balance; }
+.page-h p { margin-top: var(--s4); max-width: 62ch; color: var(--muted); font-size: 1rem; line-height: 1.7; }
+.page-h-links { display: flex; gap: var(--s2); flex-wrap: wrap; }
+.lnk { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); text-decoration: none; border: 1px solid var(--line); border-radius: var(--r-md); padding: 6px 11px; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.lnk:hover { border-color: var(--line-hover); color: var(--ink); }
+
+/* Blog index */
+.year { margin-top: var(--s10); font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); letter-spacing: .05em; }
+.posts { margin-top: var(--s4); border-top: 1px solid var(--line); }
+.prow { display: grid; grid-template-columns: 132px 1fr; gap: var(--s6); padding: var(--s6) 0; border-bottom: 1px solid var(--line); }
+.prow-date { font-family: var(--f-mono); font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; padding-top: 4px; }
+.prow-meta { display: flex; flex-wrap: wrap; gap: var(--s2); align-items: center; font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); }
+.prow-meta .pipe { color: var(--faint); }
+.prow h2 { margin-top: var(--s2); font-size: 1.25rem; font-weight: 500; letter-spacing: -.016em; line-height: 1.3; }
+.prow h2 a { color: var(--ink); text-decoration: none; }
+.prow h2 a:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.prow p { margin-top: var(--s2); color: var(--muted); font-size: .9375rem; max-width: 70ch; }
+.by { margin-top: var(--s3); display: flex; align-items: center; gap: var(--s2); font-size: 12.5px; color: var(--muted); }
+.av { width: 22px; height: 22px; border-radius: 999px; border: 1px solid var(--line); background: var(--surface); color: var(--ink); display: inline-flex; align-items: center; justify-content: center; font-size: 9.5px; font-weight: 600; letter-spacing: .02em; flex: none; }
+.av-lg { width: 36px; height: 36px; font-size: 12px; }
+.flag-note { display: inline-flex; align-items: center; gap: 5px; border: 1px solid color-mix(in srgb, var(--info) 40%, transparent); background: var(--info-bg); color: var(--info); border-radius: var(--r-sm); padding: 0 7px; font-family: var(--f-mono); font-size: 10.5px; }
+@media (max-width: 640px) { .prow { grid-template-columns: 1fr; gap: var(--s2); } }
+
+/* Blog post */
+.crumb { display: flex; gap: var(--s2); align-items: center; font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); }
+.crumb a { color: var(--muted); text-decoration: none; }
+.crumb a:hover { color: var(--ink); }
+.post-grid { display: grid; grid-template-columns: minmax(0, 1fr) 220px; gap: var(--s16); align-items: start; }
+@media (max-width: 1100px) { .post-grid { grid-template-columns: minmax(0, 1fr); } .toc { display: none; } }
+.article { max-width: 68ch; }
+.article h1 { margin-top: var(--s5); font-size: clamp(2rem, 4.2vw, 2.75rem); font-weight: 500; letter-spacing: -.032em; line-height: 1.08; color: var(--ink); text-wrap: balance; }
+.dek { margin-top: var(--s5); font-size: 1.125rem; line-height: 1.6; color: var(--muted); }
+.byline { margin-top: var(--s6); padding: var(--s4) 0; border-top: 1px solid var(--line); border-bottom: 1px solid var(--line); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3) var(--s6); }
+.byline-who { display: flex; align-items: center; gap: var(--s3); }
+.byline-name { font-size: .875rem; color: var(--ink); font-weight: 500; line-height: 1.3; }
+.byline-link { display: inline-flex; align-items: center; gap: 6px; color: inherit; text-decoration: none; }
+.byline-link:hover { text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.byline-role { font-size: .8125rem; color: var(--dim); line-height: 1.3; }
+.byline-meta { font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); display: flex; gap: var(--s2); flex-wrap: wrap; }
+.byline-meta .pipe { color: var(--faint); }
+.notice { margin-top: var(--s6); border: 1px solid color-mix(in srgb, var(--info) 40%, transparent); background: var(--info-bg); border-radius: var(--r-lg); padding: var(--s3) var(--s4); display: flex; gap: var(--s3); font-size: .875rem; color: var(--ink-2); line-height: 1.6; }
+.notice svg { color: var(--info); margin-top: 3px; }
+.notice b { font-weight: 500; color: var(--ink); }
+.prose { margin-top: var(--s8); font-size: 1.0625rem; line-height: 1.75; color: var(--ink-2); }
+.prose > * + * { margin-top: var(--s5); }
+.prose h2 { margin-top: var(--s12); font-size: 1.5rem; font-weight: 500; letter-spacing: -.02em; line-height: 1.25; color: var(--ink); }
+.prose h2 a { color: inherit; text-decoration: none; }
+.prose h2 a:hover .hash { opacity: 1; }
+.hash { color: var(--faint); margin-left: 8px; opacity: 0; transition: opacity var(--dur) var(--ease); font-weight: 400; }
+.prose p a { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; text-decoration-color: var(--line-hover); }
+.prose p a:hover { text-decoration-color: var(--ink); }
+.prose code:not(pre code) { font-size: .875em; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 5px; }
+.prose ol { counter-reset: n; display: grid; gap: var(--s3); }
+.prose ol li { counter-increment: n; display: grid; grid-template-columns: 28px 1fr; }
+.prose ol li::before { content: counter(n); font-family: var(--f-mono); font-size: .8125rem; color: var(--dim); padding-top: 4px; }
+.prose li b, .prose p b { color: var(--ink); font-weight: 500; }
+.cb { border: 1px solid var(--line); border-radius: var(--r-lg); overflow: hidden; background: var(--surface); }
+.cb-h { display: flex; align-items: center; justify-content: space-between; padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line); font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); }
+.cb pre { margin: 0; padding: var(--s4) var(--s5); overflow-x: auto; font-size: .8125rem; line-height: 1.7; color: var(--ink-2); }
+.cb .c-dim { color: var(--dim); }
+.cb .c-ok { color: var(--ok); }
+.tbl { border: 1px solid var(--line); border-radius: var(--r-lg); overflow-x: auto; }
+.tbl table { font-size: .875rem; min-width: 560px; }
+.tbl th { text-align: left; font-weight: 500; color: var(--ink); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); font-size: .8125rem; }
+.tbl td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line-soft); color: var(--muted); vertical-align: top; line-height: 1.55; }
+.tbl tr:last-child td { border-bottom: 0; }
+.callout { border: 1px solid var(--line); border-left: 2px solid var(--ink); border-radius: var(--r-md); background: var(--surface); padding: var(--s4) var(--s5); font-size: .9375rem; color: var(--muted); line-height: 1.65; }
+.callout b { color: var(--ink); font-weight: 500; }
+.toc { position: sticky; top: 24px; border-left: 1px solid var(--line); padding-left: var(--s5); }
+.toc-h { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.toc ol { margin-top: var(--s3); display: grid; gap: var(--s2); }
+.toc a { font-size: .8125rem; color: var(--dim); text-decoration: none; line-height: 1.45; display: block; }
+.toc a:hover { color: var(--ink); }
+.toc a[aria-current="location"] { color: var(--ink); }
+.post-end { margin-top: var(--s16); border-top: 1px solid var(--line); padding-top: var(--s8); }
+.end-h { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.further { margin-top: var(--s3); display: grid; gap: var(--s2); }
+.further a { display: inline-flex; align-items: center; gap: 6px; font-size: .9375rem; color: var(--ink-2); text-decoration: none; }
+.further a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.pn { margin-top: var(--s8); display: grid; grid-template-columns: 1fr 1fr; gap: var(--s4); }
+.pn a { border: 1px solid var(--line); border-radius: var(--r-lg); padding: var(--s4) var(--s5); text-decoration: none; display: grid; gap: 4px; transition: border-color var(--dur) var(--ease); }
+.pn a:hover { border-color: var(--line-hover); }
+.pn .pn-k { display: inline-flex; align-items: center; gap: 6px; font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+.pn .pn-t { color: var(--ink); font-size: .9375rem; font-weight: 500; line-height: 1.4; }
+.pn .next { text-align: right; justify-items: end; }
+.pn-empty { border: 1px dashed var(--line); border-radius: var(--r-lg); padding: var(--s4) var(--s5); color: var(--dim); font-size: .875rem; display: flex; align-items: center; justify-content: flex-end; }
+@media (max-width: 640px) { .pn { grid-template-columns: 1fr; } }
+
+/* Changelog */
+.filter { margin-top: var(--s8); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s4); }
+.seg { display: inline-flex; flex-wrap: wrap; border: 1px solid var(--line); border-radius: var(--r-md); padding: 2px; gap: 2px; background: var(--surface); }
+.seg button { font-size: 13px; color: var(--muted); padding: 5px 12px; border-radius: var(--r-sm); transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+.seg button:hover { color: var(--ink); }
+.seg button[aria-pressed="true"] { background: var(--bg); color: var(--ink); outline: 1px solid var(--line); }
+@media (pointer: coarse) { .seg button { min-height: 44px; } }
+.phone .seg button { min-height: 44px; }
+.filter-count { font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); }
+.rels { margin-top: var(--s8); border-top: 1px solid var(--line); }
+.rel { display: grid; grid-template-columns: 180px minmax(0, 1fr); gap: var(--s8); padding: var(--s8) 0; border-bottom: 1px solid var(--line); }
+.rel-side { display: grid; gap: var(--s2); align-content: start; }
+.rel-date { font-family: var(--f-mono); font-size: 12px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.rel-anchor { font-family: var(--f-mono); font-size: 11px; color: var(--dim); text-decoration: none; }
+.rel-anchor:hover { color: var(--muted); }
+.rel-head { display: flex; flex-wrap: wrap; align-items: baseline; gap: var(--s3); }
+.rel-head h2 { font-size: 1.25rem; font-weight: 500; letter-spacing: -.016em; color: var(--ink); }
+.rel-head h2 .ver { font-family: var(--f-mono); font-weight: 500; }
+.chip { display: inline-block; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 7px; font-family: var(--f-mono); font-size: 11px; color: var(--muted); white-space: nowrap; }
+.chip-warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-bg); }
+.rel-links { margin-top: var(--s3); display: flex; flex-wrap: wrap; gap: var(--s4); }
+.rel-links a { display: inline-flex; align-items: center; gap: 5px; font-size: 13px; color: var(--muted); text-decoration: none; }
+.rel-links a:hover { color: var(--ink); text-decoration: underline; text-underline-offset: 3px; text-decoration-thickness: 1px; }
+.rel-sec { margin-top: var(--s6); }
+.rel-sec h3 { font-size: .875rem; font-weight: 500; color: var(--ink); display: flex; gap: var(--s2); align-items: baseline; }
+.rel-sec h3 .n { font-family: var(--f-mono); font-size: 11px; color: var(--dim); font-weight: 400; }
+.rel-sec ul { margin-top: var(--s3); display: grid; gap: var(--s3); }
+.rel-sec li { display: grid; grid-template-columns: 14px 1fr; gap: var(--s2); font-size: .9375rem; color: var(--muted); line-height: 1.6; max-width: 76ch; }
+.rel-sec li::before { content: ""; width: 6px; height: 1px; background: var(--faint); margin-top: 13px; }
+.rel-sec li b { color: var(--ink); font-weight: 500; }
+.rel-sec li code { font-size: .85em; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 4px; }
+.more { margin-top: var(--s4); display: inline-flex; align-items: center; gap: 6px; font-size: 13px; color: var(--muted); border: 1px solid var(--line); border-radius: var(--r-md); padding: 5px 11px; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.more:hover { color: var(--ink); border-color: var(--line-hover); }
+.breaking { margin-top: var(--s5); border: 1px solid color-mix(in srgb, var(--warn) 45%, transparent); border-radius: var(--r-lg); padding: var(--s4) var(--s5); background: var(--warn-bg); }
+.breaking-h { display: flex; gap: var(--s2); align-items: center; color: var(--warn); font-size: .875rem; font-weight: 500; }
+.breaking p { margin-top: var(--s2); color: var(--ink-2); font-size: .9375rem; }
+.empty-state { margin-top: var(--s6); border: 1px dashed var(--line); border-radius: var(--r-lg); padding: var(--s10) var(--s6); text-align: center; color: var(--muted); font-size: .9375rem; }
+.empty-state b { display: block; color: var(--ink); font-weight: 500; margin-bottom: var(--s2); }
+@media (max-width: 760px) { .rel { grid-template-columns: 1fr; gap: var(--s3); } }
+
+.foot { border-top: 1px solid var(--line); padding: var(--s8) var(--s6); display: flex; flex-wrap: wrap; gap: var(--s8); font-size: 13px; color: var(--dim); background: var(--bg-hero); }
+.foot b { color: var(--muted); font-weight: 500; display: block; margin-bottom: var(--s2); font-size: 12px; }
+.foot a { display: block; color: var(--dim); text-decoration: none; line-height: 1.9; }
+.foot a:hover { color: var(--ink); }
+.foot .new { color: var(--ink); }
+
+/* Phone frames force the narrow layouts so the spec shows them at any viewport. */
+.phone .wrap { padding: 0 var(--s4); }
+.phone .nav { padding: 0 var(--s4); }
+.phone .nav-links, .phone .toc { display: none; }
+.phone .post-grid { grid-template-columns: minmax(0, 1fr); }
+.phone .page { padding: var(--s10) 0 var(--s12); }
+.phone .rel { grid-template-columns: 1fr; gap: var(--s3); }
+.phone .prow { grid-template-columns: 1fr; gap: var(--s2); }
+.phone .article h1 { font-size: 1.875rem; }
+.phone .page-h h1 { font-size: 1.875rem; }
+.menu-btn { width: 36px; height: 36px; border: 1px solid var(--line); border-radius: var(--r-md); display: inline-flex; align-items: center; justify-content: center; color: var(--muted); }
+
+@media (max-width: 640px) {
+  .doc { padding-inline: var(--s4); }
+  .spec-bar { padding-inline: var(--s4); }
+  .spec-bar .hide-sm { display: none; }
+  .cover { padding-block: var(--s16) var(--s12); }
+  .part { padding-top: var(--s16); }
+  .part-head { gap: var(--s3); }
+  .part-no { width: auto; }
+}
+@media (prefers-reduced-motion: reduce) { *, *::before, *::after { transition: none !important; animation: none !important; } }
+</style>
+<a class="skip" href="#main">Skip to content</a>
+
+<div class="spec-bar">
+  <strong>Actrone</strong><span class="sep hide-sm">/</span><span class="hide-sm">Design spec</span><span class="sep">/</span><span>Blog and changelog</span>
+  <div class="spec-bar-right">
+    <button class="tgl" id="theme-btn" type="button" aria-label="Switch theme">Theme: <span id="theme-label">light</span></button>
+  </div>
+</div>
+
+<main class="doc" id="main">
+
+<header class="cover">
+  <p class="cover-kicker">Design spec · OSS launch mode · approved and built</p>
+  <h1>Blog and changelog</h1>
+  <p class="cover-lede">Both pages already exist on the full site, and OSS mode hides them. This spec turns them on as <strong>a blog whose every claim can be checked against the repos</strong>, and <strong>a changelog generated from the packages&rsquo; own <code>CHANGELOG.md</code> files</strong>, so it cannot fall behind a release again.</p>
+  <p class="cover-lede">Part 02 checks every claim in the three existing posts. Parts 03 to 06 render the pages. Part 08 records the eight decisions, all approved; the design was approved and built on 1 October 2026.</p>
+  <dl class="cover-meta">
+    <div><dt>Routes</dt><dd>/blog, /blog/[slug], /blog/rss.xml, /changelog, /changelog/rss.xml</dd></div>
+    <div><dt>Sources of truth</dt><dd>Posts in <code>content/blog</code>; releases in the three packages&rsquo; <code>CHANGELOG.md</code></dd></div>
+    <div><dt>Brand</dt><dd>CLAUDE.md §8.1.1, unchanged</dd></div>
+    <div><dt>Status</dt><dd>Approved and built, 1 October 2026</dd></div>
+  </dl>
+</header>
+
+<!-- ─────────────────────────────── 01 ─────────────────────────────── -->
+<section class="part" id="p1" aria-labelledby="p1-h">
+  <div class="part-head"><span class="part-no">01</span><div><h2 id="p1-h">What exists today</h2><p>Both routes are built, tested and in the full sitemap. None of it reaches an OSS visitor, and what would reach them is not ready.</p></div></div>
+  <div class="finds">
+    <div class="find"><div class="find-k">Built but hidden</div><div class="find-v"><code>OSS_HIDDEN_PREFIXES</code> in <code>lib/flags.ts</code> redirects <code>/blog</code> and <code>/changelog</code> to the homepage. Neither is in the OSS nav, the OSS footer, the SEO registry or the sitemap.</div></div>
+    <div class="find"><div class="find-k">Changelog is hand-typed</div><div class="find-v"><code>changelog/page.tsx</code> copies releases into a <code>RELEASES</code> array. It stops at <b>TypeScript 0.1.0 and Python 0.2.0</b>, so 0.1.1, 0.1.2 and 0.2.1 are missing and <code>create-actrone-app</code> is not listed. Its own comment names the <code>CHANGELOG.md</code> files as the source of truth; nothing checks it.</div></div>
+    <div class="find"><div class="find-k">Blog renderer splits strings</div><div class="find-v">Posts are template strings in <code>lib/blog/posts.ts</code>, split on blank lines. A bold line becomes a heading, links are raw HTML through <code>dangerouslySetInnerHTML</code>, and there are no code blocks, tables, images or heading anchors.</div></div>
+    <div class="find"><div class="find-k">Copy that is no longer true</div><div class="find-v">Two of the three posts make claims the current library, or the hosted platform that has not launched, cannot back up. Part 02 lists each one.</div></div>
+    <div class="find"><div class="find-k">Brand drift</div><div class="find-v"><code>tracking-widest</code> eyebrows, a box shadow on the category tabs, <code>&larr;</code> text glyphs instead of lucide icons, an em dash in a code comment, accent-tinted category pills, and page metadata written by hand outside the SEO registry, so neither page gets a registry date or a standard OG card.</div></div>
+    <div class="find"><div class="find-k">Wrong byline</div><div class="find-v">Every post credits &ldquo;Matt Nyirendah, Founder&rdquo;. The correct byline is <b>Matthew Nyirenda, Founder and CEO, Apocalypse Technologies</b>, and the JSON-LD names an Organization as the author where it should name the person.</div></div>
+    <div class="find"><div class="find-k">No feeds</div><div class="find-v">Developers follow releases and engineering posts through RSS and GitHub. Neither page offers a feed today.</div></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── 02 ─────────────────────────────── -->
+<section class="part" id="p2" aria-labelledby="p2-h">
+  <div class="part-head"><span class="part-no">02</span><div><h2 id="p2-h">Blog content audit</h2><p>Every factual claim in the three posts, checked against the repos, the registries and the 1 October test runs. Nothing is published that this table cannot back.</p></div></div>
+
+  <div class="post-h"><h3>Introducing Actrone Memory</h3><span class="verdict v-ok">Keep, with corrections</span></div>
+  <p class="note">Mostly honest and still the right launch post. Five corrections, then an <b>Updated</b> notice at the top that says what changed.</p>
+  <div class="audit-wrap"><table class="audit">
+    <thead><tr><th>Claim</th><th>Verdict</th><th>Evidence</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>Dated 3 September 2026, and says &ldquo;today we are giving it away&rdquo;</td><td><span class="verdict v-err">Wrong date</span></td><td>First publish on npm and PyPI: 25 September 2026</td><td>Date the post 25 September 2026</td></tr>
+      <tr><td>&ldquo;Ours classifies each one, none, low, PII, or sensitive, at the moment it is extracted&rdquo;</td><td><span class="verdict v-warn">Needs a qualifier</span></td><td>Extraction is opt-in and costs a model call; facts written with <code>inject_memory</code> carry the sensitivity the caller gives them, default <code>none</code></td><td>Say extraction is opt-in, and that injected facts are tagged by the caller</td></tr>
+      <tr><td>&ldquo;Two independent switches take you to a durable Redis and Qdrant backend&rdquo;</td><td><span class="verdict v-warn">Incomplete</span></td><td>Postgres and pgvector shipped in TypeScript 0.1.0 and Python 0.2.0; Valkey works through the Redis store</td><td>Name Postgres, pgvector and Valkey</td></tr>
+      <tr><td>&ldquo;recall@5 around 0.93 on our bundled dataset&rdquo;</td><td><span class="verdict v-warn">Outdated</span></td><td><code>python -m actrone_memory.benchmark</code> prints recall@5 1.000, MRR 0.943 over 14 queries with the keyword embedder; the README still showed 0.929 from an older run. CI asserts at least 0.85</td><td>Quote the current output; say 14 queries and keyword embedder; refresh the README and the homepage figure to match</td></tr>
+      <tr><td>&ldquo;Our hosted platform tokenizes PII before inference&rdquo;</td><td><span class="verdict v-err">Present tense, not launched</span></td><td>The hosted platform is not available to anyone yet</td><td>&ldquo;The hosted platform will tokenize PII before inference&rdquo;</td></tr>
+      <tr><td>&ldquo;The Python adapters ... are deeper than the TypeScript ones today&rdquo;</td><td><span class="verdict v-ok">Accurate</span></td><td>16 Python adapters, several implementing the framework&rsquo;s own memory interface; 11 TypeScript helpers</td><td>Keep</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="post-h"><h3>The LLM is just a CPU. We build the kernel.</h3><span class="verdict v-warn">Hide in OSS mode</span></div>
+  <p class="note">A manifesto for the hosted platform. Read on the OSS site today, it describes a product nobody can use as if it were live.</p>
+  <div class="audit-wrap"><table class="audit">
+    <thead><tr><th>Claim</th><th>Verdict</th><th>Evidence</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>&ldquo;Each of these is production-grade, tested, and operational today&rdquo; (durable execution, model routing, governance, multi-agent coordination)</td><td><span class="verdict v-err">Not true for a reader</span></td><td>The hosted platform has not launched; none of the six services is available to the public</td><td>Keep out of the OSS build until the hosted launch (D2)</td></tr>
+      <tr><td>&ldquo;every team building AI agents in 2025&rdquo;</td><td><span class="verdict v-warn">Dated</span></td><td>Published May 2026</td><td>Fix when it is next published</td></tr>
+      <tr><td>Ten em dashes</td><td><span class="verdict v-err">Brand</span></td><td>§8.1.1</td><td>Fix when it is next published</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="post-h"><h3>How we designed two-tier agent memory: Redis + Qdrant</h3><span class="verdict v-err">Rewrite</span></div>
+  <p class="note">Describes an earlier design. Five of its specific claims contradict today&rsquo;s library or its docs, and two of its numbers cannot be traced to any run.</p>
+  <div class="audit-wrap"><table class="audit">
+    <thead><tr><th>Claim</th><th>Verdict</th><th>Evidence</th><th>Fix</th></tr></thead>
+    <tbody>
+      <tr><td>&ldquo;Layer 1 is Redis. Layer 2 is Qdrant.&rdquo;</td><td><span class="verdict v-warn">Outdated</span></td><td>The default is the in-memory store; Redis, Valkey or Postgres back L1, Qdrant or pgvector back L2</td><td>Describe the default, then the options</td></tr>
+      <tr><td>&ldquo;Every turn is embedded and stored as a vector&rdquo;</td><td><span class="verdict v-err">Wrong</span></td><td>Turns stay in L1. L2 holds injected facts, Python&rsquo;s session summaries and extracted facts (docs, memory overview)</td><td>Correct it</td></tr>
+      <tr><td>&ldquo;Ranked by a combined score of 0.7 × relevance + 0.3 × recency&rdquo;</td><td><span class="verdict v-warn">Outdated</span></td><td>The default is Reciprocal Rank Fusion of dense, BM25 and recency; the weighted blend is the fallback with hybrid retrieval off (docs, retrieval)</td><td>Correct it</td></tr>
+      <tr><td>&ldquo;0.72 emerged from empirical testing across 50,000 retrieval queries&rdquo;</td><td><span class="verdict v-err">Unverifiable</span></td><td>No such run exists in either repo; thresholds are now calibrated per embedder (0.3 keyword, 0.63 bge-small)</td><td>Remove; explain per-embedder calibration</td></tr>
+      <tr><td>&ldquo;If a slot is under-utilised, the remainder is redistributed proportionally&rdquo;</td><td><span class="verdict v-err">Wrong</span></td><td>An unused budget share is not handed to the others (docs and code)</td><td>Correct it</td></tr>
+      <tr><td>&ldquo;Compresses the session using GPT-4o-mini&rdquo;</td><td><span class="verdict v-warn">Incomplete</span></td><td>Python only; GPT-4o-mini only with the OpenAI provider, an extractive summary otherwise; TypeScript does not summarise</td><td>Correct it</td></tr>
+      <tr><td>&ldquo;In production: Redis L1 P99 &lt; 1ms ... at 100 concurrent agents: &lt; 5% latency regression&rdquo;</td><td><span class="verdict v-err">Unverifiable</span></td><td>There is no production deployment</td><td>Use the benchmark&rsquo;s figures (p50 0.22 ms, p95 0.61 ms, in-memory, keyword embedder) with the command to rerun them</td></tr>
+    </tbody>
+  </table></div>
+
+  <div class="post-h"><h3>New: Every integration, tested against a real model</h3><span class="verdict v-none">Proposed</span></div>
+  <p class="note">The engineering story behind TypeScript 0.1.2 and Python 0.2.1, written from our live run&rsquo;s report and both changelogs: why type checks were not enough, how the public Framework Compatibility workflows and the recording proxy check each integration, and what broke (extraction returned nothing on 12 of 15 real exchanges; npm refused 0.1.1 next to AI SDK 7; framework APIs that moved). It reports what the run found and <b>never names or links the internal demo repository</b>; its &ldquo;try it&rdquo; section points at the public fact-extraction docs, the tested package example and the libraries&rsquo; own workflows.</p>
+</section>
+
+<!-- ─────────────────────────────── 03 ─────────────────────────────── -->
+<section class="part" id="p3" aria-labelledby="p3-h">
+  <div class="part-head"><span class="part-no">03</span><div><h2 id="p3-h">Blog index</h2><p>A dated list, newest first, grouped by year. With three posts, category filters add a control and remove nothing; they come back at eight posts (D7).</p></div></div>
+
+  <div class="render">
+    <div class="render-bar"><span class="url">actrone.com/blog</span><span>desktop</span></div>
+    <div class="render-body"><div class="site">
+      <nav class="nav" aria-label="Site (rendered)">
+        <a class="wordmark" href="#p3">Actrone</a><span class="nav-mode">open source</span>
+        <div class="nav-links"><a href="#p3">How it works</a><a href="#p3">Use cases</a><a href="#p3">Docs</a><a href="#p3" aria-current="page">Blog</a><a href="#p3">About</a><a href="#p3">Contact</a></div>
+        <div class="nav-right"><a class="btn btn-s" href="#p3">GitHub</a><a class="btn btn-p" href="#p3">Get started</a></div>
+      </nav>
+      <div class="wrap"><div class="page">
+        <div class="page-h">
+          <div class="page-h-text">
+            <p class="kicker">Blog</p>
+            <h1>Notes from building actrone-memory</h1>
+            <p>How the library works, what changed in each release, and what we measured. Every number links to the code or the run that produced it.</p>
+          </div>
+          <div class="page-h-links">
+            <a class="lnk" href="#p5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M12 7v14"/><path d="M3 18a1 1 0 0 1-1-1V4a1 1 0 0 1 1-1h5a4 4 0 0 1 4 4 4 4 0 0 1 4-4h5a1 1 0 0 1 1 1v13a1 1 0 0 1-1 1h-6a3 3 0 0 0-3 3 3 3 0 0 0-3-3z"/></svg>Changelog</a>
+            <a class="lnk" href="#p7"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>RSS feed</a>
+          </div>
+        </div>
+
+        <p class="year">2026</p>
+        <ol class="posts">
+          <li class="prow">
+            <time class="prow-date" datetime="2026-10-01">1 Oct 2026</time>
+            <div>
+              <div class="prow-meta"><span>Engineering</span><span class="pipe">/</span><span>5 min read</span></div>
+              <h2><a href="#p4">Every integration, tested against a real model</a></h2>
+              <p>We ran all 27 framework integrations through their real frameworks and a small local model. What broke, what we fixed, and how each check works.</p>
+              <div class="by"><span class="av" aria-hidden="true">MN</span>Matthew Nyirenda</div>
+            </div>
+          </li>
+          <li class="prow">
+            <time class="prow-date" datetime="2026-10-01">1 Oct 2026</time>
+            <div>
+              <div class="prow-meta"><span>Architecture</span><span class="pipe">/</span><span>5 min read</span><span class="flag-note">Rewritten</span></div>
+              <h2><a href="#p4">How actrone-memory&rsquo;s two-tier memory works</a></h2>
+              <p>Where recent turns live, what goes into long-term memory, how hybrid recall ranks it and how a token budget is split, with numbers you can reproduce.</p>
+              <div class="by"><span class="av" aria-hidden="true">MN</span>Matthew Nyirenda</div>
+            </div>
+          </li>
+          <li class="prow">
+            <time class="prow-date" datetime="2026-09-25">25 Sep 2026</time>
+            <div>
+              <div class="prow-meta"><span>Open source</span><span class="pipe">/</span><span>4 min read</span><span class="flag-note">Updated 1 Oct 2026</span></div>
+              <h2><a href="#p4">Introducing Actrone Memory: open-source, local-first memory for AI agents</a></h2>
+              <p>We open-sourced the memory layer every agent needs: two-tier recall, sensitivity-tagged facts and nothing to run to start. What it does, and what it does not.</p>
+              <div class="by"><span class="av" aria-hidden="true">MN</span>Matthew Nyirenda</div>
+            </div>
+          </li>
+        </ol>
+      </div></div>
+      <footer class="foot">
+        <div><b>Project</b><a href="#p3">How it works</a><a href="#p3">Use cases</a><a href="#p3">Documentation</a><a href="#p3">Quickstart</a></div>
+        <div><b>Updates</b><a class="new" href="#p3">Blog</a><a class="new" href="#p5">Changelog</a><a href="#p3">GitHub releases</a></div>
+        <div><b>Company</b><a href="#p3">About</a><a href="#p3">Contact</a></div>
+      </footer>
+    </div></div>
+  </div>
+  <p class="render-note"><b>Rows</b>: date in its own column (mono, tabular), then category and read time, title, a one or two line excerpt, and the author. Titles are the only link target per row; the whole row is not a link. <b>Updated</b> and <b>Rewritten</b> markers use the info status colour, text only, no dot. The nav gains one item (Blog); Changelog sits in the footer&rsquo;s new <b>Updates</b> column and in the blog header (D5). Highlighted footer items are the additions.</p>
+</section>
+
+<!-- ─────────────────────────────── 04 ─────────────────────────────── -->
+<section class="part" id="p4" aria-labelledby="p4-h">
+  <div class="part-head"><span class="part-no">04</span><div><h2 id="p4-h">Blog post</h2><p>Reading measure of 68 characters, body at 17 px with 1.75 line height, real headings with anchors, code from the same highlighter as the docs, and an on-this-page list from 1100 px up.</p></div></div>
+
+  <div class="render">
+    <div class="render-bar"><span class="url">actrone.com/blog/every-integration-tested-against-a-real-model</span><span>desktop</span></div>
+    <div class="render-body"><div class="site">
+      <nav class="nav" aria-label="Site (rendered)">
+        <a class="wordmark" href="#p4">Actrone</a><span class="nav-mode">open source</span>
+        <div class="nav-links"><a href="#p4">How it works</a><a href="#p4">Use cases</a><a href="#p4">Docs</a><a href="#p4" aria-current="page">Blog</a><a href="#p4">About</a><a href="#p4">Contact</a></div>
+        <div class="nav-right"><a class="btn btn-s" href="#p4">GitHub</a><a class="btn btn-p" href="#p4">Get started</a></div>
+      </nav>
+      <div class="wrap"><div class="page">
+        <div class="post-grid">
+          <article class="article">
+            <nav class="crumb" aria-label="Breadcrumb"><a href="#p3">Blog</a><span aria-hidden="true">/</span><span>Engineering</span></nav>
+            <h1>Every integration, tested against a real model</h1>
+            <p class="dek">We ran all 27 framework integrations through their real frameworks and a small local model. What broke, what we fixed, and how each check works.</p>
+            <div class="byline">
+              <div class="byline-who"><span class="av av-lg" aria-hidden="true">MN</span><div><p class="byline-name"><a class="byline-link" href="#p4">Matthew Nyirenda <svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:13px;height:13px;color:var(--dim)"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a></p><p class="byline-role">Founder and CEO, Apocalypse Technologies</p></div></div>
+              <p class="byline-meta"><time datetime="2026-10-01">1 October 2026</time><span class="pipe">/</span><span>5 min read</span></p>
+            </div>
+
+            <div class="prose">
+              <p>actrone-memory ships adapters for 16 Python frameworks and 11 TypeScript ones. Until this release, we checked that glue against each framework&rsquo;s types and against stub models. That catches a renamed parameter. It cannot tell you whether the memory ever reaches the model.</p>
+              <h2 id="code"><a href="#code">Checking the code against the real frameworks<span class="hash" aria-hidden="true">#</span></a></h2>
+              <p>Each library&rsquo;s public Framework Compatibility workflow installs every framework at the oldest and the newest release its supported range allows, then drives the adapter through the real framework.</p>
+              <h2 id="model"><a href="#model">Checking the result against a real model<span class="hash" aria-hidden="true">#</span></a></h2>
+              <ol>
+                <li><span>Store one fact a model cannot guess: the payments team&rsquo;s escalation codeword is <code>PELICAN-42</code>.</span></li>
+                <li><span>Put a recording proxy between the framework and Ollama, so every request is logged.</span></li>
+                <li><span>Ask for the codeword through the framework.</span></li>
+              </ol>
+              <div class="tbl"><table>
+                <thead><tr><th scope="col">TypeScript framework</th><th scope="col">Version</th></tr></thead>
+                <tbody>
+                  <tr><td>Vercel AI SDK</td><td>7.0.126</td></tr>
+                  <tr><td>Mastra</td><td>1.72.0</td></tr>
+                </tbody>
+              </table></div>
+              <h2 id="try"><a href="#try">Try it on your own machine<span class="hash" aria-hidden="true">#</span></a></h2>
+              <div class="cb"><div class="cb-h"><span>python</span><span>from the tested package examples</span></div><pre><code>extractor = OpenAIFactExtractor(
+    base_url=base_url,
+    api_key="ollama",  <span class="c-dim"># Ollama ignores the key; the client needs one</span>
+    model="qwen2.5:3b",
+)
+return await MemoryManager.create(extractor=extractor)</code></pre></div>
+            </div>
+
+            <div class="post-end">
+              <p class="end-h">Further reading</p>
+              <div class="further">
+                <a href="#p4"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>Framework integrations, in the docs</a>
+                <a href="#p5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"/><path d="m12 5 7 7-7 7"/></svg>Changelog: TypeScript 0.1.2 and Python 0.2.1</a>
+              </div>
+              <div class="pn">
+                <a href="#p4"><span class="pn-k"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m12 19-7-7 7-7"/><path d="M19 12H5"/></svg>Older post</span><span class="pn-t">Introducing Actrone Memory</span></a>
+                <span class="pn-empty">This is the newest post</span>
+              </div>
+            </div>
+          </article>
+          <aside class="toc" aria-label="On this page">
+            <p class="toc-h">On this page</p>
+            <ol><li><a href="#code" aria-current="location">Checking the code against the real frameworks</a></li><li><a href="#model">Checking the result against a real model</a></li><li><a href="#try">Try it on your own machine</a></li></ol>
+          </aside>
+        </div>
+      </div></div>
+    </div></div>
+  </div>
+  <p class="render-note"><b>Copy shown is an excerpt of the published post</b>, every claim checked against the repos, the registries and the test runs. It reports what our own live run found and never names or links the internal demo repository; readers who want to try it get the public docs and the tested package example. <b>Byline</b>: a real person (<code>rounded-full</code> is allowed on avatars), role and company, date and read time. The name links to the author&rsquo;s LinkedIn profile, with the LinkedIn mark inside the same link (one tab stop, announced as opening in a new tab); JSON-LD names the author as a Person with that profile as <code>url</code> and <code>sameAs</code>, and Apocalypse Technologies as publisher. <b>Headings</b> carry a <code>#</code> anchor that appears on hover and focus. <b>Code</b> uses the docs&rsquo; Shiki block; snippets that show library calls come from the packages&rsquo; tested examples, never hand-typed. <b>Tables</b> scroll inside their own frame on narrow screens.</p>
+
+  <div class="render" style="max-width:760px">
+    <div class="render-bar"><span class="url">correction notice, on a post that was changed after publishing</span></div>
+    <div class="render-body" style="padding:var(--s6)">
+      <div class="notice" role="note"><svg class="ico-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"/><path d="M12 16v-4"/><path d="M12 8h.01"/></svg><p><b>Updated 1 October 2026.</b> The first version gave the release date as 3 September and described the hosted platform, which has not launched, in the present tense. Both are corrected, and the store list now includes Postgres and pgvector.</p></div>
+    </div>
+  </div>
+  <p class="render-note"><b>Every change to a published post is disclosed</b> in a notice under the byline: what changed and when. The post keeps its original publish date; <code>dateModified</code> in JSON-LD and the sitemap carry the update.</p>
+</section>
+
+<!-- ─────────────────────────────── 05 ─────────────────────────────── -->
+<section class="part" id="p5" aria-labelledby="p5-h">
+  <div class="part-head"><span class="part-no">05</span><div><h2 id="p5-h">Changelog</h2><p>Generated from the three <code>CHANGELOG.md</code> files at build time and checked in CI, so a release cannot ship without its entry reaching the site. Newest first, filterable by package, every release deep-linkable.</p></div></div>
+
+  <div class="render">
+    <div class="render-bar"><span class="url">actrone.com/changelog</span><span>desktop</span></div>
+    <div class="render-body"><div class="site">
+      <nav class="nav" aria-label="Site (rendered)">
+        <a class="wordmark" href="#p5">Actrone</a><span class="nav-mode">open source</span>
+        <div class="nav-links"><a href="#p5">How it works</a><a href="#p5">Use cases</a><a href="#p5">Docs</a><a href="#p5">Blog</a><a href="#p5">About</a><a href="#p5">Contact</a></div>
+        <div class="nav-right"><a class="btn btn-s" href="#p5">GitHub</a><a class="btn btn-p" href="#p5">Get started</a></div>
+      </nav>
+      <div class="wrap"><div class="page">
+        <div class="page-h">
+          <div class="page-h-text">
+            <p class="kicker">Changelog</p>
+            <h1>Every release of the open-source packages</h1>
+            <p>Newest first, for actrone-memory in Python and TypeScript and for create-actrone-app. Each entry is generated from the package&rsquo;s own <code>CHANGELOG.md</code>, so this page and the repos never disagree.</p>
+          </div>
+          <div class="page-h-links">
+            <a class="lnk" href="#p7"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M4 11a9 9 0 0 1 9 9"/><path d="M4 4a16 16 0 0 1 16 16"/><circle cx="5" cy="19" r="1"/></svg>RSS feed</a>
+          </div>
+        </div>
+
+        <div class="filter">
+          <div class="seg" role="group" aria-label="Filter releases by package">
+            <button type="button" aria-pressed="true">All packages</button>
+            <button type="button" aria-pressed="false">Python</button>
+            <button type="button" aria-pressed="false">TypeScript</button>
+            <button type="button" aria-pressed="false">create-actrone-app</button>
+          </div>
+          <p class="filter-count" aria-live="polite">7 releases</p>
+        </div>
+
+        <div class="rels">
+          <article class="rel" id="ts-0.1.2" aria-labelledby="ts-012-h">
+            <div class="rel-side"><time class="rel-date" datetime="2026-10-01">1 Oct 2026</time><a class="rel-anchor" href="#ts-0.1.2">#ts-0.1.2</a></div>
+            <div>
+              <div class="rel-head"><h2 id="ts-012-h">actrone-memory <span class="ver">0.1.2</span></h2><span class="chip">TypeScript</span></div>
+              <div class="rel-links">
+                <a href="#p5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>npm</a>
+                <a href="#p5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>GitHub release</a>
+              </div>
+              <div class="rel-sec">
+                <h3>Fixed <span class="n">7</span></h3>
+                <ul>
+                  <li><span><b>Fact extraction returned nothing on small models.</b> With <code>qwen2.5:3b</code> on Ollama, extraction came back empty on 12 of 15 real exchanges. Extraction spec 1.1 fixes it.</span></li>
+                  <li><span><b>Passing a real <code>openai</code> client to <code>OpenAIFactExtractor</code> failed to compile.</b> The roles are now the literal ones the extractor sends.</span></li>
+                  <li><span><b><code>npm install actrone-memory</code> failed next to current framework releases.</b> The ranges now cover <code>ai &gt;=5 &lt;8</code>, <code>@mastra/core &gt;=0.10 &lt;2</code> and <code>@voltagent/core &gt;=0.1.14 &lt;3</code>.</span></li>
+                </ul>
+                <button class="more" type="button" aria-expanded="false" aria-controls="ts-012-more"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>Show all 7 fixes</button>
+              </div>
+            </div>
+          </article>
+
+          <article class="rel" id="py-0.2.1" aria-labelledby="py-021-h">
+            <div class="rel-side"><time class="rel-date" datetime="2026-10-01">1 Oct 2026</time><a class="rel-anchor" href="#py-0.2.1">#py-0.2.1</a></div>
+            <div>
+              <div class="rel-head"><h2 id="py-021-h">actrone-memory <span class="ver">0.2.1</span></h2><span class="chip">Python</span></div>
+              <div class="rel-links">
+                <a href="#p5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>PyPI</a>
+                <a href="#p5"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M15 3h6v6"/><path d="M10 14 21 3"/><path d="M18 13v6a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V8a2 2 0 0 1 2-2h6"/></svg>GitHub release</a>
+              </div>
+              <div class="rel-sec"><h3>Fixed <span class="n">7</span></h3><ul>
+                <li><span><b>Microsoft Agent Framework.</b> The adapter targeted the pre-1.0 API, which Agent Framework 1.x removed. It now implements the 1.x <code>ContextProvider</code>.</span></li>
+                <li><span><b>LangGraph.</b> <code>ActroneCheckpointer</code> is now a real <code>BaseCheckpointSaver</code>, so <code>graph.compile(checkpointer=...)</code> accepts it.</span></li>
+              </ul><button class="more" type="button" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>Show all 7 fixes</button></div>
+              <div class="rel-sec"><h3>Added <span class="n">1</span></h3><ul>
+                <li><span><b><code>OpenAIFactExtractor</code> works with local and self-hosted models.</b> It takes <code>base_url</code> or a ready <code>client</code>.</span></li>
+              </ul></div>
+              <div class="rel-sec"><h3>Changed <span class="n">3</span></h3><ul>
+                <li><span><b>Newer framework majors are supported.</b> Haystack 3, Agno 2 and 3, Pydantic AI 2 and Google ADK 2.</span></li>
+              </ul><button class="more" type="button" aria-expanded="false"><svg class="ico" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m6 9 6 6 6-6"/></svg>Show all 3 changes</button></div>
+            </div>
+          </article>
+
+          <article class="rel" id="ts-0.1.1" aria-labelledby="ts-011-h">
+            <div class="rel-side"><time class="rel-date" datetime="2026-09-28">28 Sep 2026</time><a class="rel-anchor" href="#ts-0.1.1">#ts-0.1.1</a></div>
+            <div>
+              <div class="rel-head"><h2 id="ts-011-h">actrone-memory <span class="ver">0.1.1</span></h2><span class="chip">TypeScript</span></div>
+              <div class="rel-sec"><h3>Changed <span class="n">1</span></h3><ul>
+                <li><span><b>npm listing.</b> The description says what the library does today, and the keywords cover what people search for.</span></li>
+              </ul></div>
+            </div>
+          </article>
+
+          <article class="rel" id="py-0.1.0" aria-labelledby="py-010-h">
+            <div class="rel-side"><time class="rel-date" datetime="2026-05-18">18 May 2026</time><a class="rel-anchor" href="#py-0.1.0">#py-0.1.0</a></div>
+            <div>
+              <div class="rel-head"><h2 id="py-010-h">actrone-memory <span class="ver">0.1.0</span></h2><span class="chip">Python</span><span class="chip">Not published</span></div>
+              <p class="rel-links" style="color:var(--muted);font-size:.9375rem">An internal milestone. It was never on PyPI; 0.2.0 was the first public release.</p>
+            </div>
+          </article>
+        </div>
+      </div></div>
+    </div></div>
+  </div>
+  <p class="render-note"><b>No UX database match was found for changelog patterns</b>, so this layout follows general defaults: a dated side column, one heading per release, sections in Keep a Changelog order (Added, Changed, Deprecated, Removed, Fixed, Security). <b>Long sections</b> show three items, then a disclosure button that reveals the rest in place (<code>aria-expanded</code>). <b>Filter</b> is a button group with <code>aria-pressed</code>, mirrored to <code>?package=python</code> so a filtered view can be linked; the count is announced politely. <b>Anchors</b> such as <code>#py-0.2.1</code> are stable, so the libraries&rsquo; READMEs and release notes can link straight to an entry. The render shows four of the seven releases.</p>
+
+  <div class="grid-states" style="display:grid;gap:var(--s6);grid-template-columns:repeat(auto-fit,minmax(320px,1fr));margin-top:var(--s8)">
+    <div class="render"><div class="render-bar"><span>breaking changes, only when a release has a Breaking or Removed section</span></div><div class="render-body" style="padding:var(--s5)">
+      <div class="breaking" role="note"><p class="breaking-h"><svg class="ico-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"/><path d="M12 9v4"/><path d="M12 17h.01"/></svg>Breaking change</p><p>Example layout only. No published release has a Breaking or Removed section today.</p></div>
+    </div></div>
+    <div class="render"><div class="render-bar"><span>empty state, a filter with no releases</span></div><div class="render-body" style="padding:var(--s5)">
+      <div class="empty-state" style="margin-top:0"><b>No releases for this package yet</b>Its first release will appear here, from its CHANGELOG.md.</div>
+    </div></div>
+  </div>
+  <p class="render-note"><b>Breaking</b> uses the warning colour as a held border plus a text label; red stays reserved for errors. <b>Loading</b> needs no state: both pages are static and the filter runs in the browser on data already in the page. <b>Errors</b> surface at build time instead: a malformed <code>CHANGELOG.md</code> fails the sync and the CI gate, so a broken page never deploys.</p>
+</section>
+
+<!-- ─────────────────────────────── 06 ─────────────────────────────── -->
+<section class="part" id="p6" aria-labelledby="p6-h">
+  <div class="part-head"><span class="part-no">06</span><div><h2 id="p6-h">Phone width</h2><p>375 px. The table of contents drops away, the date column folds above the content, and nothing scrolls sideways except code and tables inside their own frames.</p></div></div>
+  <div class="phones">
+    <div class="phone"><div class="render-bar"><span class="url">/blog/every-integration...</span><span>375 px</span></div><div class="render-body"><div class="site">
+      <nav class="nav" aria-label="Site (rendered, phone)"><a class="wordmark" href="#p6">Actrone</a><div class="nav-right"><span class="menu-btn" aria-hidden="true"><svg class="ico-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg></span></div></nav>
+      <div class="wrap"><div class="page"><div class="post-grid"><article class="article">
+        <nav class="crumb" aria-label="Breadcrumb"><a href="#p6">Blog</a><span aria-hidden="true">/</span><span>Engineering</span></nav>
+        <h1>Every integration, tested against a real model</h1>
+        <p class="dek">We ran all 27 framework integrations through their real frameworks against a 3B model on a laptop.</p>
+        <div class="byline"><div class="byline-who"><span class="av av-lg" aria-hidden="true">MN</span><div><p class="byline-name"><a class="byline-link" href="#p4">Matthew Nyirenda <svg class="ico" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true" style="width:13px;height:13px;color:var(--dim)"><path d="M20.447 20.452h-3.554v-5.569c0-1.328-.027-3.037-1.852-3.037-1.853 0-2.136 1.445-2.136 2.939v5.667H9.351V9h3.414v1.561h.046c.477-.9 1.637-1.85 3.37-1.85 3.601 0 4.267 2.37 4.267 5.455v6.286zM5.337 7.433a2.062 2.062 0 0 1-2.063-2.065 2.064 2.064 0 1 1 2.063 2.065zm1.782 13.019H3.555V9h3.564v11.452zM22.225 0H1.771C.792 0 0 .774 0 1.729v20.542C0 23.227.792 24 1.771 24h20.451C23.2 24 24 23.227 24 22.271V1.729C24 .774 23.2 0 22.222 0h.003z"/></svg></a></p><p class="byline-role">Founder and CEO, Apocalypse Technologies</p></div></div><p class="byline-meta"><span>1 October 2026</span><span class="pipe">/</span><span>9 min read</span></p></div>
+        <div class="prose"><h2>Why type checks were not enough</h2><p>actrone-memory ships adapters for 16 Python and 11 TypeScript frameworks.</p></div>
+      </article></div></div></div>
+    </div></div></div>
+    <div class="phone"><div class="render-bar"><span class="url">/changelog</span><span>375 px</span></div><div class="render-body"><div class="site">
+      <nav class="nav" aria-label="Site (rendered, phone)"><a class="wordmark" href="#p6">Actrone</a><div class="nav-right"><span class="menu-btn" aria-hidden="true"><svg class="ico-16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M4 12h16"/><path d="M4 6h16"/><path d="M4 18h16"/></svg></span></div></nav>
+      <div class="wrap"><div class="page">
+        <div class="page-h"><div class="page-h-text"><p class="kicker">Changelog</p><h1>Every release of the open-source packages</h1></div></div>
+        <div class="filter"><div class="seg" role="group" aria-label="Filter releases by package"><button type="button" aria-pressed="true">All packages</button><button type="button" aria-pressed="false">Python</button><button type="button" aria-pressed="false">TypeScript</button><button type="button" aria-pressed="false">create-actrone-app</button></div></div>
+        <div class="rels"><article class="rel"><div class="rel-side"><span class="rel-date">1 Oct 2026</span></div><div><div class="rel-head"><h2>actrone-memory <span class="ver">0.1.2</span></h2><span class="chip">TypeScript</span></div><div class="rel-sec"><h3>Fixed <span class="n">7</span></h3><ul><li><span><b>Fact extraction returned nothing on small models.</b></span></li></ul></div></div></article></div>
+      </div></div>
+    </div></div></div>
+  </div>
+  <p class="render-note"><b>Filter on a phone</b> wraps onto two rows rather than scrolling sideways, and on touch screens each button is 44 px tall. <b>Nav</b> uses the existing mobile menu, which gains Blog.</p>
+</section>
+
+<!-- ─────────────────────────────── 07 ─────────────────────────────── -->
+<section class="part" id="p7" aria-labelledby="p7-h">
+  <div class="part-head"><span class="part-no">07</span><div><h2 id="p7-h">Data, build, SEO and accessibility</h2><p>Where each page&rsquo;s content comes from, what keeps it honest, and what search engines and screen readers get.</p></div></div>
+  <div class="finds">
+    <div class="find"><div class="find-k">Posts</div><div class="find-v">One Markdown file per post in <code>apps/marketing/content/blog</code>, with front matter: title, optional search title, description, published date, revision date, kind and notice, category, author, further reading, and <code>audience</code> (<code>oss</code> or <code>platform</code>). The OSS build serves only <code>oss</code> posts. <code>scripts/sync-blog.mjs</code> validates every post and compiles it into <code>src/generated/blog-posts.json</code> (metadata, headings, reading time) and <code>blog-bodies.json</code>, with a <code>check:blog</code> CI gate. Bodies render with <code>react-markdown</code> and <code>remark-gfm</code>, which the app already depends on; a fence written as <code>snippet:&lt;package&gt;/&lt;id&gt;</code> renders that tested example from <code>generated/snippets.json</code> (D1).</div></div>
+    <div class="find"><div class="find-k">Releases</div><div class="find-v"><code>scripts/sync-changelog.mjs</code> reads <code>actrone-memory-py</code>, <code>actrone-memory-ts</code> and <code>create-actrone-app</code> <code>CHANGELOG.md</code> (Keep a Changelog headings) into <code>src/generated/changelog.json</code>, the same pattern as <code>sync-snippets</code>. <code>check:changelog</code> fails CI when the committed file is stale, and <code>prebuild</code> runs the sync. A version marked internal in its heading renders with the <b>Not published</b> label.</div></div>
+    <div class="find"><div class="find-k">Feeds</div><div class="find-v"><code>/blog/rss.xml</code> and <code>/changelog/rss.xml</code> as RSS 2.0 route handlers, built from the same data, with no new dependency. Linked from each page header and advertised with <code>&lt;link rel="alternate"&gt;</code>.</div></div>
+    <div class="find"><div class="find-k">SEO</div><div class="find-v">Registry entries in <code>lib/seo/pages.ts</code> for <code>/blog</code>, <code>/changelog</code> and each post, so the sitemap, OG cards and <code>llms.txt</code> pick them up. Posts get <code>BlogPosting</code> JSON-LD with a Person author and <code>dateModified</code>; the changelog gets a <code>CollectionPage</code>. After deploy: IndexNow for the new URLs.</div></div>
+    <div class="find"><div class="find-k">Accessibility</div><div class="find-v">One <code>h1</code> per page and sequential headings; real <code>time</code> elements; the filter is a labelled button group with <code>aria-pressed</code> and a polite live count; disclosures use <code>aria-expanded</code>; heading anchors and every link have visible focus; all text uses tokens that already pass WCAG AA in both themes; motion is off under reduced motion.</div></div>
+    <div class="find"><div class="find-k">Gates</div><div class="find-v"><code>brand:check</code> and <code>seo:smoke</code> cover the new pages automatically through the sitemap. New tests: the OSS gate allows the routes, every OSS post has a registry entry, every post and release passes the dash and sentence-case rules, and the generated changelog matches the files.</div></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── 08 ─────────────────────────────── -->
+<section class="part" id="p8" aria-labelledby="p8-h">
+  <div class="part-head"><span class="part-no">08</span><div><h2 id="p8-h">Decisions</h2><p>All eight approved by the owner on 1 October 2026, with the byline in D8 corrected to the owner&rsquo;s name and title.</p></div></div>
+  <div class="decs">
+    <div class="dec"><span class="dec-no">D1</span><div><h3>How posts are written</h3><p>Posts need headings, code, tables and links that the string splitter cannot render.</p><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>Markdown posts with the docs&rsquo; components. <b>Built with <code>react-markdown</code> and <code>remark-gfm</code></b>, which the marketing app already depends on, instead of <code>@next/mdx</code>: the same Markdown authoring with headings, code, tables and links, and no new packages. Found during the build; recorded here so the spec matches the code.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Typed content blocks in TypeScript: no new dependency, but every paragraph is an object, which makes writing slow.</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D2</span><div><h3>&ldquo;The LLM is just a CPU&rdquo;</h3><p>It describes the unlaunched hosted platform as live.</p><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>Keep it out of the OSS build (<code>audience: platform</code>) and revisit at the hosted launch.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Rewrite it now as a clearly labelled vision post, or delete it.</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D3</span><div><h3>The two-tier memory post</h3><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>Rewrite it against the current library under a new title, keep its URL, and say at the top that it replaces an April 2026 post about an earlier design.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Remove it and fold the useful parts into the docs.</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D4</span><div><h3>The new engineering post</h3><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>Publish &ldquo;Every integration, tested against a real model&rdquo;, dated the day it goes live, written from the test report and the changelogs.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Launch the blog with the two corrected posts only.</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D5</span><div><h3>Where the links go</h3><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>Top nav gains <b>Blog</b> (seven items). Changelog goes in a new footer column, <b>Updates</b>, and in the blog header.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Both in the top nav (eight items, which crowds it below 1024 px).</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D6</span><div><h3>What the changelog covers</h3><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>All three packages, which means adding a <code>CHANGELOG.md</code> to <code>create-actrone-app</code> (0.1.0, plus its unreleased 0.1.1 metadata change). Python 0.1.0 shows with the <b>Not published</b> label.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>actrone-memory only, and leave published-only entries.</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D7</span><div><h3>Blog categories</h3><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>Show the category as a label only; bring back filters at eight posts.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Keep the filter tabs now, restyled without the shadow.</span></div>
+    </div></div></div>
+    <div class="dec"><span class="dec-no">D8</span><div><h3>The byline</h3><p>The posts misspell the name as &ldquo;Matt Nyirendah&rdquo; and give the role as Founder only.</p><div class="opts">
+      <div class="opt"><span class="opt-k rec">Approved</span><span>&ldquo;Matthew Nyirenda, Founder and CEO, Apocalypse Technologies&rdquo; on every post, in the byline and the JSON-LD author, with initials in the avatar.</span></div>
+      <div class="opt"><span class="opt-k">Not chosen</span><span>Use a photo in the avatar, or publish as the company.</span></div>
+    </div></div></div>
+  </div>
+</section>
+
+<!-- ─────────────────────────────── 09 ─────────────────────────────── -->
+<section class="part" id="p9" aria-labelledby="p9-h">
+  <div class="part-head"><span class="part-no">09</span><div><h2 id="p9-h">File-level change list</h2><p>With the recommended answers. The full-site build keeps working: platform posts stay available outside OSS mode.</p></div></div>
+  <div class="audit-wrap"><table class="files">
+    <thead><tr><th>File</th><th>Change</th></tr></thead>
+    <tbody>
+      <tr><td><code>apps/marketing/src/lib/flags.ts</code></td><td>Remove <code>/blog</code> and <code>/changelog</code> from <code>OSS_HIDDEN_PREFIXES</code>; allow both, plus the feeds, in OSS mode</td></tr>
+      <tr><td><code>apps/marketing/content/blog/*.md</code></td><td>New: the three OSS posts (two corrected, one new) and the platform post marked <code>audience: platform</code></td></tr>
+      <tr><td><code>apps/marketing/src/lib/blog/{parse,posts,bodies,authors,metadata}.ts</code>, <code>scripts/sync-blog.mjs</code>, <code>src/generated/blog-*.json</code></td><td>Replaces the hand-typed posts: a shared parser, the compiled post data, the author record with the LinkedIn profile, and post metadata and JSON-LD</td></tr>
+      <tr><td><code>apps/marketing/src/app/(marketing)/blog/page.tsx</code>, <code>BlogContent.tsx</code></td><td>Rebuilt as the server-rendered list in part 03; the client-side tabs go</td></tr>
+      <tr><td><code>apps/marketing/src/app/(marketing)/blog/[slug]/page.tsx</code>, <code>src/components/blog/*</code></td><td>Markdown body, linked byline, revision notice, table of contents, further reading, older and newer posts, Person JSON-LD; the gradient social card is replaced by <code>/og/blog-&lt;slug&gt;.png</code></td></tr>
+      <tr><td><code>apps/marketing/src/app/(marketing)/changelog/page.tsx</code></td><td>Rebuilt from <code>generated/changelog.json</code>; a small client component for the filter and disclosures</td></tr>
+      <tr><td><code>apps/marketing/src/app/(marketing)/{blog,changelog}/rss.xml/route.ts</code></td><td>New feeds</td></tr>
+      <tr><td><code>apps/marketing/scripts/sync-changelog.mjs</code>, <code>src/generated/changelog.json</code></td><td>New sync and its output; <code>sync:changelog</code> and <code>check:changelog</code> scripts; <code>prebuild</code> and CI wiring</td></tr>
+      <tr><td><code>apps/marketing/src/lib/seo/pages.ts</code></td><td>Registry entries for the blog, the changelog and each post</td></tr>
+      <tr><td><code>apps/marketing/src/components/marketing/TopNav.tsx</code>, <code>Footer.tsx</code></td><td>Blog in the OSS nav and mobile menu; the new Updates footer column</td></tr>
+      <tr><td><code>packages/ui/src/ui/LinkedInIcon.tsx</code>, <code>apps/marketing/src/app/globals.css</code></td><td>The LinkedIn mark beside <code>GitHubIcon</code>; two derived tokens, <code>--color-info-text</code> and <code>--color-warning-text</code>, so status labels pass WCAG AA in the light theme</td></tr>
+      <tr><td><code>apps/marketing/src/test/*</code></td><td>OSS gate, registry, brand rules and changelog sync tests</td></tr>
+      <tr><td><code>create-actrone-app/CHANGELOG.md</code></td><td>New, in Keep a Changelog form</td></tr>
+      <tr><td><code>actrone-memory-py/CHANGELOG.md</code>, <code>benchmark/README.md</code>, the homepage eval figure</td><td>Python 0.1.0 marked internal in its heading; the benchmark README and homepage show the eval&rsquo;s current output</td></tr>
+    </tbody>
+  </table></div>
+</section>
+
+</main>
+
+<script>
+(function () {
+  "use strict";
+  // Theme toggle: stamps data-theme so the choice beats the OS preference, as the real site does.
+  var root = document.documentElement;
+  root.lang = "en";
+  var btn = document.getElementById("theme-btn");
+  var label = document.getElementById("theme-label");
+  function isDark() {
+    var stamped = root.getAttribute("data-theme");
+    if (stamped) return stamped === "dark";
+    return !window.matchMedia("(prefers-color-scheme: light)").matches;
+  }
+  function sync() { label.textContent = isDark() ? "light" : "dark"; }
+  btn.addEventListener("click", function () { root.setAttribute("data-theme", isDark() ? "light" : "dark"); sync(); });
+  sync();
+
+  // The filter and disclosures behave as specified, so the states can be tried in the spec.
+  document.querySelectorAll(".seg").forEach(function (group) {
+    group.addEventListener("click", function (e) {
+      var b = e.target.closest("button");
+      if (!b) return;
+      group.querySelectorAll("button").forEach(function (x) { x.setAttribute("aria-pressed", String(x === b)); });
+    });
+  });
+  document.querySelectorAll(".more").forEach(function (b) {
+    var label = b.lastChild;
+    var closedText = label.textContent;
+    b.addEventListener("click", function () {
+      var open = b.getAttribute("aria-expanded") === "true";
+      b.setAttribute("aria-expanded", String(!open));
+      label.textContent = open ? closedText : "Show fewer";
+    });
+  });
+})();
+</script>

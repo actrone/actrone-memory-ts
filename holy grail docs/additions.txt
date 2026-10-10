@@ -1,0 +1,56 @@
+I am just running the frontend local dev and testing no backend running, I signed in, so i need to know if by default i get the full tier of everything in control tower and everything? IF not ensure that In development, we can change tiers from variables and scale tier as default
+
+Check the existing feature flag we have, i need a revamp of entire feature flag system so that we can enable or disable everything from environment variables, that has to do with platform's features but as a feature pack where its a whole pack with features and workflow regarding feature rollout of the platform at different phases/times. This means when the variable for feature pack is disabled, nothing about that feature pack has to be displayed in the UI/UX and all backend routes and everything also disabled/inaccessible, or even display or show the links in header, footer links and all pages disabled. This should also apply for docs pages to only show docs for enabled feature packs only. This is to ensure when we ready to launch either, i can just enable in env variables and everything works as engineered.
+
+The AI Assistant for docs should open as a drawer to the right. Keep the inline chat input we already have on bottom of screen, only change is when user trigger the input field or triggers the assistant button, the chat interface should open as a drawer and should be responsive and extendable either by dragging the drawer for a wider view or clicking a expand window trigger
+
+We need to implement platform wide user feedback, but with just bad, fine, good, no field to input more details and we should be able to collect that feedback robustly and have a way to view the feedback and have a system which tell us how we are doing based on the feedback
+
+For the requirements gate for BYOK + MANAGED resolver, we should ensure the inline when user selects BYOK, it takes them to next step where we display all model providers we are supporting with their official svg icons, user can select 1 or more so long they have the key, the moment they select a model, we auto open/show a field for them to input the key, once done selecting model/models and inputting keys, they trigger next step, which run the validate and test connection implementation we already have, once validated and test connection works, we should display the success and auto move to next step of whatever they were doing. For managed, once they select managed, it will take them to the next step where we display all models we have as managed with their cost (so meaning we can only show cost at next step, the view before should just say pay as you go, and any other necessary info), the costs show input, output, cache, and all other necessary costs for each model, they can select only 1 model and proceed to the next step of whatever they were doing. All this should be aesthetically pleasing and seamless UX, together with all requirements gate workflows
+
+Update SEO to ensure its top notch and also reflects our category vocabulary so we own it.
+
+EMAOP agents should be able to communicate to also connect to Telegram, WhatsApp, where an agent makes requests, it can send a message via Telegram or WhatsApp or email or slack to the user as per RBAC, then user can chat, make approvals, declines and so on via those channels and executions are done. It can also send alerts, notifications and so on too.
+
+We need to make the entire EMAOP very enterprise premium look and feel to make users believe and be addictive to use them, trust and enjoy every process in UI/UX and backend without concerns. To be better than openclaw, where a user will choose to use actrone than openclaw or any other autonomous agentic workflow systems.
+
+Is everything EMAOP still leveraging everything about actrone SDK and orchestrator thus memory, governance and so on?
+
+for actrone deploy for CLI, On failure when we return results, we should also give the user actionable steps to take on each specific issue to improve UX. Also does our CLI have some aesthetically pleasing UI/UX
+
+Ensure all repos have their .env not just the .env.example and also insert the actual values for the variables where its possible. if a repo doesn't have, create and include the env and values.
+
+Since we are using trivy, lets ensure everything is secure as per the recent CVE - https://nvd.nist.gov/vuln/detail/CVE-2026-33634
+
+Most Popular text for Scale pricing card should be black
+
+Tier 4 — Cosmetic
+Retired brand hex only in lib/aura/state.ts, app/icon.svg, and tests — no shipping UI.
+
+How can we improve our monetization for 10x revenue and profit but still ensuring everything is realistic as per current market conditions, standards and everything. Analyze everything in codebase and see what needs to be added in the monetization strategy doc in docs dir to ensure we account for every revenue point. Also check the EMAOP integration plan, it also has some monetization info, see whats relevant to be included in the monetization strategy and ensure entire doc is complete and ready to monetize actrone to be revenue efficient and lucrative at every point but still competitive and addictive. Also update the frontend to ensure everything is aligned. 
+
+Which data laws do we have currently and do we have GDPR, PIPEDA, Australian Privacy Act, and POPIA/NDPR/GPA? Because the plan is first year to do feature-pack rollout to Africa and US paid feature packs launch in parallel (Month 0-4, since infra is live and you have Africa network advantage), EU follows (Month 4-7), and Canada/Australia phase in last (Month 6-11)
+
+All deployed EMAOP agents and all agents using or built by actrone, are we also displaying/showing all activities, tasks and everything done by each agent and actrone, agent failures, agent errors, retries and everything that has to be transparent to build more user trust and engagement? And generally more info and metrics to display in control tower for users so that they know and understand everything happening with the agents and what actrone has done to benefit and help the agent and user. It should be a aesthetically pleasing UI/UX where when you click on each agent's log or whatever, it open a drawer with vast amount of info/data and visuals. The overall goal is to ensure we show users what the agents as a whole are exactly doing at every point and what actrone's power is doing to benefit and help agents and user as a whole. 
+
+The AI agent chat for EMAOP, we need to ensure we make it every strict so that user can only chat with that specific agent selected only and can switch to another agent via the chat interface. Also should ensure they can only chat about things related only to their authorization/permissions/role and we should ensure in the backend to respect the RBAC so that if user is not allowed to make certain approvals or whatever, we should ensure it's never provided/responded as an option and politely respond to let user know they are not allowed or something. If in the chat the user want to chat about anything which isn't related to that specific like chatting about politics and so forth, its not permitted, and we should respond very politely and professionally why not and tell user what they can chat about politely
+
+Build the listen/notify upgrade:
+
+Multi-instance note: a write is instant on the writing instance; peers pick it up within the refresh interval. A NOTIFY/pubsub push would make it instant fleet-wide — I left it as the standard TTL-refresh pattern to bound scope; say the word if you want the LISTEN/NOTIFY upgrade.
+
+Are our MCP servers categorized as per functionality like Messaging, E-commerce and so forth? Also are users able to connect custom MCP or be able to connect other MCP servers we dont yet have or we are supposed to have all available MCP servers from different providers pre-built-pre-populated. Search online for more MCP servers we can have pre-built/pre-populated for users unless you think differently
+
+Are all other integrations/external tools in platform categorized as well as per functionality?
+
+Check if we already have loading pages or skeletons or spinners. We need a loading page or spinner which is smart/aware of everything loading and accurately displaying what is being loaded
+
+So because now on the header of control tower, there is dev, staging, production, api key and what not. Buttons from other pages are blocked and are behind these selections now and not visible. Also we need to ensure there is gap between these selections and page content, for example in the team settings page -- the scroller is getting in the view of the selections
+
+How about increasing width size of all control tower settings pages to ensure everything is visible and still responsive
+
+Also, billing should be handled directly within control tower when user is already signed in, thus when upgrading, we should do it directly from control tower and not take user to pricing page of marketing site, understanding exactly what they have paid for and all upgrade options available for that user/organization
+
+We need to improve, enhance and expand our EMAOP integrations to include more tools used like email providers, project management, and more, do a research so we are better than Langchain fleet. Also we need to improve, enhance and expand the built-in templates and capabilities for EMAOP regardless users can create custom. 
+
+FOR ALL THESE FIRST ANALYZE WHAT WE HAVE IF ANY IS WORTH BUILDING AND PLAN, DO NOT CODE ANYTHING YET

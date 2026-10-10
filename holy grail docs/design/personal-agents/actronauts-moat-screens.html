@@ -1,0 +1,1557 @@
+<title>Actronauts moat screens</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="preconnect" href="https://unpkg.com">
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Stylesheet copied from actronauts-spec.html (approved 2026-10-04) so this addendum renders identically. */
+/* Layout: a spec document (cover, numbered parts) wrapping live renders of every surface.
+   Token layer lifted verbatim from ../blog-changelog/blog-changelog-spec.html (itself from
+   frontend/apps/marketing globals.css). Dark first; the light "paper" set for system light and a
+   stamped data-theme. Character materials are tokens too: they stay constant across themes,
+   except the outline, which must read on both grounds. */
+:root {
+  --bg: #030303; --bg-hero: #000000; --bg-band: #0A0A0A; --surface: #111111; --raised: #121214;
+  --line: #262629; --line-soft: #1C1C1F; --line-hover: #3A3A3E;
+  --ink: #F5F5F7; --ink-2: #E5E5E7; --muted: #A1A1AA; --dim: #84848C; --faint: #6A6A74;
+  --on-accent: #000000;
+  --ok: #22C55E; --warn: #F59E0B; --err: #EF4444; --info: #3B82F6;
+  --ok-bg: rgba(34,197,94,.10); --warn-bg: rgba(245,158,11,.10); --err-bg: rgba(239,68,68,.10); --info-bg: rgba(59,130,246,.10);
+  --shadow-overlay: 0 14px 36px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+  --mat-porc: #ECECEF; --mat-porc-s: #CDCDD3; --mat-silv: #B9B9C1; --mat-silv-s: #9A9AA3;
+  --mat-grph: #3A3A3F; --mat-grph-s: #2C2C30; --mat-onyx: #17171A; --mat-visor: #0B0B0D; --mat-eye: #F5F5F7;
+  --char-line: #74747C;
+  --f-sans: "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono: "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --s1: 4px; --s2: 8px; --s3: 12px; --s4: 16px; --s5: 20px; --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px; --s20: 80px; --s24: 96px;
+  --r-sm: 4px; --r-md: 6px; --r-lg: 8px;
+  --z-sticky: 20; --z-overlay: 60;
+  --dur: 200ms; --ease: cubic-bezier(.16,1,.3,1); --ease-in: cubic-bezier(.55,0,1,.45);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #FFFFFF; --bg-hero: #FFFFFF; --bg-band: #F5F5F7; --surface: #FAFAFB; --raised: #FFFFFF;
+    --line: #D9D9DE; --line-soft: #E8E8EC; --line-hover: #B9B9C2;
+    --ink: #0A0A0B; --ink-2: #1C1C1F; --muted: #55555C; --dim: #6E6E78; --faint: #7A7A84;
+    --on-accent: #FFFFFF;
+    --ok: #15803D; --warn: #B45309; --err: #DC2626; --info: #2563EB;
+    --ok-bg: rgba(21,128,61,.09); --warn-bg: rgba(180,83,9,.09); --err-bg: rgba(220,38,38,.09); --info-bg: rgba(37,99,235,.09);
+    --shadow-overlay: 0 14px 36px rgba(10,10,11,.16), 0 0 0 1px rgba(10,10,11,.06);
+    --char-line: #0A0A0B;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #FFFFFF; --bg-hero: #FFFFFF; --bg-band: #F5F5F7; --surface: #FAFAFB; --raised: #FFFFFF;
+  --line: #D9D9DE; --line-soft: #E8E8EC; --line-hover: #B9B9C2;
+  --ink: #0A0A0B; --ink-2: #1C1C1F; --muted: #55555C; --dim: #6E6E78; --faint: #7A7A84;
+  --on-accent: #FFFFFF;
+  --ok: #15803D; --warn: #B45309; --err: #DC2626; --info: #2563EB;
+  --ok-bg: rgba(21,128,61,.09); --warn-bg: rgba(180,83,9,.09); --err-bg: rgba(220,38,38,.09); --info-bg: rgba(37,99,235,.09);
+  --shadow-overlay: 0 14px 36px rgba(10,10,11,.16), 0 0 0 1px rgba(10,10,11,.06);
+  --char-line: #0A0A0B;
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #030303; --bg-hero: #000000; --bg-band: #0A0A0A; --surface: #111111; --raised: #121214;
+  --line: #262629; --line-soft: #1C1C1F; --line-hover: #3A3A3E;
+  --ink: #F5F5F7; --ink-2: #E5E5E7; --muted: #A1A1AA; --dim: #84848C; --faint: #6A6A74;
+  --on-accent: #000000;
+  --ok: #22C55E; --warn: #F59E0B; --err: #EF4444; --info: #3B82F6;
+  --ok-bg: rgba(34,197,94,.10); --warn-bg: rgba(245,158,11,.10); --err-bg: rgba(239,68,68,.10); --info-bg: rgba(59,130,246,.10);
+  --shadow-overlay: 0 14px 36px rgba(0,0,0,.55), 0 0 0 1px rgba(255,255,255,.06);
+  --char-line: #74747C;
+  color-scheme: dark;
+}
+
+*, *::before, *::after { box-sizing: border-box; }
+body { margin: 0; background: var(--bg); color: var(--ink-2); font-family: var(--f-sans); font-size: 16px; line-height: 1.65; -webkit-font-smoothing: antialiased; }
+h1, h2, h3, h4, p, ul, ol, figure, dl, dd { margin: 0; }
+h1, h2, h3, h4 { font-weight: 600; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+code, .mono { font-family: var(--f-mono); font-variant-ligatures: none; }
+table { border-collapse: collapse; width: 100%; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
+svg { display: block; flex: none; }
+[data-lucide], .lucide { width: 16px; height: 16px; flex: none; }
+.i14 { width: 14px !important; height: 14px !important; }
+.i20 { width: 20px !important; height: 20px !important; }
+[id] { scroll-margin-top: 72px; }
+a, button { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+.skip { position: absolute; left: var(--s4); top: -100px; z-index: 100; background: var(--ink); color: var(--on-accent); padding: 10px var(--s4); border-radius: var(--r-md); font-size: 13.5px; font-weight: 500; text-decoration: none; }
+.skip:focus { top: var(--s3); }
+
+/* Spec chrome */
+.spec-bar { position: sticky; top: env(safe-area-inset-top, 0px); z-index: var(--z-overlay); display: flex; flex-wrap: wrap; align-items: center; gap: var(--s2) var(--s4); padding: var(--s3) var(--s6); border-bottom: 1px solid var(--line); background: var(--bg); font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .04em; color: var(--dim); }
+.spec-bar strong { color: var(--ink); font-weight: 500; }
+.spec-bar-right { margin-left: auto; display: flex; gap: var(--s2); }
+.tgl { display: inline-flex; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 5px 10px; color: var(--muted); font-family: var(--f-mono); font-size: 11px; letter-spacing: .03em; min-height: 32px; transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease); }
+.tgl:hover { border-color: var(--line-hover); color: var(--ink); }
+.doc { max-width: 1240px; margin: 0 auto; padding-inline: var(--s6); padding-block: 0 var(--s24); }
+@media (max-width: 640px) { .doc { padding-inline: var(--s4); } .spec-bar { padding-inline: var(--s4); } }
+.cover { padding-block: var(--s20) var(--s16); border-bottom: 1px solid var(--line); display: grid; grid-template-columns: minmax(0, 1.3fr) minmax(0, 1fr); gap: var(--s10); align-items: center; }
+@media (max-width: 900px) { .cover { grid-template-columns: 1fr; } }
+.cover-kicker { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .06em; color: var(--dim); margin-bottom: var(--s6); }
+.cover h1 { font-size: clamp(2.5rem, 5.6vw, 4.25rem); line-height: 1.02; letter-spacing: -.038em; color: var(--ink); text-wrap: balance; }
+.cover-lede { margin-top: var(--s6); max-width: 62ch; font-size: 1.0625rem; line-height: 1.7; color: var(--muted); }
+.cover-lede strong { color: var(--ink); font-weight: 500; }
+.cover-meta { margin-top: var(--s10); display: grid; gap: 1px; grid-template-columns: repeat(auto-fit, minmax(200px, 1fr)); background: var(--line); border: 1px solid var(--line); }
+.cover-meta > div { background: var(--bg); padding: var(--s4) var(--s5); }
+.cover-meta dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.cover-meta dd { margin-top: 6px; font-size: .875rem; color: var(--ink); }
+.cover-cast { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.cover-cast .av { width: 100%; }
+.part { padding-top: var(--s24); }
+.part-head { display: flex; gap: var(--s6); align-items: baseline; padding-bottom: var(--s8); }
+.part-no { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em; color: var(--dim); padding-top: 10px; flex: none; width: 34px; }
+.part-head h2 { font-size: clamp(1.6rem, 3vw, 2.125rem); letter-spacing: -.026em; line-height: 1.12; color: var(--ink); text-wrap: balance; }
+.part-head p { margin-top: var(--s3); max-width: 72ch; color: var(--muted); font-size: .9375rem; }
+@media (max-width: 640px) { .part-head { flex-direction: column; gap: var(--s2); } }
+.note { max-width: 74ch; color: var(--muted); font-size: .9375rem; }
+.note + .note { margin-top: var(--s3); }
+.note strong { color: var(--ink); font-weight: 500; }
+.note code, .cell code { font-size: .8125rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 5px; }
+h3.sub { margin-top: var(--s12); margin-bottom: var(--s4); font-size: 1.125rem; color: var(--ink); letter-spacing: -.01em; }
+.render { border: 1px solid var(--line); background: var(--bg); margin-top: var(--s6); }
+.render-bar { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.render-body { overflow-x: auto; }
+.render-note { margin-top: var(--s3); font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); letter-spacing: .02em; max-width: 100ch; line-height: 1.7; }
+.render-note b { color: var(--muted); font-weight: 400; }
+
+/* Tables */
+.tbl-wrap { border: 1px solid var(--line); overflow-x: auto; margin-top: var(--s4); }
+.tbl { font-size: .875rem; min-width: 760px; }
+.tbl th { text-align: left; font-family: var(--f-mono); font-weight: 400; font-size: 10.5px; letter-spacing: .06em; color: var(--dim); padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); white-space: nowrap; }
+.tbl td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line-soft); color: var(--muted); vertical-align: top; line-height: 1.55; }
+.tbl tr:last-child td { border-bottom: 0; }
+.tbl td:first-child { color: var(--ink-2); }
+.tbl .num { font-variant-numeric: tabular-nums; white-space: nowrap; }
+
+/* Status labels: text plus colour, never colour alone, never a dot */
+.lbl { display: inline-flex; align-items: center; gap: 5px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 7px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .02em; color: var(--muted); white-space: nowrap; }
+.lbl-ok { color: var(--ok); border-color: color-mix(in srgb, var(--ok) 40%, transparent); background: var(--ok-bg); }
+.lbl-warn { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-bg); }
+.lbl-err { color: var(--err); border-color: color-mix(in srgb, var(--err) 40%, transparent); background: var(--err-bg); }
+.lbl-info { color: var(--info); border-color: color-mix(in srgb, var(--info) 40%, transparent); background: var(--info-bg); }
+
+/* Buttons used inside renders */
+.btn { display: inline-flex; align-items: center; justify-content: center; gap: 7px; min-height: 40px; padding: 0 var(--s4); border-radius: var(--r-md); font-size: 14px; font-weight: 500; border: 1px solid var(--line); color: var(--ink); background: var(--bg); transition: border-color var(--dur) var(--ease), box-shadow var(--dur) var(--ease); }
+.btn:hover { border-color: var(--line-hover); }
+.btn-primary { background: var(--ink); color: var(--on-accent); border-color: var(--ink); }
+.btn-primary:hover { box-shadow: 0 0 0 1px var(--line-hover); }
+.btn-danger { color: var(--err); border-color: color-mix(in srgb, var(--err) 45%, transparent); }
+.btn-block { width: 100%; }
+
+/* Segmented controls */
+.ctrl { display: grid; gap: var(--s2); }
+.ctrl + .ctrl { margin-top: var(--s5); }
+.ctrl-k { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.seg { display: flex; flex-wrap: wrap; gap: 6px; }
+.seg button { display: inline-flex; align-items: center; gap: 6px; min-height: 40px; padding: 0 12px; border: 1px solid var(--line); border-radius: var(--r-md); font-size: 13.5px; font-weight: 500; color: var(--muted); transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+.seg button:hover { color: var(--ink); border-color: var(--line-hover); }
+.seg button[aria-pressed="true"] { color: var(--ink); border-color: var(--ink); background: var(--raised); }
+.seg button:disabled { opacity: .4; cursor: not-allowed; }
+
+/* ===== Avatars ===== */
+.av { position: relative; width: 160px; max-width: 100%; aspect-ratio: 240 / 244; --amp: 0; }
+.av svg { width: 100%; height: 100%; overflow: visible; }
+.av .o { stroke: var(--char-line); stroke-width: 2.5; stroke-linejoin: round; }
+.av .o-thin { stroke: var(--char-line); stroke-width: 1.5; }
+.av .m-porc { fill: var(--mat-porc); } .av .m-porc-s { fill: var(--mat-porc-s); }
+.av .m-silv { fill: var(--mat-silv); } .av .m-silv-s { fill: var(--mat-silv-s); }
+.av .m-grph { fill: var(--mat-grph); } .av .m-grph-s { fill: var(--mat-grph-s); }
+.av .m-onyx { fill: var(--mat-onyx); } .av .m-visor { fill: var(--mat-visor); } .av .m-eye { fill: var(--mat-eye); }
+.av .glint { fill: var(--mat-eye); opacity: .16; }
+.av .seam { stroke: var(--mat-porc-s); stroke-width: 2; fill: none; stroke-linecap: round; }
+.av .chev { stroke: var(--mat-onyx); stroke-width: 3; fill: none; stroke-linecap: round; stroke-linejoin: round; }
+.av .wire { stroke: var(--mat-grph); stroke-width: 3.5; stroke-linecap: round; fill: none; }
+.av .strap { stroke: var(--mat-silv); stroke-width: 9; stroke-linecap: round; fill: none; }
+.av .band { stroke: var(--mat-grph); stroke-width: 7; fill: none; stroke-linecap: round; }
+.av .ring-o { stroke: var(--mat-silv); stroke-width: 9; fill: none; stroke-linecap: round; }
+.av .card-line { stroke: var(--mat-grph); stroke-width: 2.5; stroke-linecap: round; }
+.av .ring { fill: none; stroke: var(--muted); stroke-width: 3; stroke-dasharray: 704; stroke-dashoffset: 704; transition: stroke-dashoffset 260ms var(--ease), stroke 160ms var(--ease); }
+.av .edge-arc { fill: none; stroke: var(--muted); stroke-width: 4; stroke-linecap: round; opacity: 0; transition: opacity 200ms var(--ease); }
+.av .c-all, .av .c-body, .av .c-head, .av .c-eye, .av .c-eyes, .av .c-card, .av .c-arm-r { transform-box: fill-box; }
+.av .c-all { transform-origin: 50% 100%; transition: transform 320ms var(--ease), opacity 320ms var(--ease); }
+.av .c-head { transform-origin: 50% 85%; transition: transform 240ms var(--ease); }
+.av .c-eyes { transform-origin: center; transition: transform 200ms var(--ease); }
+.av .c-eye { transform-origin: center; transition: transform 120ms var(--ease); }
+.av .c-arm-r { transform-origin: 50% 8%; transition: transform 240ms var(--ease); }
+.av .c-card { transform-origin: center; opacity: 0; transform: translateY(14px) scale(.9); transition: transform 240ms var(--ease), opacity 160ms var(--ease); }
+/* idle */
+.av[data-state="idle"] .c-body { animation: av-breathe 4.2s ease-in-out infinite; }
+.av[data-state="idle"] .c-head { animation: av-breathe 4.2s ease-in-out infinite; }
+@keyframes av-breathe { 50% { transform: translateY(-2px); } }
+/* listening */
+.av[data-state="listening"] .c-all { transform: rotate(-3deg) translateY(-3px); }
+.av[data-state="listening"] .c-eye { transform: scale(1.12); }
+.av[data-state="listening"] .ring { stroke-dashoffset: 0; stroke: var(--muted); }
+/* thinking */
+.av[data-state="thinking"] .c-head { transform: rotate(6deg); }
+.av[data-state="thinking"] .c-eyes { transform: translate(7px, -8px); }
+/* working */
+.av[data-state="working"] .c-eyes { transform: translate(7px, 7px); }
+.av[data-state="working"] .c-arm-r { transform: rotate(-24deg); }
+.av[data-state="working"] .c-card { opacity: 1; transform: translateY(0) scale(1); animation: av-bob 2.4s ease-in-out infinite; }
+@keyframes av-bob { 50% { transform: translateY(-3px) scale(1); } }
+/* waiting for approval */
+.av[data-state="approval"] .c-eyes { transform: translate(5px, -5px); }
+.av[data-state="approval"] .c-arm-r { transform: rotate(-150deg); }
+.av[data-state="approval"] .c-card { opacity: 1; transform: translateY(-50px) scale(1); }
+.av[data-state="approval"] .ring { stroke-dashoffset: 0; stroke: var(--warn); }
+/* blocked */
+.av[data-state="blocked"] .c-eye { transform: scaleY(.28); }
+.av[data-state="blocked"] .c-all { transform: translateY(3px); }
+.av[data-state="blocked"] .ring { stroke-dashoffset: 0; stroke: var(--err); }
+/* speaking */
+.av[data-state="speaking"] .c-eye { transform: scaleY(calc(.55 + var(--amp))); transition-duration: 80ms; }
+.av[data-state="speaking"] .c-head { transform: translateY(calc(var(--amp) * -4px)); transition-duration: 80ms; }
+/* away */
+.av[data-state="away"] .c-all { transform: translateX(150%); opacity: 0; transition-timing-function: var(--ease-in); }
+.av[data-state="away"] .edge-arc { opacity: 1; }
+/* sleeping */
+.av[data-state="sleeping"] .c-all { opacity: .7; }
+.av[data-state="sleeping"] .c-eye { transform: scaleY(.12); }
+.av[data-state="sleeping"] .c-body, .av[data-state="sleeping"] .c-head { animation: av-breathe 6.4s ease-in-out infinite; }
+/* core form specifics */
+.av[data-char="core"][data-state="idle"] .c-eyes { animation: av-drift 5s ease-in-out infinite; }
+@keyframes av-drift { 25% { transform: translateX(-4px); } 75% { transform: translateX(4px); } }
+.av[data-char="core"][data-state="listening"] .c-eye { transform: scale(1.25); }
+.av[data-char="core"][data-state="speaking"] .c-eye { transform: scaleX(calc(.7 + var(--amp))) scaleY(1.2); }
+.av.blink[data-state] .c-eye { transform: scaleY(.1); }
+/* crew parts: eyes, charter lights, lifeline, receipt stitches */
+.av .eye-chev { fill: none; stroke: var(--mat-eye); stroke-width: 6; stroke-linecap: round; stroke-linejoin: round; }
+.av .stitch { fill: none; stroke: var(--mat-porc-s); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: .5 6; }
+.av .stitch-d { stroke: var(--mat-silv-s); }
+.av .fold { fill: none; stroke: var(--mat-silv); stroke-width: 3; stroke-linecap: round; stroke-linejoin: round; transform-box: fill-box; transform-origin: center; transition: transform 80ms var(--ease); }
+.av .rim { fill: none; stroke: var(--mat-porc); stroke-width: 3; }
+.av .tile-mark { stroke: var(--mat-grph); stroke-width: 2; stroke-linecap: round; }
+.av .stylus { fill: none; stroke: var(--mat-silv); stroke-width: 5; stroke-linecap: round; }
+.av .boom { fill: none; stroke: var(--mat-grph); stroke-width: 4; stroke-linecap: round; }
+.av .patch-t { font: 600 10px var(--f-mono); fill: var(--mat-onyx); }
+.av .tk { fill: var(--mat-silv); transition: fill 160ms var(--ease); }
+.av .tk-dark { fill: var(--mat-onyx); }
+.av[data-state="approval"] .tk-ask { fill: var(--warn); }
+.av[data-state="blocked"] .tk-never { fill: var(--err); }
+.av .tether { fill: none; stroke: var(--mat-silv); stroke-width: 2.5; stroke-linecap: round; stroke-dasharray: 320; stroke-dashoffset: 320; transition: stroke-dashoffset 420ms var(--ease); }
+.av[data-state="working"] .tether-near, .av.show-tether .tether-near, .av[data-state="away"] .tether-far { stroke-dashoffset: 0; }
+.av .tile { transform-box: fill-box; transform-origin: center; }
+.av[data-state="working"] .tile { animation: av-tile 1.8s ease-in-out infinite; animation-delay: var(--d, 0s); }
+@keyframes av-tile { 0%, 60%, 100% { transform: translateY(0); } 30% { transform: translateY(-4px); } }
+.av .pupil { fill: var(--mat-onyx); }
+.av .eye-hl { fill: var(--mat-eye); }
+.av .c-pupil { transform-box: fill-box; transform-origin: center; transition: transform 200ms var(--ease); }
+.av[data-state="thinking"] .c-pupil { transform: translate(3px, -4px); }
+.av[data-state="working"] .c-pupil { transform: translate(3px, 3px); }
+.av[data-state="approval"] .c-pupil { transform: translate(3px, -2px); }
+.av .patch-mark { fill: var(--mat-onyx); }
+.av .seal-frame { stroke: var(--mat-silv); stroke-width: 2; }
+.av .rim-s { fill: var(--mat-visor); stroke: var(--mat-silv); stroke-width: 4; }
+.av .band-s { fill: none; stroke: var(--mat-silv); stroke-width: 5; stroke-linecap: round; }
+.av .coil { fill: none; stroke: var(--mat-grph-s); stroke-width: 4; }
+.av .tool { fill: none; stroke: var(--mat-silv); stroke-width: 6; stroke-linecap: round; }
+.av .tool-s { fill: none; stroke: var(--mat-silv); stroke-width: 3.5; stroke-linecap: round; }
+.av .spy { fill: none; stroke: var(--mat-silv); stroke-width: 10; stroke-linecap: round; }
+.av .spy-s { fill: none; stroke: var(--mat-silv-s); stroke-width: 13; stroke-linecap: round; }
+.av .lamp { fill: var(--mat-eye); }
+/* still avatars and motion off */
+.av.still *, :root[data-motion="off"] .av * { animation: none !important; }
+:root[data-motion="off"] .av * { transition-duration: 0ms !important; }
+@media (prefers-reduced-motion: reduce) { .av * { animation: none !important; transition-duration: 0ms !important; } }
+
+/* ===== Part 01: library ===== */
+.lib { display: grid; grid-template-columns: repeat(auto-fill, minmax(176px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.lib-card { background: var(--surface); padding: var(--s5); display: grid; gap: var(--s3); align-content: start; }
+.lib-card .av { width: 136px; margin-inline: auto; }
+.lib-card h3 { font-size: .9375rem; color: var(--ink); }
+.lib-card p { font-size: .8125rem; color: var(--muted); line-height: 1.55; }
+.lib-card .mat { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); letter-spacing: .03em; }
+.acc-row { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: var(--s4); margin-top: var(--s4); }
+.acc { border: 1px solid var(--line); background: var(--surface); padding: var(--s4); display: grid; gap: var(--s2); justify-items: center; }
+.acc .av { width: 112px; }
+.acc span { font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+
+.species { display: grid; grid-template-columns: minmax(0, .9fr) minmax(0, 1.1fr); gap: var(--s8); align-items: center; border: 1px solid var(--line); background: var(--surface); padding: var(--s6); }
+@media (max-width: 900px) { .species { grid-template-columns: 1fr; } }
+.anat-fig { position: relative; width: min(100%, 400px); margin-inline: auto; }
+.anat-fig .av { width: 100%; }
+.mk, .mk-k { width: 22px; height: 22px; border-radius: var(--r-sm); background: var(--ink); color: var(--on-accent); font: 500 11px var(--f-mono); display: grid; place-items: center; flex: none; }
+.mk { position: absolute; transform: translate(-50%, -50%); }
+.traits { display: grid; gap: var(--s4); }
+.traits li { display: grid; grid-template-columns: 22px 1fr; gap: var(--s3); }
+.traits h3 { font-size: .9375rem; color: var(--ink); }
+.traits p { margin-top: 2px; font-size: .875rem; color: var(--muted); }
+.rhyme { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s4); }
+.rhyme figure { background: var(--surface); padding: var(--s5); display: grid; justify-items: center; align-content: end; gap: var(--s3); }
+.rhyme .av { width: 128px; }
+.rhyme .mark { width: 92px; height: auto; margin-bottom: 14px; }
+.rhyme .mark path { fill: var(--ink); }
+.rhyme figcaption, .expr figcaption { font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+.expr { display: grid; grid-template-columns: repeat(auto-fill, minmax(118px, 1fr)); gap: var(--s3); margin-top: var(--s4); }
+.expr figure { border: 1px solid var(--line); background: var(--surface); padding: var(--s3); display: grid; gap: 6px; justify-items: center; }
+.expr svg { width: 96px; height: 60px; }
+.ex-visor { fill: var(--mat-visor); }
+.ex-w { fill: var(--mat-eye); }
+.ex-p { fill: var(--mat-onyx); }
+.ex-l { fill: none; stroke: var(--mat-eye); stroke-width: 4.5; stroke-linecap: round; }
+.patch-demo { display: flex; gap: var(--s3); align-items: center; padding-bottom: var(--s3); border-bottom: 1px solid var(--line-soft); }
+.patch-demo .av { width: 84px; }
+
+/* ===== Part 02: stage ===== */
+.stage { display: grid; grid-template-columns: minmax(0, 1.05fr) minmax(0, 1fr); gap: var(--s6); margin-top: var(--s6); }
+@media (max-width: 900px) { .stage { grid-template-columns: 1fr; } }
+.stage-view { position: relative; aspect-ratio: 1 / 1; width: 100%; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+.stage-view .av { width: min(70%, 380px); }
+.stage-label { position: absolute; left: 50%; bottom: var(--s4); transform: translateX(-50%); }
+.stage-label .lbl { background: var(--bg); font-size: 11.5px; padding: 3px 10px; }
+.stage-tier { position: absolute; left: var(--s4); top: var(--s4); font-family: var(--f-mono); font-size: 11px; color: var(--dim); letter-spacing: .03em; }
+.stage-panel { min-width: 0; }
+.stage-desc { margin-top: var(--s5); border: 1px solid var(--line); background: var(--surface); padding: var(--s4) var(--s5); }
+.stage-desc h3 { font-size: 1rem; color: var(--ink); }
+.stage-desc p { margin-top: var(--s2); font-size: .875rem; color: var(--muted); }
+.stage-desc dl { margin-top: var(--s3); display: grid; grid-template-columns: 110px 1fr; gap: 4px var(--s3); font-size: .8125rem; }
+.stage-desc dt { font-family: var(--f-mono); font-size: 11px; color: var(--dim); padding-top: 2px; }
+.stage-desc dd { color: var(--muted); }
+
+/* ===== Diagrams ===== */
+.fig { margin-top: var(--s6); border: 1px solid var(--line); background: var(--surface); }
+.fig-body { overflow-x: auto; padding: var(--s5); }
+.fig svg { width: 100%; min-width: 760px; height: auto; color: var(--muted); }
+.fig figcaption { border-top: 1px solid var(--line); padding: var(--s3) var(--s5); font-size: .8125rem; color: var(--muted); }
+.d-box { fill: var(--bg); stroke: var(--line-hover); stroke-width: 1.5; }
+.d-box-strong { fill: var(--bg); stroke: var(--ink); stroke-width: 1.5; }
+.d-box-rej { fill: var(--err-bg); stroke: var(--err); stroke-width: 1.5; stroke-dasharray: 6 5; }
+.d-title { fill: var(--ink); font: 600 14px var(--f-sans); }
+.d-text { fill: var(--muted); font: 400 12.5px var(--f-sans); }
+.d-mono { fill: var(--dim); font: 400 11.5px var(--f-mono); }
+.d-rej { fill: var(--err); font: 500 12.5px var(--f-sans); }
+.d-line { stroke: currentColor; stroke-width: 1.5; fill: none; }
+.d-dash { stroke: currentColor; stroke-width: 1.5; fill: none; stroke-dasharray: 5 5; }
+.d-head { fill: currentColor; }
+
+/* ===== Part 04: desktop ===== */
+.desk-wrap { overflow-x: auto; border-top: 1px solid var(--line); }
+.desk { position: relative; min-width: 760px; aspect-ratio: 16 / 10; background: var(--bg-band); overflow: hidden; font-size: 13px; }
+.desk-menu { position: absolute; inset: 0 0 auto 0; height: 28px; display: flex; align-items: center; gap: var(--s4); padding: 0 var(--s4); border-bottom: 1px solid var(--line); background: var(--bg); font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+.desk-menu .r { margin-left: auto; display: flex; gap: var(--s3); align-items: center; }
+.desk-share { display: none; }
+.desk[data-scene="share"] .desk-share { display: inline-flex; }
+.win { position: absolute; left: 5%; top: 11%; width: 60%; height: 76%; border: 1px solid var(--line); background: var(--bg); display: grid; grid-template-rows: 34px 1fr; }
+.win-bar { display: flex; align-items: center; gap: var(--s3); padding: 0 var(--s3); border-bottom: 1px solid var(--line); font-size: 12px; color: var(--muted); }
+.win-bar b { color: var(--ink); font-weight: 500; }
+.win-body { display: grid; grid-template-columns: 34% 1fr; min-height: 0; }
+.win-list { border-right: 1px solid var(--line); padding: var(--s3); display: grid; gap: var(--s2); align-content: start; }
+.win-item { border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: var(--s2); display: grid; gap: 5px; }
+.sk { height: 6px; border-radius: 3px; background: var(--line); }
+.win-main { padding: var(--s4); display: grid; gap: var(--s3); align-content: start; position: relative; }
+.win-main .win-t { font-size: 14px; font-weight: 600; color: var(--ink); }
+.win-form { display: grid; gap: var(--s2); max-width: 300px; }
+.win-field { border: 1px solid var(--line); border-radius: var(--r-sm); height: 30px; display: flex; align-items: center; padding: 0 var(--s2); font-size: 12px; color: var(--muted); }
+.win-submit { justify-self: start; border: 1px solid var(--line-hover); border-radius: var(--r-md); padding: 6px 14px; font-size: 12px; color: var(--ink); font-weight: 500; }
+.target { outline: 2px solid transparent; outline-offset: 3px; transition: outline-color 160ms var(--ease); }
+.desk[data-scene="driving"] .target { outline-color: var(--info); }
+.target-tag { display: none; position: absolute; font-family: var(--f-mono); font-size: 10.5px; color: var(--info); border: 1px solid color-mix(in srgb, var(--info) 45%, transparent); background: var(--bg); border-radius: var(--r-sm); padding: 1px 6px; }
+.desk[data-scene="driving"] .target-tag { display: inline-block; }
+.perch { position: absolute; right: 3.5%; bottom: 5%; width: 124px; display: grid; justify-items: center; gap: 4px; transition: opacity 200ms var(--ease); }
+.perch .av { width: 124px; }
+.perch-name { font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); border: 1px solid var(--line); background: var(--bg); border-radius: var(--r-sm); padding: 0 6px; }
+.desk[data-scene="share"] .perch { opacity: 0; }
+.ov { position: absolute; display: none; background: var(--raised); border: 1px solid var(--line); border-radius: var(--r-lg); box-shadow: var(--shadow-overlay); padding: var(--s4); width: 290px; font-size: 13px; }
+.ov .ov-t { margin: 0; font-size: 13.5px; color: var(--ink); font-weight: 600; }
+.ov p { margin: 6px 0 0; color: var(--muted); line-height: 1.5; }
+.ov .row { display: flex; gap: var(--s2); margin-top: var(--s3); flex-wrap: wrap; }
+.ov .btn { min-height: 32px; font-size: 12.5px; padding: 0 12px; }
+.ov-bubble { right: calc(3.5% + 132px); bottom: 15%; }
+.ov-approve { right: calc(3.5% + 132px); bottom: 12%; border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); }
+.ov-drop { right: calc(3.5% + 132px); bottom: 10%; width: 230px; padding: var(--s2); }
+.ov-drop .mi, .ov-tray .mi { width: 100%; text-align: left; display: flex; align-items: center; gap: var(--s2); padding: 7px var(--s2); border-radius: var(--r-sm); color: var(--ink-2); font-size: 13px; }
+.ov-drop .mi:hover, .ov-tray .mi:hover { background: var(--surface); }
+.ov-drop .cap, .ov-tray .cap { padding: 6px var(--s2) 4px; font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); }
+.desk[data-scene="summoned"] .ov-bubble, .desk[data-scene="approval"] .ov-approve, .desk[data-scene="drop"] .ov-drop { display: block; }
+.drive-banner { position: absolute; top: 40px; left: 50%; transform: translateX(-50%); display: none; align-items: center; gap: var(--s2); background: var(--raised); border: 1px solid var(--line-hover); border-radius: var(--r-md); padding: 6px var(--s3); font-size: 12.5px; color: var(--ink); box-shadow: var(--shadow-overlay); white-space: nowrap; }
+.drive-banner kbd { font-family: var(--f-mono); font-size: 11px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 0 5px; color: var(--muted); }
+.desk[data-scene="driving"] .drive-banner { display: inline-flex; }
+.drop-file { position: absolute; right: calc(3.5% + 44px); bottom: 30%; display: none; align-items: center; gap: 6px; background: var(--raised); border: 1px solid var(--line-hover); border-radius: var(--r-md); padding: 6px 10px; font-size: 12px; color: var(--ink); box-shadow: var(--shadow-overlay); transform: rotate(-4deg); }
+.desk[data-scene="drop"] .drop-file { display: inline-flex; }
+.tray { display: inline-flex; align-items: center; justify-content: center; width: 24px; height: 20px; border-radius: var(--r-sm); }
+.tray .av { width: 16px; }
+.desk[data-scene="tray"] .tray { background: var(--surface); box-shadow: inset 0 0 0 1px var(--line-hover); }
+.desk[data-scene="tray"] .perch { opacity: 0; }
+.ov-tray { top: 34px; right: 64px; width: 272px; padding: var(--s2); }
+.ov-tray .kb { margin-left: auto; font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+.ov-tray [role="separator"] { border-top: 1px solid var(--line); margin: 4px 0; }
+.desk[data-scene="tray"] .ov-tray { display: block; }
+.ct-win { position: absolute; left: 14%; top: 17%; width: 56%; height: 64%; display: none; grid-template-rows: 34px 1fr; border: 1px solid var(--line-hover); background: var(--bg); }
+.desk[data-scene="ct"] .ct-win { display: grid; }
+.pip { position: absolute; right: 2.2%; bottom: 3%; width: 158px; height: 222px; display: none; grid-template-rows: 26px 1fr; border: 1px solid var(--line-hover); background: var(--bg); border-radius: var(--r-md); box-shadow: var(--shadow-overlay); }
+.pip-bar { display: flex; align-items: center; gap: 6px; padding: 0 var(--s2); border-bottom: 1px solid var(--line); font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); white-space: nowrap; overflow: hidden; }
+.desk[data-scene="pip"] .pip { display: grid; }
+.desk[data-scene="pip"] .tray { display: none; }
+.ext-ico { display: none; margin-left: auto; align-items: center; gap: 6px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 8px 1px 4px; font-family: var(--f-mono); font-size: 10.5px; color: var(--muted); }
+.ext-ico .av { width: 16px; }
+.desk[data-scene="ext"] .ext-ico { display: inline-flex; }
+.desk[data-scene="ext"] .tray { display: none; }
+.desk[data-scene="ext"] .perch { right: calc(35% + 14px); bottom: calc(13% + 12px); width: 96px; }
+.desk[data-scene="ext"] .perch .av { width: 96px; }
+.ct-body { padding: var(--s4); display: grid; gap: var(--s2); align-content: start; }
+.ct-body .win-t { margin: 0 0 var(--s1); font-size: 14px; font-weight: 600; color: var(--ink); }
+.ct-row { display: flex; align-items: center; justify-content: space-between; gap: var(--s3); border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: var(--s2) var(--s3); font-size: 12.5px; color: var(--ink-2); }
+.desk-ctrl { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); }
+
+/* ===== Part 05: phone ===== */
+.phones { display: flex; flex-wrap: wrap; gap: var(--s6); margin-top: var(--s6); }
+.ph { width: 320px; max-width: 100%; height: 660px; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg); overflow: hidden; display: flex; flex-direction: column; position: relative; }
+.ph-status { height: 30px; flex: none; display: flex; align-items: center; justify-content: space-between; padding: 0 var(--s4); font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+.ph-head { flex: none; display: flex; align-items: center; gap: var(--s3); padding: var(--s2) var(--s4) var(--s3); border-bottom: 1px solid var(--line); }
+.ph-head .ph-t { font-size: 15px; font-weight: 600; color: var(--ink); }
+.ph-head .sub { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); }
+.ph-head .r { margin-left: auto; color: var(--muted); }
+.ph-body { flex: 1; overflow: hidden; padding: var(--s4); display: grid; gap: var(--s4); align-content: start; }
+.ph-hero { display: grid; justify-items: center; gap: var(--s2); padding: var(--s2) 0; }
+.ph-hero .av { width: 150px; }
+.sec-k { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); letter-spacing: .04em; }
+.rowlist { border: 1px solid var(--line); border-radius: var(--r-md); }
+.rl { display: grid; grid-template-columns: 20px 1fr auto; gap: var(--s2); align-items: start; padding: 10px var(--s3); border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+.rl:last-child { border-bottom: 0; }
+.rl .t { color: var(--ink-2); line-height: 1.4; }
+.rl .m { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+.rl svg { color: var(--muted); margin-top: 1px; }
+.ph-nav { flex: none; display: grid; grid-template-columns: repeat(4, 1fr); border-top: 1px solid var(--line); padding-bottom: env(safe-area-inset-bottom, 0px); }
+.ph-nav span { display: grid; justify-items: center; gap: 3px; padding: 8px 0 10px; font-size: 10.5px; color: var(--dim); font-weight: 500; }
+.ph-nav span.on { color: var(--ink); }
+.sheet-scrim { position: absolute; inset: 30px 0 0 0; background: rgba(0,0,0,.5); }
+.sheet { position: absolute; left: 0; right: 0; bottom: 0; background: var(--raised); border-top: 1px solid var(--line); border-radius: var(--r-lg) var(--r-lg) 0 0; box-shadow: var(--shadow-overlay); padding: var(--s5) var(--s4) var(--s6); display: grid; gap: var(--s3); }
+.sheet .sheet-t { font-size: 16px; font-weight: 600; color: var(--ink); }
+.kv { display: grid; grid-template-columns: 96px 1fr; gap: 6px var(--s3); font-size: 13px; }
+.kv dt { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); padding-top: 2px; }
+.kv dd { color: var(--ink-2); }
+.undo { font-family: var(--f-mono); font-size: 11px; color: var(--ink); border: 1px solid var(--line-hover); border-radius: var(--r-sm); padding: 1px 7px; white-space: nowrap; font-variant-numeric: tabular-nums; }
+.fact { display: grid; grid-template-columns: 1fr auto; gap: 4px var(--s2); padding: 10px var(--s3); border-bottom: 1px solid var(--line-soft); font-size: 13px; }
+.fact:last-child { border-bottom: 0; }
+.fact .src { grid-column: 1 / -1; font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); }
+.forget { font-size: 11.5px; color: var(--muted); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 7px; font-weight: 500; }
+.setup { display: grid; gap: var(--s2); }
+.setup li { display: grid; grid-template-columns: 22px 1fr auto; gap: var(--s2); align-items: center; border: 1px solid var(--line); border-radius: var(--r-md); padding: 10px var(--s3); font-size: 13px; }
+.setup li.now { border-color: var(--ink); }
+.setup li.done .mk-k { background: var(--line-hover); }
+.setup .t { color: var(--ink-2); line-height: 1.35; }
+.setup .m { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+.setup .btn { min-height: 32px; font-size: 12.5px; padding: 0 12px; }
+.icon-tile { display: grid; justify-items: center; gap: 6px; }
+.icon-tile .tile { width: 64px; height: 64px; border-radius: var(--r-lg); background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; overflow: hidden; }
+.icon-tile .tile .av { width: 62px; margin-top: 8px; }
+.icon-tile span { font-size: 11px; color: var(--ink-2); }
+
+/* ===== Part 06: Studio ===== */
+.studio { padding: var(--s6); display: grid; gap: var(--s6); }
+.editions { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: var(--s4); }
+@media (max-width: 640px) { .editions { grid-template-columns: 1fr; } }
+.edition { text-align: left; border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: var(--s5); display: grid; gap: var(--s2); transition: border-color var(--dur) var(--ease); }
+.edition:hover { border-color: var(--line-hover); }
+.edition[aria-pressed="true"] { border-color: var(--ink); }
+.edition .ed-t { font-size: 1rem; font-weight: 600; color: var(--ink); display: flex; gap: var(--s2); align-items: center; }
+.edition .ed-d { font-size: .875rem; color: var(--muted); }
+.stepper { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.step { display: inline-flex; align-items: center; gap: 6px; font-size: 13px; font-weight: 500; color: var(--dim); border: 1px solid var(--line-soft); border-radius: var(--r-md); padding: 6px 10px; }
+.step.done { color: var(--muted); }
+.step.now { color: var(--ink); border-color: var(--ink); }
+.step .n { font-family: var(--f-mono); font-size: 10.5px; font-weight: 400; }
+.panes { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s4); }
+@media (max-width: 1000px) { .panes { grid-template-columns: 1fr; } }
+.pane { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg); padding: var(--s5); display: grid; gap: var(--s3); align-content: start; min-width: 0; }
+.pane h3 { font-size: .9375rem; color: var(--ink); }
+.getting { padding: var(--s6); display: grid; gap: var(--s5); }
+.getting h3 { font-size: 1rem; color: var(--ink); }
+.getting .gs-sub { font-size: .875rem; color: var(--muted); margin-top: 4px; }
+.plans { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--s3); }
+.plan { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: var(--s4); display: grid; gap: var(--s3); align-content: start; }
+.plan.rec { border-color: var(--line-hover); }
+.plan-h { display: flex; align-items: center; justify-content: space-between; gap: var(--s2); }
+.plan-n { font-weight: 600; color: var(--ink); font-size: .9375rem; }
+.plan-p { font-size: 1.375rem; font-weight: 600; color: var(--ink); font-variant-numeric: tabular-nums; line-height: 1.2; }
+.plan-p small { display: block; font-size: .8125rem; font-weight: 400; color: var(--muted); margin-top: 2px; }
+.plan ul { display: grid; gap: 6px; font-size: .8125rem; color: var(--ink-2); list-style: none; padding: 0; margin: 0; }
+.plan li { display: flex; gap: 6px; align-items: flex-start; line-height: 1.45; }
+.plan li svg { flex: none; margin-top: 2px; color: var(--muted); }
+.plans[data-show="personal"] .plan[data-ed="work"], .plans[data-show="work"] .plan[data-ed="personal"] { display: none; }
+.pay-note { font-size: .8125rem; color: var(--muted); }
+.every { display: grid; grid-template-columns: repeat(auto-fit, minmax(220px, 1fr)); gap: var(--s3); }
+.tile { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: var(--s4); display: grid; gap: var(--s3); align-content: start; justify-items: start; }
+.tile-t { display: flex; align-items: center; gap: var(--s2); font-weight: 500; color: var(--ink); font-size: .9375rem; }
+.tile p { font-size: .8125rem; color: var(--muted); line-height: 1.5; margin: 0; }
+.tile .big { width: 56px; height: 56px; color: var(--ink-2); }
+.pane .hint { font-size: .8125rem; color: var(--muted); }
+.field { display: grid; gap: 6px; }
+.field .field-k { font-size: 12.5px; font-weight: 500; color: var(--ink-2); }
+.field .in { min-height: 40px; border: 1px solid var(--line-hover); border-radius: var(--r-md); display: flex; align-items: center; padding: 0 var(--s3); color: var(--ink); font-size: 14px; }
+.checks { display: grid; gap: 6px; font-size: 12.5px; color: var(--muted); }
+.checks div { display: flex; gap: 6px; align-items: flex-start; }
+.checks svg { color: var(--ok); margin-top: 2px; }
+.pick { display: grid; grid-template-columns: repeat(3, minmax(0, 1fr)); gap: var(--s2); }
+.pick button { border: 1px solid var(--line); border-radius: var(--r-md); padding: 6px 4px 4px; display: grid; justify-items: center; gap: 2px; font-size: 11px; color: var(--muted); font-weight: 500; }
+.pick button[aria-pressed="true"] { border-color: var(--ink); color: var(--ink); }
+.pick .av { display: block; width: 58px; }
+.pick button:hover { border-color: var(--line-hover); color: var(--ink); }
+.forget:hover { border-color: var(--line-hover); color: var(--ink); }
+.sw:hover { border-color: var(--ink); }
+.lists { display: grid; gap: var(--s2); }
+.list-col { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s3); }
+.list-col h4 { margin: 0 0 6px; font-size: 12.5px; font-weight: 600; display: flex; align-items: center; gap: 6px; }
+.list-col ul { display: grid; gap: 4px; font-size: 12.5px; color: var(--muted); }
+.col-ok h4 { color: var(--ink); } .col-ask h4 { color: var(--warn); } .col-never h4 { color: var(--err); }
+.col-ask { border-color: color-mix(in srgb, var(--warn) 35%, var(--line)); }
+.col-never { border-color: color-mix(in srgb, var(--err) 35%, var(--line)); }
+.chips { display: flex; flex-wrap: wrap; gap: 6px; }
+.chip { font-size: 12px; font-weight: 500; color: var(--ink-2); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 2px 8px; }
+.rehearse { display: grid; gap: var(--s2); }
+.rh { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s3); display: grid; gap: 6px; font-size: 12.5px; }
+.rh .q { color: var(--ink-2); }
+.rh .a { color: var(--muted); }
+
+/* ===== Part 07: enterprise ===== */
+.ent { display: grid; grid-template-columns: minmax(0, 1fr) minmax(0, 1fr); gap: var(--s4); padding: var(--s6); }
+@media (max-width: 1000px) { .ent { grid-template-columns: 1fr; } }
+.setrow { display: grid; grid-template-columns: 1fr auto; gap: var(--s3); align-items: center; padding: var(--s3) 0; border-bottom: 1px solid var(--line-soft); }
+.setrow:last-child { border-bottom: 0; }
+.setrow .t { font-size: 13.5px; color: var(--ink-2); font-weight: 500; }
+.setrow .d { font-size: 12.5px; color: var(--muted); margin-top: 2px; }
+.sw { width: 40px; height: 24px; border-radius: 12px; border: 1px solid var(--line-hover); position: relative; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.sw::after { content: ""; position: absolute; top: 3px; left: 3px; width: 16px; height: 16px; border-radius: 50%; background: var(--muted); transition: transform var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+.sw[aria-checked="true"] { background: var(--ink); border-color: var(--ink); }
+.sw[aria-checked="true"]::after { transform: translateX(16px); background: var(--on-accent); }
+.selv { font-size: 12.5px; color: var(--ink); border: 1px solid var(--line); border-radius: var(--r-md); padding: 5px 10px; white-space: nowrap; }
+
+/* ===== Part 08 / 10 ===== */
+.idle-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(260px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s4); }
+.idle-grid > div { background: var(--surface); padding: var(--s4) var(--s5); }
+.idle-grid h4 { font-size: .875rem; color: var(--ink); }
+.idle-grid p { margin-top: 4px; font-size: .8125rem; color: var(--muted); }
+.sd-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(210px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s4); }
+.sd-grid > figure { margin: 0; background: var(--surface); padding: var(--s4); display: grid; gap: var(--s2); align-content: start; }
+.sd-grid svg { width: 96px; height: 60px; }
+.sd-say { font-size: .875rem; color: var(--ink); line-height: 1.5; }
+.sd-dir { font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); line-height: 1.7; }
+.sd-grid figcaption { font-size: .8125rem; color: var(--muted); line-height: 1.5; }
+.rules-list { margin-top: var(--s4); display: grid; gap: var(--s2); max-width: 80ch; list-style: decimal; padding-left: 1.6em; color: var(--muted); font-size: .9375rem; }
+.rules-list li::marker { color: var(--dim); font-family: var(--f-mono); font-size: .8125rem; }
+.rules-list strong { color: var(--ink); font-weight: 500; }
+.checklist { display: grid; gap: var(--s2); margin-top: var(--s4); max-width: 90ch; }
+.checklist li { display: grid; grid-template-columns: 18px 1fr; gap: var(--s2); font-size: .9rem; color: var(--muted); }
+.checklist svg { color: var(--ok); margin-top: 4px; }
+.decs { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s4); }
+.dec { background: var(--bg); padding: var(--s5) var(--s6); display: grid; grid-template-columns: 52px 1fr; gap: var(--s4); }
+.dec-no { font-family: var(--f-mono); font-size: 12px; color: var(--dim); padding-top: 2px; }
+.dec h3 { font-size: 1rem; color: var(--ink); }
+.dec p { margin-top: var(--s2); color: var(--muted); font-size: .9375rem; max-width: 82ch; }
+.dec-demo { margin-top: var(--s3); display: flex; gap: var(--s4); flex-wrap: wrap; }
+.dec-demo figure { display: grid; justify-items: center; gap: 4px; border: 1px solid var(--line); padding: var(--s3); background: var(--surface); }
+.dec-demo .av { width: 104px; }
+.dec-demo figcaption { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); }
+@media (max-width: 640px) { .dec { grid-template-columns: 1fr; gap: var(--s2); } }
+
+[hidden] { display: none !important; }
+/* ===== Addendum: moat screens. Same tokens and components as the approved spec; only new layouts below. ===== */
+.pane-2 { display: grid; grid-template-columns: minmax(0, 1.35fr) minmax(0, 1fr); }
+.pane-2 > * { min-width: 0; }
+.pane-2 > * + * { border-left: 1px solid var(--line); }
+@media (max-width: 860px) {
+  .pane-2 { grid-template-columns: 1fr; }
+  .pane-2 > * + * { border-left: 0; border-top: 1px solid var(--line); }
+}
+.pad { padding: var(--s5); display: grid; gap: var(--s4); align-content: start; }
+.panel-h { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.panel-h h3 { font-size: 1rem; color: var(--ink); letter-spacing: -.005em; }
+.panel-h .r { margin-left: auto; }
+.panel-h .av { width: 56px; flex: none; }
+.mission { font-size: 1.0625rem; color: var(--ink); font-weight: 500; line-height: 1.4; text-wrap: balance; }
+.hint { font-size: .8125rem; color: var(--muted); line-height: 1.55; }
+.row-btns { display: flex; flex-wrap: wrap; gap: var(--s2); }
+.status-line { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); min-height: 18px; }
+
+/* Rewind */
+.rw-list { border: 1px solid var(--line); border-radius: var(--r-md); }
+.rw-row { display: grid; grid-template-columns: 18px 44px 16px minmax(0, 1fr) auto; gap: var(--s3); align-items: start; padding: 12px var(--s3); border-bottom: 1px solid var(--line-soft); font-size: 13.5px; }
+.rw-row:last-child { border-bottom: 0; }
+.rw-row input { margin: 3px 0 0; width: 16px; height: 16px; accent-color: var(--ink); cursor: pointer; }
+.rw-row input:disabled { cursor: not-allowed; opacity: .45; }
+.rw-time { font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); font-variant-numeric: tabular-nums; padding-top: 1px; }
+.rw-row svg { color: var(--muted); margin-top: 2px; }
+.rw-row .t { display: block; color: var(--ink-2); line-height: 1.4; cursor: pointer; }
+.rw-row .m { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); margin-top: 3px; line-height: 1.5; }
+.rw-row.locked .t { color: var(--muted); cursor: default; }
+.rw-row.done .t { color: var(--muted); text-decoration: line-through; text-decoration-color: var(--line-hover); }
+.cd { font-variant-numeric: tabular-nums; color: var(--ink); }
+.sum { display: grid; gap: var(--s2); }
+.sum-line { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--s2); font-size: 13.5px; align-items: start; color: var(--ink-2); }
+.sum-line svg { margin-top: 3px; color: var(--muted); }
+.sum-line.muted { color: var(--muted); }
+.confirm { border: 1px solid var(--line-hover); border-radius: var(--r-md); padding: var(--s4); display: grid; gap: var(--s3); background: var(--surface); }
+.confirm .t { font-size: 14px; font-weight: 500; color: var(--ink); }
+
+/* Banners: a full tinted border, never a side rail */
+.banner { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--s2); align-items: start; border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s3); font-size: 13px; color: var(--ink-2); background: var(--bg); }
+.banner svg { margin-top: 2px; color: var(--muted); }
+.banner .t { font-weight: 500; color: var(--ink); }
+.banner .m { color: var(--muted); margin-top: 2px; line-height: 1.5; }
+.banner-ok { border-color: color-mix(in srgb, var(--ok) 45%, var(--line)); }
+.banner-ok svg { color: var(--ok); }
+.banner-warn { border-color: color-mix(in srgb, var(--warn) 50%, var(--line)); }
+.banner-warn svg { color: var(--warn); }
+.banner-err { border-color: color-mix(in srgb, var(--err) 50%, var(--line)); }
+.banner-err svg { color: var(--err); }
+
+/* States strip: every screen shows its empty, loading and error states */
+.states { display: grid; grid-template-columns: repeat(auto-fit, minmax(240px, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s4); }
+.states > div { background: var(--surface); padding: var(--s4); display: grid; gap: var(--s2); align-content: start; }
+.states h4 { font-size: .8125rem; color: var(--ink); }
+.states p { font-size: .8125rem; color: var(--muted); line-height: 1.5; }
+.skel { display: grid; gap: 8px; }
+.sk-bar { height: 9px; border-radius: var(--r-sm); background: var(--line); animation: sk-pulse 1.6s ease-in-out infinite; }
+@keyframes sk-pulse { 50% { opacity: .5; } }
+:root[data-motion="off"] .sk-bar { animation: none; }
+@media (prefers-reduced-motion: reduce) { .sk-bar { animation: none; } }
+
+/* Mission preview */
+.steps { border: 1px solid var(--line); border-radius: var(--r-md); }
+.steps li { display: grid; grid-template-columns: 24px minmax(0, 1fr) auto; gap: var(--s3); padding: 11px var(--s3); border-bottom: 1px solid var(--line-soft); font-size: 13.5px; align-items: start; color: var(--ink-2); line-height: 1.4; }
+.steps li:last-child { border-bottom: 0; }
+.st-n { font-family: var(--f-mono); font-size: 11px; color: var(--dim); border: 1px solid var(--line); border-radius: var(--r-sm); text-align: center; height: 22px; line-height: 20px; font-variant-numeric: tabular-nums; }
+.touch { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 1px; background: var(--line); border: 1px solid var(--line); border-radius: var(--r-md); overflow: hidden; }
+.touch > div { background: var(--bg); padding: var(--s3); display: grid; gap: 4px; align-content: start; }
+.touch .k { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); display: flex; gap: 6px; align-items: center; }
+.touch .v { font-size: 14px; color: var(--ink); font-weight: 500; line-height: 1.35; }
+.touch .w { font-size: 12px; color: var(--muted); line-height: 1.4; }
+.dry { border: 1px solid var(--line); border-radius: var(--r-md); }
+.dry-row { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s3); padding: 10px var(--s3); border-bottom: 1px solid var(--line-soft); font-size: 13px; align-items: start; color: var(--muted); }
+.dry-row:last-child { border-bottom: 0; }
+.dry-row.chosen { background: var(--surface); color: var(--ink-2); }
+.dry-row .m { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); margin-top: 2px; }
+
+/* Shareable proof */
+.chk { display: flex; gap: var(--s2); align-items: flex-start; font-size: 13px; color: var(--ink-2); line-height: 1.4; cursor: pointer; }
+.chk input { margin: 2px 0 0; width: 16px; height: 16px; accent-color: var(--ink); flex: none; }
+.linkbox { display: flex; gap: var(--s2); align-items: center; border: 1px solid var(--line); border-radius: var(--r-md); padding: 4px 4px 4px var(--s3); font-family: var(--f-mono); font-size: 12px; color: var(--ink); min-width: 0; }
+.linkbox output { overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; flex: 1; }
+.linkbox .btn { min-height: 32px; font-size: 12.5px; padding: 0 10px; }
+.browser-bar { display: flex; align-items: center; gap: var(--s2); padding: 8px var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band); font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); min-width: 0; }
+.browser-bar .url { border: 1px solid var(--line); border-radius: var(--r-sm); padding: 2px 10px; color: var(--muted); background: var(--bg); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; min-width: 0; }
+.verify { max-width: 580px; margin: 0 auto; padding: var(--s8) var(--s5) var(--s10); display: grid; gap: var(--s5); }
+.v-brand { display: flex; align-items: center; gap: var(--s2); font-size: 13px; color: var(--muted); font-weight: 500; }
+.v-head { display: grid; gap: var(--s3); justify-items: start; }
+.v-title { font-size: 1.375rem; line-height: 1.25; letter-spacing: -.02em; color: var(--ink); text-wrap: balance; }
+.v-lede { font-size: .9375rem; color: var(--muted); line-height: 1.6; }
+.v-checks { display: grid; gap: 8px; }
+.v-check { display: grid; grid-template-columns: 16px minmax(0, 1fr); gap: var(--s2); align-items: start; font-size: 13.5px; color: var(--ink-2); line-height: 1.45; }
+.v-check svg { margin-top: 2px; color: var(--ok); }
+.v-check.bad svg { color: var(--err); }
+.v-check.neutral svg { color: var(--muted); }
+.v-card { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--bg); }
+.v-card .kv { padding: var(--s4); grid-template-columns: 128px minmax(0, 1fr); }
+.v-foot { border-top: 1px solid var(--line); padding: var(--s3) var(--s4); font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); display: grid; gap: 4px; overflow-wrap: anywhere; }
+
+/* Guardian */
+.flag { border: 1px solid var(--line); border-radius: var(--r-md); padding: var(--s4); display: grid; gap: var(--s3); }
+.flag-h { display: grid; grid-template-columns: 18px minmax(0, 1fr) auto; gap: var(--s2); align-items: start; }
+.flag-h svg { margin-top: 2px; color: var(--muted); }
+.flag-h .t { font-size: 14px; color: var(--ink); font-weight: 500; line-height: 1.4; }
+.flag-h .m { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); margin-top: 3px; line-height: 1.5; }
+.why { display: flex; flex-wrap: wrap; gap: 6px; }
+.why span { font-size: 11.5px; border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 8px; color: var(--muted); }
+.quote { background: var(--surface); border: 1px solid var(--line-soft); border-radius: var(--r-sm); padding: var(--s2) var(--s3); font-size: 13px; color: var(--ink-2); line-height: 1.5; }
+.flag .row-btns .btn { min-height: 34px; font-size: 13px; padding: 0 12px; }
+.rules { border: 1px solid var(--line); border-radius: var(--r-md); }
+.rule { display: grid; grid-template-columns: minmax(0, 1fr) auto; gap: var(--s3); align-items: center; padding: 10px var(--s3); border-bottom: 1px solid var(--line-soft); font-size: 13.5px; color: var(--ink-2); line-height: 1.4; }
+.rule:last-child { border-bottom: 0; }
+.tog { width: 38px; height: 22px; border: 1px solid var(--line-hover); border-radius: var(--r-sm); background: var(--surface); position: relative; flex: none; transition: background-color var(--dur) var(--ease), border-color var(--dur) var(--ease); }
+.tog::after { content: ""; position: absolute; top: 3px; left: 3px; width: 14px; height: 14px; border-radius: 3px; background: var(--muted); transition: transform var(--dur) var(--ease), background-color var(--dur) var(--ease); }
+.tog[aria-checked="true"] { background: var(--ink); border-color: var(--ink); }
+.tog[aria-checked="true"]::after { transform: translateX(16px); background: var(--on-accent); }
+:root[data-motion="off"] .tog, :root[data-motion="off"] .tog::after { transition: none; }
+.people { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+.pp { display: inline-flex; align-items: center; gap: var(--s2); font-size: 13px; color: var(--ink-2); }
+.pp-i { width: 28px; height: 28px; border-radius: 999px; background: var(--surface); border: 1px solid var(--line); display: grid; place-items: center; font-size: 11px; font-weight: 500; color: var(--ink); }
+.ph-big .ph-body { gap: var(--s4); }
+.calm { font-size: 19px; line-height: 1.4; color: var(--ink); font-weight: 500; text-wrap: balance; }
+.calm-sub { font-size: 15.5px; line-height: 1.5; color: var(--muted); }
+.ph-big .btn { min-height: 52px; font-size: 16px; }
+.guard-side { display: grid; justify-items: center; gap: var(--s3); }
+
+/* Initiative cards */
+.cards { display: grid; grid-template-columns: repeat(auto-fit, minmax(250px, 1fr)); gap: var(--s3); }
+.icard { border: 1px solid var(--line); border-radius: var(--r-lg); background: var(--surface); padding: var(--s4); display: grid; gap: var(--s3); align-content: start; }
+.icard-h { display: grid; grid-template-columns: 18px minmax(0, 1fr); gap: var(--s2); align-items: start; }
+.icard-h svg { margin-top: 2px; color: var(--muted); }
+.icard .t { font-size: 14px; color: var(--ink); font-weight: 500; line-height: 1.4; }
+.src { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); display: flex; gap: 6px; align-items: center; line-height: 1.5; }
+.icard .row-btns .btn { min-height: 34px; font-size: 13px; padding: 0 12px; }
+.ini-top { display: flex; flex-wrap: wrap; align-items: center; gap: var(--s3); }
+.ini-top .av { width: 72px; flex: none; }
+.budget { font-family: var(--f-mono); font-size: 11px; color: var(--dim); }
+</style>
+
+<a class="skip" href="#main">Skip to the screens</a>
+<div class="spec-bar" role="banner">
+  <span><strong>Actronauts moat screens</strong></span>
+  <span>Approved 2026-10-09, now parts 08 to 12 of the main spec</span>
+  <div class="spec-bar-right">
+    <button class="tgl" id="motion-toggle" type="button" aria-pressed="true"><i data-lucide="pause"></i><span>Motion on</span></button>
+    <button class="tgl" id="theme-toggle" type="button"><i data-lucide="sun"></i><span>Theme</span></button>
+  </div>
+</div>
+
+<main id="main" class="doc">
+
+<section class="cover" aria-labelledby="cover-h">
+  <div>
+    <p class="cover-kicker">Addendum to the Actronauts design spec</p>
+    <h1 id="cover-h">Rewind, preview, proof and Guardian</h1>
+    <p class="cover-lede">These are the screens for the additions in decision D22 that people see and touch: <strong>Rewind</strong> to undo an hour of work, <strong>mission preview</strong> before a big task, <strong>shareable proof</strong> anyone can check, <strong>Guardian mode</strong> for an older parent, and the early <strong>initiative cards</strong>.</p>
+    <p class="cover-lede">They reuse the approved spec’s tokens, components and characters unchanged, in both themes and at phone width. Nothing here is built, and every name, number and receipt is an example.</p>
+    <dl class="cover-meta">
+      <div><dt>Status</dt><dd>Approved 2026-10-09 and folded into the main spec as parts 08 to 12</dd></div>
+      <div><dt>Plan</dt><dd>Section 6.9 and decision D22</dd></div>
+      <div><dt>Extends</dt><dd>Actronauts design spec, approved 2026-10-04</dd></div>
+      <div><dt>Phases</dt><dd>P1 to P6, given per screen</dd></div>
+    </dl>
+  </div>
+  <div class="cover-cast" aria-hidden="true">
+    <div class="av still" data-char="lander" data-state="thinking"></div>
+    <div class="av still" data-char="atoll" data-state="idle"></div>
+    <div class="av still" data-char="binnacle" data-state="approval"></div>
+  </div>
+</section>
+
+<!-- 01 Rewind -->
+<section class="part" id="rewind" aria-labelledby="h-01">
+  <div class="part-head"><span class="part-no">01</span><div><h2 id="h-01">Rewind</h2><p>One place to undo what an Actronaut did. Pick a window of time, untick anything you want to keep, and Rewind reverses the rest: it unsends emails still inside their window, cancels bookings the business still allows, and restores the calendar. Anything that can’t be undone says so, and why, before you start. Phase P2.</p></div></div>
+  <div class="render">
+    <div class="render-bar"><span>Desktop app, Actronaut panel</span><span>the same screen in Control Tower and the phone app</span></div>
+    <div class="pane-2">
+      <div class="pad">
+        <div class="panel-h">
+          <h3 id="rw-h">What Mabel did</h3>
+          <div class="r seg" role="group" aria-label="Time window" id="rw-range">
+            <button type="button" data-range="15" aria-pressed="false">Last 15 min</button>
+            <button type="button" data-range="60" aria-pressed="true">Last hour</button>
+            <button type="button" data-range="1440" aria-pressed="false">Today</button>
+          </div>
+        </div>
+        <ul class="rw-list" id="rw-list" aria-labelledby="rw-h">
+          <li class="rw-row" data-age="2" data-kind="email">
+            <input type="checkbox" id="rw-1" checked>
+            <span class="rw-time">10:04</span><i data-lucide="send" class="i14"></i>
+            <div><label class="t" for="rw-1">Emailed Hartley Plumbing to confirm Friday</label><p class="m">Still sending: the unsend window closes in <span class="cd" data-left="54">0:54</span></p></div>
+            <span class="lbl lbl-ok rw-state">Can undo</span>
+          </li>
+          <li class="rw-row" data-age="3" data-kind="calendar">
+            <input type="checkbox" id="rw-2" checked>
+            <span class="rw-time">10:03</span><i data-lucide="calendar" class="i14"></i>
+            <div><label class="t" for="rw-2">Added “Plumber, Hartley” to Fri 08:00</label><p class="m">Your calendar; restores the free slot</p></div>
+            <span class="lbl lbl-ok rw-state">Can undo</span>
+          </li>
+          <li class="rw-row" data-age="22" data-kind="booking">
+            <input type="checkbox" id="rw-3" checked>
+            <span class="rw-time">09:42</span><i data-lucide="badge-check" class="i14"></i>
+            <div><label class="t" for="rw-3">Booked Hartley Plumbing, $135.00</label><p class="m">Free cancellation until Thu 18:00; refund to the single-use card</p></div>
+            <span class="lbl lbl-ok rw-state">Can undo</span>
+          </li>
+          <li class="rw-row locked" data-age="44" data-kind="call">
+            <input type="checkbox" id="rw-4" disabled>
+            <span class="rw-time">09:20</span><i data-lucide="phone" class="i14"></i>
+            <div><label class="t" for="rw-4">Called three plumbers for quotes</label><p class="m">A call can’t be taken back; the transcripts stay in the receipts</p></div>
+            <span class="lbl rw-state"><i data-lucide="lock" class="i14"></i>Can’t undo</span>
+          </li>
+          <li class="rw-row" data-age="190" data-kind="calendar" hidden>
+            <input type="checkbox" id="rw-5" checked>
+            <span class="rw-time">07:14</span><i data-lucide="calendar" class="i14"></i>
+            <div><label class="t" for="rw-5">Moved the dentist to Thu 15:00</label><p class="m">The dentist’s booking page still allows changes</p></div>
+            <span class="lbl lbl-ok rw-state">Can undo</span>
+          </li>
+          <li class="rw-row locked" data-age="204" data-kind="email" hidden>
+            <input type="checkbox" id="rw-6" disabled>
+            <span class="rw-time">07:00</span><i data-lucide="mail" class="i14"></i>
+            <div><label class="t" for="rw-6">Replied to Mom about Sunday</label><p class="m">Sent at 07:00; the unsend window closed at 07:01</p></div>
+            <span class="lbl rw-state"><i data-lucide="lock" class="i14"></i>Can’t undo</span>
+          </li>
+        </ul>
+      </div>
+      <div class="pad">
+        <div class="panel-h"><h3>What Rewind will do</h3></div>
+        <div class="sum" id="rw-sum" aria-live="polite"></div>
+        <p class="hint">Each reversal gets its own signed receipt, linked to the action it reverses. Reversals run newest first.</p>
+        <button class="btn btn-primary btn-block" id="rw-go" type="button"><i data-lucide="rotate-ccw"></i><span id="rw-go-t">Rewind 3 actions</span></button>
+        <div class="confirm" id="rw-confirm" hidden>
+          <p class="t" id="rw-confirm-t">Rewind 3 actions?</p>
+          <p class="hint">This unsends, cancels and restores the ticked items. Items you leave unticked stay as they are.</p>
+          <div class="row-btns"><button class="btn btn-primary" id="rw-yes" type="button">Rewind now</button><button class="btn" id="rw-no" type="button">Keep everything</button></div>
+        </div>
+        <div class="banner banner-ok" id="rw-done" role="status" hidden><i data-lucide="circle-check" class="i14"></i><div><p class="t" id="rw-done-t">Rewound 3 actions</p><p class="m" id="rw-done-m">3 signed receipts added to the mission log.</p></div></div>
+        <button class="btn" id="rw-reset" type="button" hidden><i data-lucide="history"></i>Reset this example</button>
+      </div>
+    </div>
+  </div>
+  <div class="states" aria-label="Rewind states">
+    <div><h4>Nothing to rewind</h4><p>“Mabel hasn’t changed anything in the last hour.” The time window stays, so today is one tap away.</p></div>
+    <div><h4>Checking what can still be undone</h4><div class="skel" aria-hidden="true"><div class="sk-bar" style="width:86%"></div><div class="sk-bar" style="width:64%"></div><div class="sk-bar" style="width:74%"></div></div><p>Shown while each business is asked whether its cancellation window is still open.</p></div>
+    <div><h4>Partly rewound</h4><div class="banner banner-warn"><i data-lucide="triangle-alert" class="i14"></i><div><p class="t">2 of 3 rewound</p><p class="m">Hartley Plumbing’s free cancellation ended at 18:00, so the booking stands. Call them on 555 0182 or keep it.</p></div></div></div>
+    <div><h4>Rewind failed</h4><div class="banner banner-err"><i data-lucide="circle-x" class="i14"></i><div><p class="t">Nothing was changed</p><p class="m">Gmail didn’t answer. Try again in a minute; unsend windows keep counting down meanwhile.</p></div></div></div>
+  </div>
+  <p class="render-note"><b>Default window:</b> the last hour, with 15 minutes and today one tap away. <b>Ticks:</b> everything that can still be undone starts ticked; locked rows say why they can’t be. <b>Countdown:</b> unsend windows tick live, and a row locks when its window closes. <b>Voice:</b> “Mabel, rewind the last hour” opens this screen with the same ticks; nothing reverses without a tap. <b>Backend:</b> the existing “reverse everything this agent did” call, newest first, one signed reversal receipt per action.</p>
+</section>
+
+<!-- 02 Mission preview -->
+<section class="part" id="preview" aria-labelledby="h-02">
+  <div class="part-head"><span class="part-no">02</span><div><h2 id="h-02">Mission preview</h2><p>Before a mission that spends, books or contacts someone new, the Actronaut does a dry run and shows the plan, what it will touch, what it costs and where it will stop to ask. The dry run reads but never writes, so nothing reaches the outside world until you approve. One approval runs the whole mission. Phase P2.</p></div></div>
+  <div class="render">
+    <div class="render-bar"><span>Desktop app or Control Tower, before a mission starts</span><span>a compact version opens as a sheet on the phone</span></div>
+    <div class="pane-2">
+      <div class="pad">
+        <div class="panel-h">
+          <div class="av still" data-char="lander" data-state="thinking" aria-hidden="true"></div>
+          <div style="min-width:0;flex:1">
+            <p class="mission">Book a plumber for tomorrow morning, under $150</p>
+            <span class="lbl lbl-ok" style="margin-top:6px"><i data-lucide="circle-check" class="i14"></i>Dry run complete</span>
+          </div>
+        </div>
+        <div class="sec-k">The plan</div>
+        <ol class="steps">
+          <li><span class="st-n">1</span><span>Check online booking for three plumbers near home</span><span class="lbl">Done in the dry run</span></li>
+          <li><span class="st-n">2</span><span>Call Hartley Plumbing to confirm the Friday slot</span><span class="lbl">This approval</span></li>
+          <li><span class="st-n">3</span><span>Book Fri 08:00 for $135.00</span><span class="lbl lbl-warn"><i data-lucide="fingerprint" class="i14"></i>Passkey</span></li>
+          <li><span class="st-n">4</span><span>Add it to your calendar</span><span class="lbl">On its own</span></li>
+          <li><span class="st-n">5</span><span>Text you the confirmation</span><span class="lbl">On its own</span></li>
+        </ol>
+        <div class="sec-k">Options the dry run compared</div>
+        <div class="dry">
+          <div class="dry-row chosen"><div><div>Cheapest under your limit: Hartley Plumbing</div><div class="m">Fri 08:00, $135.00, 4.7 stars</div></div><span class="lbl lbl-ok">Chosen</span></div>
+          <div class="dry-row"><div><div>Earliest slot: Rapid Rooter</div><div class="m">Thu 17:00, $165.00</div></div><span class="lbl">Over $150</span></div>
+          <div class="dry-row"><div><div>Best rated: Oak and Pipe</div><div class="m">Mon 09:00, $148.00</div></div><span class="lbl">Not tomorrow</span></div>
+        </div>
+      </div>
+      <div class="pad">
+        <div class="sec-k">What it will touch</div>
+        <div class="touch">
+          <div><span class="k"><i data-lucide="phone" class="i14"></i>Calls</span><span class="v">1 business</span><span class="w">A new number, covered by this approval</span></div>
+          <div><span class="k"><i data-lucide="banknote" class="i14"></i>Money</span><span class="v">$135.00</span><span class="w">Single-use card, limit $150</span></div>
+          <div><span class="k"><i data-lucide="calendar" class="i14"></i>Calendar</span><span class="v">1 event</span><span class="w">Fri 08:00 to 09:00</span></div>
+          <div><span class="k"><i data-lucide="message-square" class="i14"></i>Messages</span><span class="v">1 text</span><span class="w">To you only</span></div>
+        </div>
+        <div class="sec-k">What it costs</div>
+        <dl class="kv"><dt>Call time</dt><dd>About 4 minutes of your 100</dd><dt>Finishes</dt><dd>In about 10 minutes</dd><dt>Stops to ask</dt><dd>Once, before paying $135.00</dd></dl>
+        <div class="row-btns">
+          <button class="btn btn-primary" id="pv-go" type="button"><i data-lucide="fingerprint"></i>Approve and run</button>
+          <button class="btn" id="pv-edit" type="button">Change the plan</button>
+          <button class="btn" id="pv-cancel" type="button">Cancel</button>
+        </div>
+        <p class="status-line" id="pv-status" role="status" aria-live="polite"></p>
+      </div>
+    </div>
+  </div>
+  <div class="states" aria-label="Mission preview states">
+    <div><h4>Dry run in progress</h4><div class="skel" aria-hidden="true"><div class="sk-bar" style="width:70%"></div><div class="sk-bar" style="width:90%"></div><div class="sk-bar" style="width:56%"></div></div><p>“Checking three booking pages.” Shown with the character in its thinking pose.</p></div>
+    <div><h4>No option fits</h4><div class="banner banner-warn"><i data-lucide="triangle-alert" class="i14"></i><div><p class="t">No plumber can come tomorrow under $150</p><p class="m">Raise the limit to $170, or allow Monday?</p></div></div></div>
+    <div><h4>Your charter blocks it</h4><div class="banner banner-err"><i data-lucide="octagon-x" class="i14"></i><div><p class="t">Paying a new business is on your never list</p><p class="m">Change the charter in Settings, or book it yourself from the plan.</p></div></div></div>
+  </div>
+  <p class="render-note"><b>When it appears:</b> any mission with a purchase, a booking, a message to someone new, or more than five steps; small tasks run without it. <b>Dry run:</b> reads booking pages, prices and calendars, and holds every call, message and payment until you approve. <b>After approval:</b> the chosen option runs for real; if the slot or price changed in between, the Actronaut asks again instead of picking something new. <b>Backend:</b> GAL preview plus speculative execution, both already built.</p>
+</section>
+
+<!-- 03 Shareable proof -->
+<section class="part" id="proof" aria-labelledby="h-03">
+  <div class="part-head"><span class="part-no">03</span><div><h2 id="h-03">Shareable proof</h2><p>Anything an Actronaut did can become a link that someone else can check: a landlord, an employer, an airline or a court. The same page checks a Mandate, which says what an Actronaut may do, for whom and until when, and the code an Actronaut reads out on a call. It proves what happened without showing anything the owner chose to hide. Phase P2; Mandates and calls in P3.</p></div></div>
+
+  <h3 class="sub">Sharing it</h3>
+  <div class="phones">
+    <div class="ph" aria-label="Sharing a proof from the phone app">
+      <div class="ph-status"><span>14:05</span><span>5G</span></div>
+      <div class="ph-head"><div><p class="ph-t">Receipt</p><span class="sub">R-2026-1003-0187</span></div></div>
+      <div class="ph-body">
+        <div><p class="mission" style="font-size:16px">Cancelled the Iron Gym contract</p><span class="lbl lbl-ok" style="margin-top:6px"><i data-lucide="badge-check" class="i14"></i>Signed receipt</span></div>
+        <dl class="kv"><dt>When</dt><dd>Fri 3 Oct, 14:02</dd><dt>How</dt><dd>Iron Gym’s cancellation form</dd><dt>Reference</dt><dd>IG-48213</dd><dt>Approved</dt><dd>By you, with a passkey</dd></dl>
+        <div class="sec-k">Share proof</div>
+        <label class="chk"><input type="checkbox" id="pf-name">Show my full name (initials otherwise)</label>
+        <label class="chk"><input type="checkbox" id="pf-ref" checked>Show the reference number</label>
+        <div class="seg" role="group" aria-label="Link expires" id="pf-exp">
+          <button type="button" data-exp="7 days" aria-pressed="true">7 days</button>
+          <button type="button" data-exp="30 days" aria-pressed="false">30 days</button>
+          <button type="button" data-exp="no end date" aria-pressed="false">No end</button>
+        </div>
+        <div class="linkbox"><output id="pf-link">actrone.com/v/7KQ2-M9X4</output><button class="btn" id="pf-copy" type="button"><i data-lucide="copy" class="i14"></i>Copy</button></div>
+        <p class="hint" id="pf-note" role="status" aria-live="polite">Anyone with the link can check it for 7 days. Revoke it here any time.</p>
+      </div>
+    </div>
+  </div>
+
+  <h3 class="sub">What the other person sees</h3>
+  <div class="render">
+    <div class="render-bar"><span>Any browser, no account, no cookies</span></div>
+    <div class="pad" style="border-bottom:1px solid var(--line)">
+      <div class="seg" role="group" aria-label="Example" id="vf-seg">
+        <button type="button" data-v="action" aria-pressed="true">Action proof</button>
+        <button type="button" data-v="mandate" aria-pressed="false">Mandate</button>
+        <button type="button" data-v="expired" aria-pressed="false">Expired Mandate</button>
+        <button type="button" data-v="altered" aria-pressed="false">Altered record</button>
+      </div>
+    </div>
+    <div class="browser-bar"><i data-lucide="lock" class="i14"></i><span class="url" id="vf-url">actrone.com/v/7KQ2-M9X4</span></div>
+    <div class="verify">
+      <div class="v-brand"><i data-lucide="badge-check" class="i14"></i>Actrone verification</div>
+
+      <div data-panel="action">
+        <div class="v-head">
+          <span class="lbl lbl-ok"><i data-lucide="circle-check" class="i14"></i>Verified</span>
+          <h3 class="v-title">An Actronaut cancelled this contract, with its owner’s approval</h3>
+        </div>
+        <div class="v-checks" style="margin-top:var(--s4)">
+          <div class="v-check"><i data-lucide="circle-check" class="i14"></i><span>Signed with Actrone’s published key</span></div>
+          <div class="v-check"><i data-lucide="circle-check" class="i14"></i><span>Part of an unbroken chain of 187 receipts</span></div>
+          <div class="v-check"><i data-lucide="circle-check" class="i14"></i><span>Approved by the owner with a passkey</span></div>
+        </div>
+        <div class="v-card" style="margin-top:var(--s4)">
+          <dl class="kv">
+            <dt>What happened</dt><dd>Cancelled a gym contract</dd>
+            <dt>With</dt><dd>Iron Gym<span id="vf-ref">, reference IG-48213</span></dd>
+            <dt>When</dt><dd>Fri 3 Oct 2026, 14:02 UTC</dd>
+            <dt>Done by</dt><dd>Mabel, a Personal Actronaut</dd>
+            <dt>Acting for</dt><dd id="vf-name">J. E.</dd>
+          </dl>
+          <div class="v-foot"><span>Receipt R-2026-1003-0187</span><span>Key ed25519 9f3a 51c0 ... c21e</span></div>
+        </div>
+      </div>
+
+      <div data-panel="mandate" hidden>
+        <div class="v-head">
+          <span class="lbl lbl-ok"><i data-lucide="circle-check" class="i14"></i>Valid now</span>
+          <h3 class="v-title">Mabel may book and pay for one plumbing visit for J. E.</h3>
+          <p class="v-lede">An Actronaut read out this code on a call to you. This page shows what it is allowed to do.</p>
+        </div>
+        <div class="v-card" style="margin-top:var(--s4)">
+          <dl class="kv">
+            <dt>Allowed</dt><dd>Book one plumbing visit</dd>
+            <dt>Spend limit</dt><dd>Up to $150.00 on a single-use card</dd>
+            <dt>With</dt><dd>Hartley Plumbing</dd>
+            <dt>Valid until</dt><dd>Fri 10 Oct 2026, 18:00</dd>
+            <dt>Granted</dt><dd>By the owner, with a passkey, Thu 9 Oct 10:12</dd>
+          </dl>
+          <div class="v-foot"><span>Mandate M-2026-1009-0042</span><span>Spoken on calls as “actrone dot com slash v, 7 K Q 2”</span></div>
+        </div>
+      </div>
+
+      <div data-panel="expired" hidden>
+        <div class="v-head">
+          <span class="lbl"><i data-lucide="clock" class="i14"></i>Expired</span>
+          <h3 class="v-title">This Mandate ended on Fri 10 Oct 2026 at 18:00</h3>
+          <p class="v-lede">Mabel can no longer act on it. If Mabel contacts you about this, ask its owner for a new link.</p>
+        </div>
+        <div class="v-checks" style="margin-top:var(--s4)">
+          <div class="v-check"><i data-lucide="circle-check" class="i14"></i><span>The signature is genuine; the time limit has passed</span></div>
+        </div>
+      </div>
+
+      <div data-panel="altered" hidden>
+        <div class="v-head">
+          <span class="lbl lbl-err"><i data-lucide="circle-x" class="i14"></i>Does not verify</span>
+          <h3 class="v-title">This record was changed after it was signed</h3>
+          <p class="v-lede">The details no longer match the signature, so don’t rely on them. Ask whoever sent you the link for a new one.</p>
+        </div>
+        <div class="v-checks" style="margin-top:var(--s4)">
+          <div class="v-check bad"><i data-lucide="circle-x" class="i14"></i><span>The signature doesn’t match the record</span></div>
+          <div class="v-check neutral"><i data-lucide="info" class="i14"></i><span>The original, unaltered receipt is still in its owner’s ledger</span></div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="states" aria-label="Verification states">
+    <div><h4>Checking the signature</h4><div class="skel" aria-hidden="true"><div class="sk-bar" style="width:40%"></div><div class="sk-bar" style="width:88%"></div><div class="sk-bar" style="width:66%"></div></div><p>The browser checks the signature and the chain itself, as well as the server.</p></div>
+    <div><h4>Revoked or unknown link</h4><p>“This proof was revoked by its owner, or the link is wrong.” No details are shown, so a revoked link reveals nothing.</p></div>
+    <div><h4>Owner revoked it after sharing</h4><p>The owner’s copy shows “Revoked 4 Oct, 09:15”. The receipt itself stays in the ledger.</p></div>
+  </div>
+  <p class="render-note"><b>Privacy:</b> the owner’s name shows as initials unless they choose the full name; reference numbers show unless unticked. <b>No account:</b> checking needs no sign-in and sets no cookies. <b>Trust:</b> the page checks the Ed25519 signature and the hash chain in the browser as well as on the server, so a copied page can’t fake a green result. <b>Calls:</b> an Actronaut can read out its short code on any call, and the code opens the Mandate view. <b>Backend:</b> signed run attestations, already built; Mandates are new in P3.</p>
+</section>
+
+<!-- 04 Guardian -->
+<section class="part" id="guardian" aria-labelledby="h-04">
+  <div class="part-head"><span class="part-no">04</span><div><h2 id="h-04">Guardian mode</h2><p>An Actronaut that watches over an older parent, set up with their consent. It screens unknown calls, spots the patterns scammers use, holds payments that break the family’s rules and tells the family. The parent stays in charge: they see every flag, can call anyone back and can pause Guardian any time. It works from what is said and done, never from the tone of anyone’s voice. Phase P3 for call screening, P6 with households.</p></div></div>
+  <div class="render">
+    <div class="render-bar"><span>Family view in Control Tower or the phone app, with Ada’s phone beside it</span></div>
+    <div class="pane-2">
+      <div class="pad">
+        <div class="panel-h"><h3>Guardian for Ada</h3><span class="r lbl lbl-ok">On</span></div>
+        <div class="banner"><i data-lucide="users" class="i14"></i><div><p class="t">Ada turned Guardian on with Sam on 2 Oct</p><p class="m">She sees every flag and can pause it any time. Sam and Lee hear about anything held.</p></div></div>
+        <div class="sec-k">Today</div>
+
+        <article class="flag" aria-labelledby="fl-1">
+          <div class="flag-h"><i data-lucide="phone-off" class="i14"></i><div><p class="t" id="fl-1">Ended a call asking for gift cards</p><p class="m">10:12, from +1 202 555 0147, said it was the Wells Fargo fraud team</p></div><span class="lbl lbl-ok" id="fl-1-st">Stopped</span></div>
+          <div class="why" aria-label="Why it was flagged"><span>Asked for gift cards</span><span>Said it was urgent</span><span>Not in Ada’s contacts</span><span>Claimed to be her bank</span></div>
+          <p class="quote">“You need to buy $500 in gift cards today to protect your account.”</p>
+          <p class="hint">Mabel ended the call, blocked the number and told Ada why. Her real bank was not contacted.</p>
+          <div class="row-btns"><button class="btn" type="button" data-say="Calling Ada from your phone">Call Ada</button><button class="btn" type="button" id="fl-1-safe">Mark as safe</button></div>
+        </article>
+
+        <article class="flag" aria-labelledby="fl-2">
+          <div class="flag-h"><i data-lucide="banknote" class="i14"></i><div><p class="t" id="fl-2">Held a $2,400.00 transfer to a new payee</p><p class="m">11:40, to J. Morris, a payee added today</p></div><span class="lbl lbl-warn" id="fl-2-st">Needs family approval</span></div>
+          <div class="why" aria-label="Why it was held"><span>New payee</span><span>Over $500</span><span>Same day as the scam call</span></div>
+          <div class="row-btns" id="fl-2-btns"><button class="btn btn-primary" type="button" id="fl-2-ok"><i data-lucide="fingerprint"></i>Approve</button><button class="btn" type="button" id="fl-2-no">Decline</button><button class="btn" type="button" data-say="Calling Ada from your phone">Call Ada first</button></div>
+        </article>
+
+        <article class="flag" aria-labelledby="fl-3">
+          <div class="flag-h"><i data-lucide="mail" class="i14"></i><div><p class="t" id="fl-3">Moved a fake Microsoft support email to junk</p><p class="m">08:31, asked her to call a number about a virus</p></div><span class="lbl lbl-ok">Moved</span></div>
+        </article>
+        <p class="status-line" id="gd-status" role="status" aria-live="polite"></p>
+
+        <div class="sec-k">Rules</div>
+        <div class="rules">
+          <div class="rule"><span id="r1">Screen calls from numbers not in Ada’s contacts</span><button class="tog" type="button" role="switch" aria-checked="true" aria-labelledby="r1"></button></div>
+          <div class="rule"><span id="r2">Never buy gift cards or crypto</span><button class="tog" type="button" role="switch" aria-checked="true" aria-labelledby="r2"></button></div>
+          <div class="rule"><span id="r3">Hold transfers over $500 to new payees</span><button class="tog" type="button" role="switch" aria-checked="true" aria-labelledby="r3"></button></div>
+          <div class="rule"><span>Tell Ada why, every time</span><span class="lbl">Always on</span></div>
+        </div>
+        <div class="sec-k">Who hears about it</div>
+        <div class="people">
+          <span class="pp"><span class="pp-i" aria-hidden="true">A</span>Ada, owner</span>
+          <span class="pp"><span class="pp-i" aria-hidden="true">S</span>Sam</span>
+          <span class="pp"><span class="pp-i" aria-hidden="true">L</span>Lee</span>
+        </div>
+        <p class="hint">A held payment needs Sam or Lee to approve with a passkey. Ada can always ring either of them first.</p>
+      </div>
+
+      <div class="pad guard-side">
+        <div class="ph ph-big" aria-label="Ada’s phone">
+          <div class="ph-status"><span>10:13</span><span>5G</span></div>
+          <div class="ph-head"><div><p class="ph-t">Mabel</p><span class="sub">Guardian is on</span></div></div>
+          <div class="ph-body">
+            <div class="ph-hero"><div class="av" data-char="lander" data-state="idle"></div></div>
+            <p class="calm" id="ada-msg">I ended a call that asked you to buy gift cards.</p>
+            <p class="calm-sub" id="ada-sub">Real banks never ask for gift cards. I’ve told Sam.</p>
+            <button class="btn btn-primary btn-block" type="button" data-ada="Calling Sam now.">Call Sam</button>
+            <button class="btn btn-block" type="button" data-ada="I’ll check with your bank on the number printed on your card, then tell you.">That was my real bank</button>
+            <button class="btn btn-block" type="button" data-ada="Guardian is paused for one hour. Sam and Lee were told.">Pause Guardian</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="states" aria-label="Guardian states">
+    <div><h4>Quiet day</h4><p>“Nothing needed Mabel today.” The rules and the people stay visible.</p></div>
+    <div><h4>Paused by Ada</h4><div class="banner"><i data-lucide="pause" class="i14"></i><div><p class="t">Ada paused Guardian until 11:00</p><p class="m">Calls reach her directly meanwhile. You were told because she asked us to.</p></div></div></div>
+    <div><h4>A scam got through</h4><p>Ada or the family can report one Mabel missed. It becomes a new pattern after review, and the report is a signed receipt.</p></div>
+  </div>
+  <p class="render-note"><b>Consent:</b> Guardian starts only after the parent agrees on their own phone, in their own words, and the agreement is a signed receipt. <b>Control:</b> the parent can pause it for an hour, a day or until they turn it back on, and they always see why something was flagged. <b>Patterns:</b> gift cards, crypto, wire transfers to new payees, remote-access apps, demands for secrecy or urgency, and callers posing as banks, government agencies or relatives. No voice tone or emotion reading (decision D9). <b>Calls:</b> calls from numbers outside the parent’s contacts forward to the Actronaut’s number for screening. <b>Claims:</b> “helps spot scams”, never “prevents fraud”.</p>
+</section>
+
+<!-- 05 Initiative -->
+<section class="part" id="initiative" aria-labelledby="h-05">
+  <div class="part-head"><span class="part-no">05</span><div><h2 id="h-05">Initiative cards</h2><p>The first version of the Actronaut’s initiative: a few useful nudges a day, each with its reason and where it came from, answered in one tap. It answers Hark Pro’s anticipation, with a daily budget so it never nags. Phase P1 for the “while you were away” card, P2 for watchers.</p></div></div>
+  <div class="render">
+    <div class="render-bar"><span>Desktop panel and phone home, also read out in the morning brief</span></div>
+    <div class="pad">
+      <div class="ini-top">
+        <div class="av" data-char="atoll" data-state="idle" aria-hidden="true"></div>
+        <div><p class="mission" style="font-size:1rem">Mabel has three things for you</p><p class="budget">2 of 3 nudges used today; the rest wait for the morning brief</p></div>
+      </div>
+      <div class="cards">
+        <article class="icard">
+          <div class="icard-h"><i data-lucide="plane" class="i14"></i><p class="t">You booked a flight to Lisbon for Tue 14 Oct, but no hotel</p></div>
+          <p class="src"><i data-lucide="mail" class="i14"></i>From TAP Air Portugal’s email of 3 Oct</p>
+          <div class="row-btns"><button class="btn btn-primary" type="button" data-done="Searching hotels near the venue" data-tone="ok">Find hotels</button><button class="btn" type="button" data-done="Noted: staying with friends">Staying with friends</button><button class="btn" type="button" data-done="Not now; fewer hotel nudges">Not now</button></div>
+        </article>
+        <article class="icard">
+          <div class="icard-h"><i data-lucide="car" class="i14"></i><p class="t">Your car registration renews by 31 Oct</p></div>
+          <p class="src"><i data-lucide="file-text" class="i14"></i>From the DMV letter you scanned on 12 Sep</p>
+          <div class="row-btns"><button class="btn btn-primary" type="button" data-done="Renewal ready for your approval" data-tone="ok">Renew it</button><button class="btn" type="button" data-done="Reminder set for next Monday">Remind me next week</button></div>
+        </article>
+        <article class="icard">
+          <div class="icard-h"><i data-lucide="package" class="i14"></i><p class="t">A parcel arrives today, and you’re out from 14:00</p></div>
+          <p class="src"><i data-lucide="calendar" class="i14"></i>From UPS tracking and your calendar</p>
+          <div class="row-btns"><button class="btn btn-primary" type="button" data-done="Asked UPS to leave it in the safe place" data-tone="ok">Leave it in the safe place</button><button class="btn" type="button" data-done="Fine; no change">It’s fine</button></div>
+        </article>
+      </div>
+      <div class="sec-k">While you were away</div>
+      <div class="rowlist">
+        <div class="rl"><i data-lucide="mail" class="i14"></i><div><div class="t">Replied to Mom about Sunday</div><div class="m">07:00, family circle, on its own</div></div><span></span></div>
+        <div class="rl"><i data-lucide="calendar" class="i14"></i><div><div class="t">Moved the dentist to Thu 15:00</div><div class="m">07:14, reversible</div></div><span></span></div>
+        <div class="rl"><i data-lucide="hourglass" class="i14"></i><div><div class="t">Book Hartley Plumbing, $135.00</div><div class="m">needs your approval</div></div><span class="lbl lbl-warn">Approve</span></div>
+      </div>
+    </div>
+  </div>
+  <div class="states" aria-label="Initiative states">
+    <div><h4>Nothing to nudge</h4><p>No card at all; the character rests. Initiative never invents work to look busy.</p></div>
+    <div><h4>Budget used</h4><p>“3 of 3 nudges today; 2 more wait for tomorrow’s brief.” Urgent items, such as a held payment, ignore the budget.</p></div>
+    <div><h4>Source unavailable</h4><p>If the source can’t be opened (an email was deleted), the card says so and offers to drop the nudge.</p></div>
+  </div>
+  <p class="render-note"><b>Budget:</b> three nudges a day by default; the rest wait for the morning brief. <b>Source:</b> every card says where it came from, and tapping the source opens it. <b>Learning:</b> a dismissal lowers that kind of nudge, and three in a row stop it until you ask again. <b>Character:</b> the Actronaut raises a hand instead of speaking (the “raise hand” stage direction), and the tray shows the count.</p>
+</section>
+
+<!-- 06 Decisions -->
+<section class="part" id="decisions" aria-labelledby="h-06">
+  <div class="part-head"><span class="part-no">06</span><div><h2 id="h-06">Decisions for approval</h2><p>Approving this addendum accepts the choices below. Once approved, these screens fold into the main spec.</p></div></div>
+  <div class="decs">
+    <div class="dec"><span class="dec-no">R1</span><div><h3>Rewind’s default window</h3><p>The last hour, with 15 minutes and today one tap away. Everything that can still be undone starts ticked.</p></div></div>
+    <div class="dec"><span class="dec-no">R2</span><div><h3>How Rewind reports</h3><p>Newest first, one signed reversal receipt per action, and partial results reported row by row with what to do next.</p></div></div>
+    <div class="dec"><span class="dec-no">P1</span><div><h3>When a mission gets a preview</h3><p>Purchases, bookings, messages to someone new, or more than five steps. Everything else runs without one.</p></div></div>
+    <div class="dec"><span class="dec-no">P2</span><div><h3>What the dry run may do</h3><p>Read only. If the chosen option changes between the preview and the real run, the Actronaut asks again.</p></div></div>
+    <div class="dec"><span class="dec-no">V1</span><div><h3>What a shared proof shows</h3><p>Initials by default; the full name only if the owner chooses. Links last 7 days by default and can be revoked any time.</p></div></div>
+    <div class="dec"><span class="dec-no">V2</span><div><h3>Who can check a proof</h3><p>Anyone with the link, with no account and no cookies. The signature is checked in the browser as well as on the server.</p></div></div>
+    <div class="dec"><span class="dec-no">G1</span><div><h3>Guardian consent</h3><p>The parent agrees on their own phone, can pause Guardian any time, and is always told why something was flagged.</p></div></div>
+    <div class="dec"><span class="dec-no">G2</span><div><h3>Held payments</h3><p>One named family member approves with a passkey. The parent can always call them first, and nobody else sees the parent’s accounts.</p></div></div>
+    <div class="dec"><span class="dec-no">I1</span><div><h3>The nudge budget</h3><p>Three a day by default, each with its source; urgent items ignore the budget, and dismissals teach the Actronaut to ask less.</p></div></div>
+  </div>
+</section>
+
+</main>
+
+<script src="https://unpkg.com/lucide@0.468.0/dist/umd/lucide.min.js"></script>
+<script>
+(function () {
+  "use strict";
+
+  /* ---------- Character art (2D tier): the explorer crew. Flat two-tone shading, no gradients. ---------- */
+  function shade(cx, cy, r, inner, cls) {
+    return '<path class="' + cls + '" d="M' + cx + ' ' + (cy - r) + ' A' + r + ' ' + r + ' 0 0 1 ' + cx + ' ' + (cy + r) + ' A' + inner + ' ' + r + ' 0 0 0 ' + cx + ' ' + (cy - r) + ' Z"/>';
+  }
+  function eyes(cx, cy, dx, s) {
+    s = s || 1;
+    var one = function (x) {
+      return '<g class="c-eye"><ellipse class="m-eye" cx="' + x + '" cy="' + cy + '" rx="' + (8.5 * s).toFixed(1) + '" ry="' + (10.5 * s).toFixed(1) + '"/>' +
+        '<g class="c-pupil"><ellipse class="pupil" cx="' + (x + 1.2 * s).toFixed(1) + '" cy="' + (cy + 1.6 * s).toFixed(1) + '" rx="' + (4.4 * s).toFixed(1) + '" ry="' + (5.4 * s).toFixed(1) + '"/>' +
+        '<circle class="eye-hl" cx="' + (x - 0.6 * s).toFixed(1) + '" cy="' + (cy - 1.4 * s).toFixed(1) + '" r="' + (1.7 * s).toFixed(1) + '"/></g></g>';
+    };
+    return '<g class="c-eyes">' + one(cx - dx) + one(cx + dx) + '</g>';
+  }
+  function seal(x, y, s, dark) {
+    var bw = s * 0.15, bh = s * 0.44, gap = (s - 3 * bw) / 4, by = y + s * 0.28;
+    var out = dark ? '' : '<rect class="m-onyx seal-frame" x="' + x + '" y="' + y + '" width="' + s + '" height="' + s + '" rx="' + (s * 0.22).toFixed(1) + '"/>';
+    ["tk-ok", "tk-ask", "tk-never"].forEach(function (k, i) {
+      out += '<rect class="tk ' + (dark ? 'tk-dark ' : '') + k + '" x="' + (x + gap + i * (bw + gap)).toFixed(1) + '" y="' + by.toFixed(1) + '" width="' + bw.toFixed(1) + '" height="' + bh.toFixed(1) + '" rx="' + (bw / 2).toFixed(1) + '"/>';
+    });
+    return '<g class="c-seal">' + out + '</g>';
+  }
+  function patch(x, y) {
+    return '<g><rect class="m-porc o-thin" x="' + x + '" y="' + y + '" width="14" height="14" rx="3"/><path class="patch-mark" transform="translate(' + (x + 2.6) + ' ' + (y + 2.2) + ') scale(0.068)" d="M45,3 0,141 40,140 71,34 73,34 73,36 69,54 70,72 90,141 130,141 85,3Z"/></g>';
+  }
+  function limbs(sleeve, glove, ang) {
+    // arms hang from the shoulders at (57,140) and (143,140); legs and boots below
+    return '<rect class="' + sleeve + ' o" x="46" y="136" width="22" height="44" rx="11" transform="rotate(' + ang + ' 57 140)"/><circle class="' + glove + ' o" cx="47" cy="182" r="9"/>';
+  }
+  function armR(sleeve, glove, ang, extra) {
+    return '<g class="c-arm-r"><rect class="' + sleeve + ' o" x="132" y="136" width="22" height="44" rx="11" transform="rotate(' + (-ang) + ' 143 140)"/><circle class="' + glove + ' o" cx="153" cy="182" r="9"/>' + (extra || '') + '</g>';
+  }
+  function legs(trouser, boot) {
+    return '<rect class="' + trouser + ' o" x="74" y="180" width="22" height="24" rx="9"/><rect class="' + trouser + ' o" x="104" y="180" width="22" height="24" rx="9"/>' +
+      '<rect class="' + boot + ' o" x="68" y="198" width="32" height="14" rx="7"/><rect class="' + boot + ' o" x="100" y="198" width="32" height="14" rx="7"/>';
+  }
+  var CARD = '<g class="c-card"><rect class="m-porc o" x="146" y="160" width="40" height="30" rx="4"/><line class="card-line" x1="153" y1="171" x2="178" y2="171"/><line class="card-line" x1="153" y1="180" x2="171" y2="180"/></g>';
+  var ACC = {
+    scarf: '<path class="m-silv o" d="M72 118 Q100 130 128 118 L130 128 Q100 140 70 128 Z"/><path class="m-silv o" d="M76 128 L66 156 L78 157 L84 132 Z"/>',
+    satchel: '<path class="strap" d="M74 124 L128 186"/><rect class="m-silv o" x="118" y="172" width="30" height="22" rx="5"/>',
+    patch: '<rect class="m-porc o-thin" x="136" y="146" width="14" height="14" rx="3"/><text class="patch-t" x="143" y="157" text-anchor="middle">N</text>'
+  };
+
+  var CHARS = {
+    lander: {
+      name: "Lander", note: "The astronaut. The default, for everything.", mat: "spacesuit porcelain, silver pack, onyx visor", tether: [58, 180],
+      art: function (acc) {
+        return '<g class="c-body">' +
+          '<rect class="m-silv o" x="54" y="108" width="92" height="76" rx="16"/><rect class="m-silv-s" x="128" y="112" width="15" height="68" rx="7"/>' +
+          limbs("m-porc", "m-grph", 14) + armR("m-porc", "m-grph", 14) + legs("m-porc", "m-grph") +
+          '<rect class="m-porc o" x="62" y="122" width="76" height="66" rx="22"/>' +
+          '<path class="m-porc-s" d="M118 124 Q136 126 136 144 V166 Q136 184 118 186 Q128 176 128 160 V148 Q128 132 118 124 Z"/>' +
+          '<path class="stitch" d="M70 178 H130"/>' +
+          '<rect class="m-silv o" x="70" y="114" width="60" height="14" rx="7"/>' +
+          (acc === "scarf" ? ACC.scarf : '') + (acc === "satchel" ? ACC.satchel : '') +
+          seal(84, 138, 32) + patch(46, 146) + (acc === "patch" ? ACC.patch : '') +
+          '</g>' +
+          '<g class="c-head">' +
+          '<rect class="m-silv o" x="88" y="14" width="24" height="12" rx="5"/>' +
+          '<circle class="m-porc o" cx="100" cy="72" r="52"/>' + shade(100, 72, 52, 38, "m-porc-s") +
+          '<circle class="m-silv o" cx="48" cy="76" r="8"/><circle class="m-silv o" cx="152" cy="76" r="8"/>' +
+          '<rect class="m-visor" x="60" y="44" width="80" height="62" rx="28"/>' + eyes(100, 76, 16) +
+          '<rect class="glint" x="70" y="50" width="20" height="5" rx="2.5"/>' +
+          '</g>' + CARD;
+      }
+    },
+    biplane: {
+      name: "Biplane", note: "The aviator. Calls and messages, with a radio headset.", mat: "graphite flight jacket, shearling collar, silver scarf", tether: [60, 176],
+      art: function () {
+        return '<g class="c-body">' +
+          limbs("m-grph", "m-onyx", 16) + armR("m-grph", "m-onyx", 16) + legs("m-grph-s", "m-onyx") +
+          '<rect class="m-grph o" x="62" y="128" width="76" height="62" rx="18"/>' +
+          '<path class="m-grph-s" d="M120 130 Q136 132 136 146 V172 Q136 188 120 188 Q128 178 128 164 V150 Q128 136 120 130 Z"/>' +
+          '<path class="stitch stitch-d" d="M100 158 V186"/>' +
+          '<path class="m-porc o" d="M66 132 Q100 152 134 132 Q138 140 132 146 Q100 166 68 146 Q62 140 66 132 Z"/>' +
+          '<path class="m-silv o" d="M116 140 Q146 146 166 126 L172 136 Q150 160 118 152 Z"/>' +
+          seal(88, 162, 24) + patch(46, 148) +
+          '</g>' +
+          '<g class="c-head">' +
+          '<circle class="m-grph o" cx="100" cy="80" r="48"/>' + shade(100, 80, 48, 36, "m-grph-s") +
+          '<rect class="m-grph-s o" x="48" y="80" width="16" height="34" rx="8"/><rect class="m-grph-s o" x="136" y="80" width="16" height="34" rx="8"/>' +
+          '<path class="stitch stitch-d" d="M60 62 Q100 36 140 62"/>' +
+          '<rect class="m-visor" x="64" y="62" width="72" height="44" rx="20"/>' +
+          '<path class="band-s" d="M52 80 H148"/>' +
+          '<circle class="rim-s" cx="83" cy="82" r="15"/><circle class="rim-s" cx="117" cy="82" r="15"/>' +
+          eyes(100, 82, 17, 0.82) +
+          '<path class="boom" d="M56 110 Q60 124 84 124"/><rect class="m-onyx o-thin" x="82" y="119" width="11" height="9" rx="4"/>' +
+          '</g>' + CARD;
+      }
+    },
+    atoll: {
+      name: "Atoll", note: "The aquanaut. Deep work in the inbox and long documents.", mat: "silver diving helmet, porcelain canvas, onyx boots", tether: [44, 98],
+      art: function () {
+        return '<g class="c-body">' +
+          '<rect class="m-porc o" x="40" y="138" width="26" height="44" rx="13" transform="rotate(12 53 142)"/><circle class="m-porc-s o" cx="45" cy="184" r="11"/>' +
+          '<g class="c-arm-r"><rect class="m-porc o" x="134" y="138" width="26" height="44" rx="13" transform="rotate(-12 147 142)"/><circle class="m-porc-s o" cx="155" cy="184" r="11"/></g>' +
+          '<rect class="m-porc o" x="74" y="180" width="22" height="20" rx="8"/><rect class="m-porc o" x="104" y="180" width="22" height="20" rx="8"/>' +
+          '<rect class="m-onyx o" x="64" y="194" width="36" height="18" rx="6"/><rect class="m-onyx o" x="100" y="194" width="36" height="18" rx="6"/>' +
+          '<rect class="m-porc o" x="60" y="132" width="80" height="58" rx="20"/>' +
+          '<path class="stitch" d="M66 178 H134"/>' +
+          '<path class="m-silv o" d="M56 120 H144 Q150 120 150 128 L146 146 Q144 152 136 152 H64 Q56 152 54 146 L50 128 Q50 120 56 120 Z"/>' +
+          '<circle class="m-onyx" cx="62" cy="134" r="2.6"/><circle class="m-onyx" cx="78" cy="143" r="2.6"/><circle class="m-onyx" cx="122" cy="143" r="2.6"/><circle class="m-onyx" cx="138" cy="134" r="2.6"/>' +
+          seal(86, 154, 28) + patch(42, 152) +
+          '</g>' +
+          '<g class="c-head">' +
+          '<rect class="m-silv o" x="90" y="14" width="20" height="10" rx="3"/>' +
+          '<circle class="m-silv o" cx="100" cy="72" r="54"/>' + shade(100, 72, 54, 40, "m-silv-s") +
+          '<rect class="m-silv o" x="146" y="48" width="14" height="10" rx="3"/>' +
+          '<circle class="m-porc o" cx="52" cy="80" r="11"/><circle class="m-visor" cx="52" cy="80" r="7"/>' +
+          '<circle class="m-porc o" cx="148" cy="80" r="11"/><circle class="m-visor" cx="148" cy="80" r="7"/>' +
+          '<circle class="m-porc o" cx="100" cy="78" r="31"/><circle class="m-visor" cx="100" cy="78" r="24"/>' +
+          eyes(100, 78, 10, 0.9) +
+          '<rect class="glint" x="86" y="60" width="14" height="4" rx="2"/>' +
+          '</g>' + CARD;
+      }
+    },
+    speleo: {
+      name: "Speleo", note: "The cave explorer. Research and browsing, with a headlamp.", mat: "silver coveralls, porcelain hard hat, graphite rope", tether: [54, 168],
+      art: function () {
+        return '<g class="c-body">' +
+          limbs("m-silv", "m-grph", 16) + armR("m-silv", "m-grph", 16, patch(140, 150)) + legs("m-silv-s", "m-onyx") +
+          '<rect class="m-silv o" x="62" y="128" width="76" height="62" rx="18"/>' +
+          '<path class="m-silv-s" d="M120 130 Q136 132 136 146 V172 Q136 188 120 188 Q128 178 128 164 V150 Q128 136 120 130 Z"/>' +
+          '<path class="band" d="M72 130 L88 188 M128 130 L112 188"/>' +
+          '<path class="stitch stitch-d" d="M68 180 H132"/>' +
+          seal(86, 146, 28) +
+          '<ellipse class="coil" cx="62" cy="150" rx="17" ry="21"/><ellipse class="coil" cx="62" cy="150" rx="12" ry="16"/>' +
+          '</g>' +
+          '<g class="c-head">' +
+          '<rect class="m-porc o" x="70" y="114" width="60" height="18" rx="9"/>' +
+          '<circle class="m-grph o" cx="100" cy="84" r="46"/>' +
+          '<path class="m-porc o" d="M50 72 Q50 28 100 28 Q150 28 150 72 Z"/>' + '<path class="seam" d="M100 30 V66"/>' +
+          '<rect class="m-porc o" x="40" y="66" width="120" height="12" rx="6"/>' +
+          '<rect class="m-silv o" x="86" y="40" width="28" height="20" rx="6"/><circle class="lamp o-thin" cx="100" cy="50" r="7"/>' +
+          '<rect class="m-visor" x="62" y="80" width="76" height="34" rx="16"/>' + eyes(100, 97, 16, 0.85) +
+          '</g>' + CARD;
+      }
+    },
+    lathe: {
+      name: "Lathe", note: "The inventor. Automations, forms and skills, with a wrench.", mat: "graphite apron, porcelain shirt, silver tools", tether: [60, 176],
+      art: function () {
+        var wrench = '<path class="tool" d="M152 182 L170 152"/><circle class="m-silv o" cx="173" cy="146" r="8"/><rect class="m-visor" x="170" y="136" width="6" height="8" rx="1"/>';
+        return '<g class="c-body">' +
+          limbs("m-porc", "m-onyx", 16) + armR("m-porc", "m-onyx", 16, wrench) + legs("m-grph-s", "m-onyx") +
+          '<rect class="m-porc o" x="62" y="128" width="76" height="62" rx="18"/>' +
+          '<path class="band" d="M78 134 L70 122 M122 134 L130 122"/>' +
+          '<path class="m-grph o" d="M72 132 H128 V184 Q128 192 120 192 H80 Q72 192 72 184 Z"/>' +
+          '<rect class="m-grph-s o-thin" x="80" y="166" width="40" height="18" rx="4"/><path class="tool-s" d="M88 166 V154 M112 166 V156"/>' +
+          '<path class="stitch stitch-d" d="M76 188 H124"/>' +
+          seal(87, 136, 26) + patch(46, 148) +
+          '</g>' +
+          '<g class="c-head">' +
+          '<circle class="m-porc o" cx="100" cy="80" r="48"/>' + shade(100, 80, 48, 36, "m-porc-s") +
+          '<path class="band" d="M54 54 Q100 38 146 54"/>' +
+          '<circle class="rim-s" cx="84" cy="46" r="11"/><circle class="rim-s" cx="116" cy="46" r="13"/>' +
+          '<rect class="m-visor" x="62" y="64" width="76" height="46" rx="20"/>' + eyes(100, 88, 16, 0.92) +
+          '</g>' + CARD;
+      }
+    },
+    binnacle: {
+      name: "Binnacle", note: "The navigator. Travel, calendars and logistics, with a spyglass.", mat: "graphite coat, silver buttons, onyx cap", tether: [58, 180],
+      art: function () {
+        var spy = '<path class="spy" d="M152 180 L170 150"/><path class="spy-s" d="M170 150 L177 138"/>';
+        return '<g class="c-body">' +
+          limbs("m-grph", "m-porc", 14) + armR("m-grph", "m-porc", 14, spy) + legs("m-grph-s", "m-onyx") +
+          '<rect class="m-grph o" x="60" y="124" width="80" height="72" rx="18"/>' +
+          '<path class="m-grph-s" d="M122 126 Q138 128 138 142 V178 Q138 194 122 194 Q130 184 130 170 V146 Q130 132 122 126 Z"/>' +
+          '<circle class="m-silv" cx="88" cy="168" r="3.2"/><circle class="m-silv" cx="112" cy="168" r="3.2"/><circle class="m-silv" cx="88" cy="184" r="3.2"/><circle class="m-silv" cx="112" cy="184" r="3.2"/>' +
+          '<path class="stitch stitch-d" d="M66 192 H134"/>' +
+          seal(87, 132, 26) + patch(46, 146) +
+          '</g>' +
+          '<g class="c-head">' +
+          '<circle class="m-porc o" cx="100" cy="86" r="46"/>' + shade(100, 86, 46, 34, "m-porc-s") +
+          '<rect class="m-visor" x="62" y="72" width="76" height="44" rx="20"/>' + eyes(100, 96, 16, 0.92) +
+          '<path class="m-onyx o" d="M54 62 Q56 34 100 32 Q144 34 146 62 Q100 54 54 62 Z"/>' +
+          '<rect class="m-silv o" x="54" y="58" width="92" height="10" rx="5"/>' +
+          '<path class="m-grph o" d="M62 68 Q100 82 138 68 Q136 76 100 82 Q64 76 62 68 Z"/>' +
+          '</g>' + CARD;
+      }
+    },
+    core: {
+      name: "Core form", note: "The helmet alone; every Actronaut’s low-power form.", mat: "porcelain, onyx", tether: [44, 140],
+      art: function () {
+        return '<g class="c-body"><rect class="m-silv o" x="88" y="40" width="24" height="12" rx="5"/>' +
+          '<circle class="m-porc o" cx="100" cy="110" r="62"/>' + shade(100, 110, 62, 46, "m-porc-s") +
+          '<circle class="m-silv o" cx="38" cy="112" r="9"/><circle class="m-silv o" cx="162" cy="112" r="9"/>' +
+          seal(82, 138, 36, true) + '</g>' +
+          '<g class="c-head"><rect class="m-visor" x="62" y="76" width="76" height="52" rx="24"/>' + eyes(100, 102, 16) + '</g>';
+      }
+    }
+  };
+  var LIB_ORDER = ["lander", "biplane", "atoll", "speleo", "lathe", "binnacle"];
+
+  function avatarSVG(id, acc) {
+    var c = CHARS[id] || CHARS.lander;
+    var s = c.tether;
+    return '<svg viewBox="-20 -14 240 244" aria-hidden="true" focusable="false">' +
+      '<circle class="ring" cx="100" cy="112" r="112"/>' +
+      '<path class="tether tether-far" d="M-18 226 C 50 238, 150 232, 224 198"/>' +
+      '<path class="tether tether-near" d="M' + s[0] + ' ' + s[1] + ' C ' + (s[0] - 26) + ' ' + (s[1] + 34) + ', 6 216, -18 226"/>' +
+      '<g class="c-all">' + c.art(acc) + '</g></svg>';
+  }
+  function mount(el) {
+    el.innerHTML = avatarSVG(el.dataset.char, el.dataset.acc);
+  }
+  document.querySelectorAll(".av[data-char]").forEach(mount);
+
+  /* ---------- Shared helpers ---------- */
+  function press(group, attr, val) {
+    group.querySelectorAll("button").forEach(function (b) { b.setAttribute("aria-pressed", b.dataset[attr] === val ? "true" : "false"); });
+  }
+  function icons() {
+    if (window.lucide) { window.lucide.createIcons({ attrs: { "stroke-width": 1.5, "aria-hidden": "true" } }); }
+  }
+  function motionOn() {
+    return document.documentElement.dataset.motion !== "off" && !window.matchMedia("(prefers-reduced-motion: reduce)").matches;
+  }
+  function plural(n, one, many) { return n + " " + (n === 1 ? one : many); }
+
+  /* ---------- Character blink ---------- */
+  setInterval(function () {
+    if (!motionOn()) return;
+    document.querySelectorAll(".av:not(.still)").forEach(function (a) {
+      var st = a.dataset.state;
+      if (st === "sleeping" || st === "blocked" || st === "away") return;
+      if (Math.random() < .55) { a.classList.add("blink"); setTimeout(function () { a.classList.remove("blink"); }, 130); }
+    });
+  }, 3200);
+
+  /* ---------- 01 Rewind ---------- */
+  var rwList = document.getElementById("rw-list");
+  var rwRows = Array.prototype.slice.call(rwList.querySelectorAll(".rw-row"));
+  var rwSum = document.getElementById("rw-sum");
+  var rwGo = document.getElementById("rw-go");
+  var rwGoT = document.getElementById("rw-go-t");
+  var rwConfirm = document.getElementById("rw-confirm");
+  var rwDone = document.getElementById("rw-done");
+  var rwReset = document.getElementById("rw-reset");
+  var rwRange = 60;
+  var VERB = { email: ["Unsend", "email", "emails"], calendar: ["Restore", "calendar change", "calendar changes"], booking: ["Cancel", "booking, with a full refund", "bookings, with full refunds"] };
+  var ICON = { email: "send", calendar: "calendar", booking: "badge-check" };
+
+  rwRows.forEach(function (r) {
+    r.dataset.initLocked = r.classList.contains("locked") ? "1" : "0";
+    r.dataset.initState = r.querySelector(".rw-state").outerHTML;
+    r.dataset.initMeta = r.querySelector(".m").innerHTML;
+    r.dataset.initChecked = r.querySelector("input").checked ? "1" : "0";
+  });
+
+  function inRange(r) { return Number(r.dataset.age) <= rwRange; }
+  function picked() {
+    return rwRows.filter(function (r) { return inRange(r) && !r.classList.contains("locked") && !r.classList.contains("done") && r.querySelector("input").checked; });
+  }
+  function renderRewind() {
+    rwRows.forEach(function (r) { r.hidden = !inRange(r); });
+    var chosen = picked();
+    var byKind = {};
+    chosen.forEach(function (r) { byKind[r.dataset.kind] = (byKind[r.dataset.kind] || 0) + 1; });
+    var locked = rwRows.filter(function (r) { return inRange(r) && r.classList.contains("locked"); }).length;
+    var html = "";
+    Object.keys(VERB).forEach(function (k) {
+      if (!byKind[k]) return;
+      var v = VERB[k];
+      html += '<p class="sum-line"><i data-lucide="' + ICON[k] + '" class="i14"></i><span>' + v[0] + " " + plural(byKind[k], v[1], v[2]) + "</span></p>";
+    });
+    if (locked) { html += '<p class="sum-line muted"><i data-lucide="lock" class="i14"></i><span>' + plural(locked, "action stays", "actions stay") + " as it is: can’t be undone</span></p>"; }
+    if (!chosen.length) { html += '<p class="sum-line muted"><i data-lucide="circle-check" class="i14"></i><span>Nothing ticked, so nothing will change</span></p>'; }
+    rwSum.innerHTML = html;
+    rwGoT.textContent = chosen.length ? "Rewind " + plural(chosen.length, "action", "actions") : "Nothing to rewind";
+    rwGo.disabled = !chosen.length;
+    rwGo.style.opacity = chosen.length ? "" : ".45";
+    icons();
+  }
+  document.getElementById("rw-range").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    rwRange = Number(b.dataset.range);
+    press(this, "range", b.dataset.range);
+    rwConfirm.hidden = true;
+    renderRewind();
+  });
+  rwList.addEventListener("change", function () { rwConfirm.hidden = true; renderRewind(); });
+  rwGo.addEventListener("click", function () {
+    var n = picked().length; if (!n) return;
+    document.getElementById("rw-confirm-t").textContent = "Rewind " + plural(n, "action", "actions") + "?";
+    rwConfirm.hidden = false;
+    document.getElementById("rw-yes").focus();
+  });
+  document.getElementById("rw-no").addEventListener("click", function () { rwConfirm.hidden = true; rwGo.focus(); });
+  document.getElementById("rw-yes").addEventListener("click", function () {
+    var chosen = picked();
+    chosen.forEach(function (r) {
+      r.classList.add("done");
+      var input = r.querySelector("input"); input.checked = false; input.disabled = true;
+      r.querySelector(".rw-state").outerHTML = '<span class="lbl lbl-ok rw-state"><i data-lucide="rotate-ccw" class="i14"></i>Rewound</span>';
+      r.querySelector(".m").textContent = "Reversed at 10:06; signed receipt linked to the original";
+    });
+    rwConfirm.hidden = true;
+    document.getElementById("rw-done-t").textContent = "Rewound " + plural(chosen.length, "action", "actions");
+    document.getElementById("rw-done-m").textContent = plural(chosen.length, "signed receipt", "signed receipts") + " added to the mission log, each linked to the action it reverses.";
+    rwDone.hidden = false;
+    rwReset.hidden = false;
+    renderRewind();
+  });
+  rwReset.addEventListener("click", function () {
+    rwRows.forEach(function (r) {
+      r.classList.remove("done");
+      r.classList.toggle("locked", r.dataset.initLocked === "1");
+      var input = r.querySelector("input");
+      input.disabled = r.dataset.initLocked === "1";
+      input.checked = r.dataset.initChecked === "1";
+      r.querySelector(".rw-state").outerHTML = r.dataset.initState;
+      r.querySelector(".m").innerHTML = r.dataset.initMeta;
+    });
+    countdown = 54;
+    rwDone.hidden = true; rwReset.hidden = true;
+    renderRewind();
+    rwGo.focus();
+  });
+
+  /* Live unsend countdown: the row locks when its window closes. */
+  var countdown = 54;
+  setInterval(function () {
+    if (!motionOn()) return;
+    var cd = rwList.querySelector(".cd"); if (!cd) return;
+    var row = cd.closest(".rw-row");
+    if (row.classList.contains("done")) return;
+    countdown -= 1;
+    if (countdown > 0) { cd.textContent = "0:" + String(countdown).padStart(2, "0"); return; }
+    row.classList.add("locked");
+    var input = row.querySelector("input"); input.checked = false; input.disabled = true;
+    row.querySelector(".m").textContent = "Sent at 10:05; the unsend window has closed";
+    row.querySelector(".rw-state").outerHTML = '<span class="lbl rw-state"><i data-lucide="lock" class="i14"></i>Can’t undo</span>';
+    renderRewind();
+  }, 1000);
+  renderRewind();
+
+  /* ---------- 02 Mission preview ---------- */
+  var pvStatus = document.getElementById("pv-status");
+  var pvGo = document.getElementById("pv-go");
+  pvGo.addEventListener("click", function () {
+    pvStatus.textContent = "Approved with your passkey at 10:06. Calling Hartley Plumbing now.";
+    pvGo.disabled = true; pvGo.style.opacity = ".45";
+  });
+  document.getElementById("pv-edit").addEventListener("click", function () {
+    pvStatus.textContent = "Tell Mabel what to change, for example “Monday is fine too”, and it runs the dry run again.";
+  });
+  document.getElementById("pv-cancel").addEventListener("click", function () {
+    pvStatus.textContent = "Cancelled. Nothing was called, booked or sent.";
+    pvGo.disabled = true; pvGo.style.opacity = ".45";
+  });
+
+  /* ---------- 03 Shareable proof ---------- */
+  var pfName = document.getElementById("pf-name");
+  var pfRef = document.getElementById("pf-ref");
+  var pfNote = document.getElementById("pf-note");
+  var pfExpiry = "7 days";
+  function renderProof() {
+    document.getElementById("vf-name").textContent = pfName.checked ? "Jordan Ellis" : "J. E.";
+    document.getElementById("vf-ref").hidden = !pfRef.checked;
+    pfNote.textContent = (pfExpiry === "no end date" ? "Anyone with the link can check it until you revoke it." : "Anyone with the link can check it for " + pfExpiry + ". Revoke it here any time.");
+  }
+  pfName.addEventListener("change", renderProof);
+  pfRef.addEventListener("change", renderProof);
+  document.getElementById("pf-exp").addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    pfExpiry = b.dataset.exp; press(this, "exp", b.dataset.exp); renderProof();
+  });
+  document.getElementById("pf-copy").addEventListener("click", function () {
+    var text = "https://" + document.getElementById("pf-link").textContent;
+    function selectFallback() {
+      var range = document.createRange(); range.selectNodeContents(document.getElementById("pf-link"));
+      var sel = window.getSelection(); sel.removeAllRanges(); sel.addRange(range);
+      pfNote.textContent = "Selected; copy it with your keyboard.";
+    }
+    try {
+      navigator.clipboard.writeText(text).then(function () { pfNote.textContent = "Link copied."; }, selectFallback);
+    } catch (err) { selectFallback(); }
+  });
+  var vfSeg = document.getElementById("vf-seg");
+  var VF_URL = { action: "actrone.com/v/7KQ2-M9X4", mandate: "actrone.com/v/7KQ2", expired: "actrone.com/v/7KQ2", altered: "actrone.com/v/7KQ2-M9X4" };
+  vfSeg.addEventListener("click", function (e) {
+    var b = e.target.closest("button"); if (!b) return;
+    press(vfSeg, "v", b.dataset.v);
+    document.querySelectorAll("[data-panel]").forEach(function (p) { p.hidden = p.dataset.panel !== b.dataset.v; });
+    document.getElementById("vf-url").textContent = VF_URL[b.dataset.v];
+  });
+  renderProof();
+
+  /* ---------- 04 Guardian ---------- */
+  var gdStatus = document.getElementById("gd-status");
+  document.querySelectorAll("[data-say]").forEach(function (b) {
+    b.addEventListener("click", function () { gdStatus.textContent = b.dataset.say + "."; });
+  });
+  document.getElementById("fl-1-safe").addEventListener("click", function () {
+    var st = document.getElementById("fl-1-st");
+    st.className = "lbl"; st.textContent = "Marked safe by you";
+    gdStatus.textContent = "Marked safe. Mabel will still never buy gift cards for this caller.";
+  });
+  function resolveHeld(text, tone) {
+    var st = document.getElementById("fl-2-st");
+    st.className = "lbl" + (tone ? " lbl-" + tone : ""); st.textContent = text;
+    document.getElementById("fl-2-btns").hidden = true;
+  }
+  document.getElementById("fl-2-ok").addEventListener("click", function () {
+    resolveHeld("Approved by you", "ok");
+    gdStatus.textContent = "Approved with your passkey. The transfer is sent and Ada was told.";
+  });
+  document.getElementById("fl-2-no").addEventListener("click", function () {
+    resolveHeld("Declined by you");
+    gdStatus.textContent = "Declined. Nothing was sent, and Ada was told why.";
+  });
+  document.querySelectorAll(".tog").forEach(function (sw) {
+    sw.addEventListener("click", function () {
+      var on = sw.getAttribute("aria-checked") === "true";
+      sw.setAttribute("aria-checked", on ? "false" : "true");
+    });
+  });
+  var adaSub = document.getElementById("ada-sub");
+  document.querySelectorAll("[data-ada]").forEach(function (b) {
+    b.addEventListener("click", function () { adaSub.textContent = b.dataset.ada; });
+  });
+
+  /* ---------- 05 Initiative ---------- */
+  document.querySelectorAll(".icard").forEach(function (card) {
+    card.addEventListener("click", function (e) {
+      var b = e.target.closest("button[data-done]"); if (!b) return;
+      var row = b.parentElement;
+      row.outerHTML = '<p class="lbl' + (b.dataset.tone ? " lbl-" + b.dataset.tone : "") + '" role="status">' + b.dataset.done + "</p>";
+    });
+  });
+
+  /* ---------- Toggles ---------- */
+  document.getElementById("theme-toggle").addEventListener("click", function () {
+    var root = document.documentElement;
+    var dark = root.dataset.theme ? root.dataset.theme === "dark" : !window.matchMedia("(prefers-color-scheme: light)").matches;
+    root.dataset.theme = dark ? "light" : "dark";
+  });
+  var motionBtn = document.getElementById("motion-toggle");
+  motionBtn.addEventListener("click", function () {
+    var root = document.documentElement;
+    var off = root.dataset.motion === "off";
+    root.dataset.motion = off ? "on" : "off";
+    motionBtn.setAttribute("aria-pressed", off ? "true" : "false");
+    motionBtn.querySelector("span").textContent = off ? "Motion on" : "Motion off";
+  });
+
+  icons();
+})();
+</script>

@@ -1,0 +1,14 @@
+This confirms everything and adds one useful architectural detail (why the API tier can't use AWS WAF at all). I have the full picture now, so I can answer directly.
+
+Two WAF layers, one live, one built but not yet flipped on:
+
+1. AWS WAFv2 — live, in front of the CDN-fronted surfaces (app.actrone.com, marketing, marketplace). Two aws_wafv2_web_acl resources (CLOUDFRONT scope):
+
+infra/terraform/envs/prod/app_cdn.tf — Control Tower
+infra/terraform/modules/cloudfront-fargate-site/main.tf — marketing + marketplace (reusable module)
+Both run AWS Managed Rule Groups (IP Reputation List → Known Bad Inputs → Common Rule Set) plus a custom per-IP rate-based rule (2000 req/5min). This is the current, applied state per the runbook.
+
+2. Coraza (OWASP CRS) on the API/gRPC edge — built, not yet enabled. The API front door is Envoy Gateway → NLB, not an ALB, so AWS WAFv2 literally can't attach there (it only binds ALB/CloudFront/AppSync), and fronting the voice-WebSocket/gRPC path with CloudFront+WAF would add a latency hop that hurts the voice path. So the architecturally-correct choice is Coraza running in-cluster as an Envoy Gateway EnvoyExtensionPolicy (proxy-wasm), alongside ext_authz on the same route (envoyextensionpolicy-waf.yaml). It's gated waf.enabled: false by default in gateway/values.yaml — helm template/lint are green, but it hasn't been rolled out live. The runbook's remaining steps: pin the wasm module by digest, enable in SecRuleEngine DetectionOnly first, tune against real traffic for CRS false positives, then flip to SecRuleEngine On.
+
+Until that rollout happens, the API/gRPC edge's request-content protection is: Envoy rate-limiting + fail-closed ext_authz + app-layer per-principal limits + AWS Shield Standard (L3/4) — no L7 WAF yet. So "which WAF" splits cleanly by surface: AWS WAFv2 covers the web app surfaces today; Coraza is the answer for the API/voice edge but is still sitting behind an apply-gate.
+

@@ -1,0 +1,7 @@
+Do a deep codebase review of all repos, spawn agents to do review for each repo and each subject/category thus security, performance, resilience, UX, UI, scalability, gaps, unwired, unimplemented, missing implementations and everything else i might have not mentioned to ensure everything is prod grade/enterprise grade as we want it, following CLAUDE.md standards. Then finally create a report as a markdown document which will also be an issue fix document per review.
+
+Spawn agents to test entire platform end to end, don't miss a thing then have other agents which will fix issues found during testing to ensure everything is green, do not doctor tests to just pass, spawn agents to write real tests and lets run and fix everything until 100% across everything in all repos. 
+
+In order to properly test everything end to end, we need to do:
+
+Build an agent/multi-agent system both python and TS with any of the integrated framework (langgraph or crewai or any other) and then use actrone-py for the python system and actrone-ts for the TS system. Will need both experiences as a developer, Startup, SME and Enterprise. Everything should just be as if I'm a user purchasing each and every plan. This is to validate and test BYOF-connected, BYOF-hosted, CLI, the OSS both python and TS. I will need to use the system for demos for sales, marketing and so forth, so ensure they can sale and market appropriately to communicate, sale and market actrone correctly.

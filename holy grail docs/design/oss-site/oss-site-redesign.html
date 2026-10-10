@@ -1,0 +1,1900 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Approved design direction for actrone.com in OSS launch mode: homepage and docs, rendered at full fidelity inside the locked Black and Apple-Silver brand.">
+<meta name="theme-color" content="#030303" media="(prefers-color-scheme: dark)">
+<meta name="theme-color" content="#ffffff" media="(prefers-color-scheme: light)">
+<title>Actrone OSS Site Redesign</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&family=Big+Shoulders+Display:wght@500;600&display=swap">
+
+<style>
+/* ═══════════════════════════════════════════════════════════════════════════
+   ACTRONE OSS SITE REDESIGN
+   Token layer. Dark-first, because the brand is dark-first (Black & Apple
+   Silver, locked). Bare :root carries the dark set; the light "paper"
+   counterpart is redefined in the two light blocks so all three viewer
+   states (system-light, stamped-light, stamped-dark) resolve as a set.
+   Values are lifted verbatim from frontend/apps/marketing/src/app/globals.css
+   so this spec and the codebase cannot drift.
+   ═════════════════════════════════════════════════════════════════════════ */
+:root {
+  --bg:          #030303;
+  --bg-hero:     #000000;
+  --bg-band:     #0A0A0A;
+  --surface:     #111111;
+  --raised:      #121214;
+  --input:       #0D0D0D;
+
+  --line:        #262629;
+  --line-soft:   #1C1C1F;
+  --line-hover:  #3A3A3E;
+
+  --ink:         #F5F5F7;
+  --ink-2:       #E5E5E7;
+  --muted:       #A1A1AA;
+  --dim:         #84848C;
+  --faint:       #6A6A74;
+
+  --on-accent:   #000000;
+
+  /* Chroma is a status vector. It never appears as decoration. */
+  --ok:    #22C55E;
+  --warn:  #F59E0B;
+  --err:   #EF4444;
+  --info:  #3B82F6;
+
+  --ok-bg:   rgba(34,197,94,.10);
+  --warn-bg: rgba(245,158,11,.10);
+  --err-bg:  rgba(239,68,68,.10);
+  --info-bg: rgba(59,130,246,.10);
+
+  /* Type */
+  --f-sans:  "Geist", ui-sans-serif, system-ui, -apple-system, "Segoe UI", sans-serif;
+  --f-mono:  "Geist Mono", ui-monospace, "SF Mono", Menlo, Consolas, monospace;
+  --f-accent:"Big Shoulders Display", "Geist", system-ui, sans-serif;
+
+  /* 4px grid */
+  --s1: 4px;  --s2: 8px;  --s3: 12px; --s4: 16px; --s5: 20px;
+  --s6: 24px; --s8: 32px; --s10: 40px; --s12: 48px; --s16: 64px;
+  --s20: 80px; --s24: 96px;
+
+  /* Radius: 4 / 6 / 8. Reserved for things you can operate. */
+  --r-sm: 4px; --r-md: 6px; --r-lg: 8px;
+
+  /* z-index scale. Every layer names itself; no arbitrary values. */
+  --z-base: 0; --z-sticky: 20; --z-header: 40; --z-overlay: 60; --z-skip: 100;
+
+  --dur-fast: 100ms; --dur: 200ms; --dur-slow: 400ms;
+  --ease: cubic-bezier(.16,1,.3,1);
+
+  /* The one permitted in-flow "shadow": an inner hairline glow. */
+  --glow: 0 0 0 1px rgba(255,255,255,.08);
+
+  color-scheme: dark;
+}
+
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #FFFFFF; --bg-hero: #FFFFFF; --bg-band: #F5F5F7;
+    --surface: #FAFAFB; --raised: #FFFFFF; --input: #FFFFFF;
+    --line: #D9D9DE; --line-soft: #E8E8EC; --line-hover: #B9B9C2;
+    --ink: #0A0A0B; --ink-2: #1C1C1F; --muted: #55555C; --dim: #6E6E78; --faint: #7A7A84;
+    --on-accent: #FFFFFF;
+    --ok: #15803D; --warn: #B45309; --err: #DC2626; --info: #2563EB;
+    --ok-bg: rgba(21,128,61,.09); --warn-bg: rgba(180,83,9,.09);
+    --err-bg: rgba(220,38,38,.09); --info-bg: rgba(37,99,235,.09);
+    --glow: 0 0 0 1px rgba(0,0,0,.07);
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #FFFFFF; --bg-hero: #FFFFFF; --bg-band: #F5F5F7;
+  --surface: #FAFAFB; --raised: #FFFFFF; --input: #FFFFFF;
+  --line: #D9D9DE; --line-soft: #E8E8EC; --line-hover: #B9B9C2;
+  --ink: #0A0A0B; --ink-2: #1C1C1F; --muted: #55555C; --dim: #6E6E78; --faint: #7A7A84;
+  --on-accent: #FFFFFF;
+  --ok: #15803D; --warn: #B45309; --err: #DC2626; --info: #2563EB;
+  --ok-bg: rgba(21,128,61,.09); --warn-bg: rgba(180,83,9,.09);
+  --err-bg: rgba(220,38,38,.09); --info-bg: rgba(37,99,235,.09);
+  --glow: 0 0 0 1px rgba(0,0,0,.07);
+  color-scheme: light;
+}
+:root[data-theme="dark"] {
+  --bg: #030303; --bg-hero: #000000; --bg-band: #0A0A0A;
+  --surface: #111111; --raised: #121214; --input: #0D0D0D;
+  --line: #262629; --line-soft: #1C1C1F; --line-hover: #3A3A3E;
+  --ink: #F5F5F7; --ink-2: #E5E5E7; --muted: #A1A1AA; --dim: #84848C; --faint: #6A6A74;
+  --on-accent: #000000;
+  --ok: #22C55E; --warn: #F59E0B; --err: #EF4444; --info: #3B82F6;
+  --ok-bg: rgba(34,197,94,.10); --warn-bg: rgba(245,158,11,.10);
+  --err-bg: rgba(239,68,68,.10); --info-bg: rgba(59,130,246,.10);
+  --glow: 0 0 0 1px rgba(255,255,255,.08);
+  color-scheme: dark;
+}
+
+/* ── Reset ─────────────────────────────────────────────────────────────── */
+*, *::before, *::after { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink-2);
+  font-family: var(--f-sans);
+  font-size: 16px;
+  line-height: 1.65;
+  -webkit-font-smoothing: antialiased;
+  text-rendering: optimizeLegibility;
+  font-feature-settings: "cv11", "ss01";
+}
+h1, h2, h3, h4, p, ul, ol, figure, dl, dd { margin: 0; }
+ul, ol { padding: 0; list-style: none; }
+a { color: inherit; }
+button { font: inherit; color: inherit; background: none; border: 0; cursor: pointer; }
+code, pre, .mono { font-family: var(--f-mono); font-variant-ligatures: none; }
+table { border-collapse: collapse; width: 100%; }
+:focus-visible { outline: 2px solid var(--ink); outline-offset: 2px; border-radius: 2px; }
+svg { display: block; }
+.nums { font-variant-numeric: tabular-nums; }
+
+/* Kill the 300ms double-tap delay and the default blue flash on touch. */
+a, button, input, [role="button"] { touch-action: manipulation; -webkit-tap-highlight-color: transparent; }
+
+/* Anchor targets clear the sticky spec bar instead of hiding under it. */
+[id] { scroll-margin-top: 72px; }
+
+/* Skip link: visible only once focused. */
+.skip {
+  position: absolute; left: var(--s4); top: -100px; z-index: var(--z-skip);
+  background: var(--ink); color: var(--on-accent);
+  padding: 10px var(--s4); border-radius: var(--r-md);
+  font-size: 13.5px; font-weight: 500; text-decoration: none;
+  transition: top var(--dur) var(--ease);
+}
+.skip:focus { top: var(--s3); }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   SPEC CHROME  ·  the document that wraps the design
+   ═════════════════════════════════════════════════════════════════════════ */
+.doc { max-width: 1240px; margin: 0 auto; padding: 0 var(--s6) var(--s24); }
+
+.spec-bar {
+  position: sticky; top: 0; z-index: var(--z-overlay);
+  display: flex; align-items: center; gap: var(--s4);
+  padding: var(--s3) var(--s6);
+  border-bottom: 1px solid var(--line);
+  background: color-mix(in srgb, var(--bg) 88%, transparent);
+  backdrop-filter: saturate(180%) blur(14px);
+  -webkit-backdrop-filter: saturate(180%) blur(14px);
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .04em; color: var(--dim);
+}
+.spec-bar strong { color: var(--ink); font-weight: 500; }
+.spec-bar .sep { color: var(--faint); }
+.spec-bar-right { margin-left: auto; display: flex; align-items: center; gap: var(--s2); }
+
+.tgl {
+  display: inline-flex; align-items: center; gap: 6px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 4px 9px; color: var(--muted);
+  transition: border-color var(--dur) var(--ease), color var(--dur) var(--ease);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .03em;
+}
+.tgl:hover { border-color: var(--line-hover); color: var(--ink); }
+
+.cover { padding: var(--s24) 0 var(--s20); border-bottom: 1px solid var(--line); }
+.cover-kicker {
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em;
+  color: var(--dim); margin-bottom: var(--s6);
+}
+.cover h1 {
+  font-size: clamp(2.5rem, 5.6vw, 4.25rem);
+  line-height: 1.0; letter-spacing: -.038em; font-weight: 500;
+  color: var(--ink); text-wrap: balance; max-width: 17ch;
+}
+.cover h1 em { font-style: normal; font-family: var(--f-accent); font-weight: 500; letter-spacing: -.01em; }
+.cover-lede {
+  margin-top: var(--s8); max-width: 62ch; font-size: 1.0625rem; line-height: 1.7; color: var(--muted);
+}
+.cover-lede + .cover-lede { margin-top: var(--s4); }
+.cover-meta {
+  margin-top: var(--s12); display: grid; gap: 1px;
+  grid-template-columns: repeat(auto-fit, minmax(190px, 1fr));
+  background: var(--line); border: 1px solid var(--line);
+}
+.cover-meta > div { background: var(--bg); padding: var(--s4) var(--s5); }
+.cover-meta dt { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.cover-meta dd { margin-top: 6px; font-size: .875rem; color: var(--ink); }
+
+/* Part header */
+.part { padding-top: var(--s24); }
+.part-head { display: flex; gap: var(--s6); align-items: baseline; padding-bottom: var(--s8); }
+.part-no {
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .08em;
+  color: var(--dim); padding-top: 10px; flex: none; width: 34px;
+}
+.part-head h2 {
+  font-size: clamp(1.6rem, 3vw, 2.125rem); font-weight: 500; letter-spacing: -.026em;
+  line-height: 1.12; color: var(--ink); text-wrap: balance;
+}
+.part-head p { margin-top: var(--s3); max-width: 66ch; color: var(--muted); font-size: .9375rem; }
+
+.note { max-width: 68ch; color: var(--muted); font-size: .9375rem; }
+.note + .note { margin-top: var(--s3); }
+.note strong, .cover-lede strong { color: var(--ink); font-weight: 500; }
+.tick { color: var(--ink); font-family: var(--f-mono); font-size: .875em; }
+
+/* Findings list (part 01) */
+.finds { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.find { background: var(--bg); padding: var(--s5) var(--s6); display: grid; gap: var(--s3); grid-template-columns: 150px 1fr; }
+.find-k { font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .05em; color: var(--dim); padding-top: 3px; }
+.find-v { color: var(--muted); font-size: .9375rem; max-width: 74ch; }
+.find-v b { color: var(--ink); font-weight: 500; }
+.find-v code { font-size: .8125rem; color: var(--ink); background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 5px; }
+@media (max-width: 720px) { .find { grid-template-columns: 1fr; } }
+
+/* The render frame: "here is the actual design" */
+.render { border: 1px solid var(--line); background: var(--bg); margin-top: var(--s6); }
+.render-bar {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: var(--s2) var(--s4); border-bottom: 1px solid var(--line);
+  background: var(--bg-band);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim);
+}
+.render-bar .dotless { color: var(--faint); }
+.render-body { overflow-x: auto; }
+.render-note {
+  margin-top: var(--s3); font-family: var(--f-mono); font-size: 11.5px;
+  color: var(--dim); letter-spacing: .02em; max-width: 92ch; line-height: 1.7;
+}
+.render-note b { color: var(--muted); font-weight: 400; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   PART 02  ·  FOUNDATION SPECIMENS
+   ═════════════════════════════════════════════════════════════════════════ */
+.grid2 { display: grid; gap: var(--s6); grid-template-columns: 1fr 1fr; margin-top: var(--s6); }
+@media (max-width: 900px) { .grid2 { grid-template-columns: 1fr; } }
+
+.panel { border: 1px solid var(--line); background: var(--surface); }
+.panel-h {
+  padding: var(--s3) var(--s5); border-bottom: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim);
+  display: flex; justify-content: space-between; gap: var(--s3);
+}
+.panel-b { padding: var(--s5); }
+
+/* Type ramp */
+.ramp { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s6); }
+.ramp-row {
+  background: var(--bg); display: grid; grid-template-columns: 190px 1fr;
+  gap: var(--s5); align-items: baseline; padding: var(--s5) var(--s6);
+}
+.ramp-spec { font-family: var(--f-mono); font-size: 11px; line-height: 1.7; color: var(--dim); letter-spacing: .02em; }
+.ramp-spec b { display: block; color: var(--ink); font-weight: 500; letter-spacing: .05em; margin-bottom: 4px; }
+.ramp-sample { color: var(--ink); min-width: 0; }
+@media (max-width: 760px) { .ramp-row { grid-template-columns: 1fr; } }
+
+.t-d1 { font-size: clamp(2.4rem,5vw,3.75rem); font-weight: 500; letter-spacing: -.038em; line-height: 1.0; }
+.t-d2 { font-size: clamp(1.9rem,3.4vw,2.5rem); font-weight: 500; letter-spacing: -.028em; line-height: 1.08; }
+.t-h2 { font-size: 1.75rem; font-weight: 500; letter-spacing: -.022em; line-height: 1.15; }
+.t-h3 { font-size: 1.0625rem; font-weight: 500; letter-spacing: -.008em; line-height: 1.45; }
+.t-body { font-size: 1rem; line-height: 1.65; color: var(--ink-2); font-weight: 400; }
+.t-sm { font-size: .875rem; line-height: 1.6; color: var(--muted); }
+.t-lab { font-family: var(--f-mono); font-size: .6875rem; letter-spacing: .07em; color: var(--dim); }
+.t-data { font-family: var(--f-mono); font-size: .8125rem; letter-spacing: .01em; color: var(--ink); font-variant-numeric: tabular-nums; }
+.t-acc { font-family: var(--f-accent); font-size: clamp(2.4rem,5vw,3.75rem); font-weight: 500; line-height: 1; letter-spacing: -.01em; }
+
+/* Swatches */
+.sw-list { display: grid; gap: 1px; background: var(--line); }
+.sw { background: var(--surface); display: grid; grid-template-columns: 40px 1fr auto; gap: var(--s4); align-items: center; padding: var(--s3) var(--s4); }
+.sw-chip { width: 40px; height: 24px; border: 1px solid var(--line); }
+.sw-name { font-size: .8125rem; color: var(--ink); }
+.sw-name span { display: block; color: var(--dim); font-size: .75rem; }
+.sw-hex { font-family: var(--f-mono); font-size: 11.5px; color: var(--muted); }
+
+.rule-list { display: grid; gap: var(--s3); }
+.rule-list li { display: grid; grid-template-columns: 16px 1fr; gap: var(--s3); font-size: .875rem; color: var(--muted); line-height: 1.6; }
+.rule-list li b { color: var(--ink); font-weight: 500; }
+.rule-list .m { font-family: var(--f-mono); color: var(--dim); font-size: .75rem; padding-top: 4px; }
+
+/* ═══════════════════════════════════════════════════════════════════════════
+   THE SITE ITSELF  ·  classes used inside .render-body
+   ═════════════════════════════════════════════════════════════════════════ */
+.site { background: var(--bg); color: var(--ink-2); }
+.wrap { max-width: 1120px; margin: 0 auto; padding-left: var(--s6); padding-right: var(--s6); }
+
+/* Nav */
+.nav {
+  display: flex; align-items: center; gap: var(--s4);
+  height: 56px; padding: 0 var(--s6);
+  border-bottom: 1px solid var(--line); background: var(--bg-hero);
+}
+.wordmark { font-size: 15px; font-weight: 600; letter-spacing: -.03em; color: var(--ink); }
+.nav-mode {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .08em; color: var(--dim);
+  border-left: 1px solid var(--line); padding-left: var(--s3); margin-left: var(--s1);
+}
+.nav-links { display: flex; gap: var(--s1); margin-left: var(--s8); }
+.nav-links a {
+  text-decoration: none; font-size: 13.5px; color: var(--dim);
+  padding: 5px 10px; border-radius: var(--r-sm);
+  transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.nav-links a:hover { color: var(--ink); background: var(--surface); }
+.nav-links a[aria-current] { color: var(--ink); }
+.nav-right { margin-left: auto; display: flex; align-items: center; gap: var(--s2); }
+@media (max-width: 780px) { .nav-links { display: none; } }
+
+.stars {
+  display: inline-flex; align-items: center; gap: 7px;
+  border: 1px solid var(--line); border-radius: var(--r-sm);
+  padding: 5px 9px; font-size: 12.5px; color: var(--muted);
+  text-decoration: none; transition: border-color var(--dur) var(--ease);
+}
+.stars:hover { border-color: var(--line-hover); }
+.stars .n { font-family: var(--f-mono); color: var(--ink); font-variant-numeric: tabular-nums; }
+
+.btn {
+  display: inline-flex; align-items: center; justify-content: center; gap: 7px;
+  border-radius: var(--r-md); padding: 8px 16px;
+  font-size: 13.5px; font-weight: 500; text-decoration: none;
+  transition: box-shadow var(--dur) var(--ease), border-color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.btn-p { background: var(--ink); color: var(--on-accent); border: 1px solid var(--ink); }
+.btn-p:hover { box-shadow: var(--glow); }
+.btn-s { border: 1px solid var(--line); color: var(--ink-2); background: var(--surface); }
+.btn-s:hover { border-color: var(--line-hover); }
+.btn-g { color: var(--muted); border: 1px solid transparent; }
+.btn-g:hover { color: var(--ink); border-color: var(--line); }
+.btn-lg { padding: 11px 22px; font-size: 14px; }
+
+/* Hero */
+.hero { background: var(--bg-hero); border-bottom: 1px solid var(--line); padding: var(--s20) 0 0; }
+.hero-eyebrow {
+  display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center;
+  font-family: var(--f-mono); font-size: 11.5px; letter-spacing: .05em; color: var(--dim);
+}
+.hero-eyebrow .pipe { color: var(--faint); }
+.hero .h1 {
+  margin-top: var(--s6);
+  font-size: clamp(2.6rem, 6.4vw, 4.75rem);
+  font-weight: 500; letter-spacing: -.04em; line-height: .99;
+  color: var(--ink); text-wrap: balance; max-width: 15ch;
+}
+.hero .h1 em { font-style: normal; font-family: var(--f-accent); font-weight: 500; letter-spacing: -.005em; }
+.hero-sub { margin-top: var(--s6); max-width: 58ch; font-size: 1.0625rem; line-height: 1.7; color: var(--muted); }
+.hero-sub b { color: var(--ink-2); font-weight: 400; }
+.hero-cta { margin-top: var(--s8); display: flex; flex-wrap: wrap; gap: var(--s3); }
+.hero-inline {
+  margin-top: var(--s5); font-family: var(--f-mono); font-size: 12px; color: var(--muted);
+}
+
+/* Ledger: the hero’s proof object */
+.ledger { margin: var(--s12) 0 var(--s20); border: 1px solid var(--line); background: var(--surface); }
+.ledger-h {
+  display: flex; align-items: center; gap: var(--s3); flex-wrap: wrap;
+  padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line);
+  font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim);
+  background: var(--bg-band);
+}
+.ledger-h .grow { margin-left: auto; }
+.ledger table { font-family: var(--f-mono); font-size: 12.5px; }
+.ledger th {
+  text-align: left; font-weight: 400; color: var(--dim);
+  font-size: 10.5px; letter-spacing: .07em; padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line); white-space: nowrap;
+}
+.ledger td { padding: 9px var(--s4); border-bottom: 1px solid var(--line-soft); color: var(--ink-2); vertical-align: middle; }
+.ledger tr:last-child td { border-bottom: 1px solid var(--line); }
+.ledger .c-num { text-align: right; font-variant-numeric: tabular-nums; color: var(--muted); white-space: nowrap; }
+.ledger .c-tier { color: var(--dim); white-space: nowrap; }
+.ledger .fact { color: var(--ink); font-family: var(--f-sans); font-size: 13.5px; }
+
+.tag {
+  display: inline-block; border-radius: var(--r-sm); padding: 1px 7px;
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .04em; white-space: nowrap;
+  border: 1px solid;
+}
+.tag-none { color: var(--dim);  border-color: var(--line); }
+.tag-low  { color: var(--info); border-color: color-mix(in srgb, var(--info) 40%, transparent); background: var(--info-bg); }
+.tag-pii  { color: var(--warn); border-color: color-mix(in srgb, var(--warn) 40%, transparent); background: var(--warn-bg); }
+.tag-sens { color: var(--err);  border-color: color-mix(in srgb, var(--err) 40%, transparent);  background: var(--err-bg); }
+.tag-ok   { color: var(--ok);   border-color: color-mix(in srgb, var(--ok) 40%, transparent);   background: var(--ok-bg); }
+
+.ledger-f {
+  border-top: 1px solid var(--line); background: var(--bg-band);
+  padding: var(--s4); font-family: var(--f-mono); font-size: 12px; color: var(--muted);
+  display: grid; gap: 6px;
+}
+.ledger-f .q { color: var(--ink); }
+.ledger-f .r { color: var(--dim); }
+.ledger-f .r b { color: var(--ink); font-weight: 400; }
+
+/* Row settle on load. Starts visible under reduced motion. */
+@media (prefers-reduced-motion: no-preference) {
+  .ledger tbody tr { animation: settle 260ms var(--ease) backwards; }
+  .ledger tbody tr:nth-child(1) { animation-delay: 40ms; }
+  .ledger tbody tr:nth-child(2) { animation-delay: 80ms; }
+  .ledger tbody tr:nth-child(3) { animation-delay: 120ms; }
+  .ledger tbody tr:nth-child(4) { animation-delay: 160ms; }
+  .ledger tbody tr:nth-child(5) { animation-delay: 200ms; }
+}
+@keyframes settle { from { opacity: 0; transform: translateY(5px); } to { opacity: 1; transform: none; } }
+
+/* Datasheet strip */
+.sheet { border-top: 1px solid var(--line); background: var(--bg-band); }
+.sheet-grid { display: grid; grid-template-columns: repeat(4, 1fr); }
+.sheet-cell { padding: var(--s5) var(--s6); border-left: 1px solid var(--line); }
+.sheet-cell:first-child { border-left: 0; }
+.sheet-k { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .07em; color: var(--dim); }
+.sheet-v { margin-top: 7px; font-size: 13.5px; color: var(--ink); line-height: 1.45; }
+.sheet-v .m { font-family: var(--f-mono); font-size: 12.5px; }
+.sheet-grid > .sheet-cell:nth-child(n+5) { border-top: 1px solid var(--line); }
+@media (max-width: 900px) {
+  .sheet-grid { grid-template-columns: repeat(2, 1fr); }
+  .sheet-grid > .sheet-cell:nth-child(odd) { border-left: 0; }
+  .sheet-grid > .sheet-cell:nth-child(n+3) { border-top: 1px solid var(--line); }
+}
+
+/* Numbered lifecycle band */
+.band { border-top: 1px solid var(--line); padding: var(--s20) 0; }
+.band-alt { background: var(--bg-band); }
+.band-head { display: grid; grid-template-columns: 56px 1fr; gap: var(--s5); align-items: start; }
+.band-no {
+  font-family: var(--f-mono); font-size: 12px; letter-spacing: .08em;
+  color: var(--dim); padding-top: 10px;
+}
+.band-head h2 {
+  font-size: clamp(1.7rem, 3vw, 2.25rem); font-weight: 500;
+  letter-spacing: -.028em; line-height: 1.1; color: var(--ink); text-wrap: balance; max-width: 22ch;
+}
+.band-head p { margin-top: var(--s4); max-width: 62ch; color: var(--muted); font-size: .9375rem; line-height: 1.7; }
+.band-head p b { color: var(--ink-2); font-weight: 400; }
+.band-body { margin-top: var(--s10); margin-left: 56px; padding-left: var(--s5); }
+@media (max-width: 700px) {
+  .band-head { grid-template-columns: 1fr; gap: var(--s2); }
+  .band-no { padding-top: 0; }
+  .band-body { margin-left: 0; padding-left: 0; }
+}
+
+/* Code */
+.code { border: 1px solid var(--line); background: var(--input); }
+.code-h {
+  display: flex; align-items: center; gap: var(--s3);
+  padding: 7px var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band);
+  font-family: var(--f-mono); font-size: 11px; color: var(--dim); letter-spacing: .04em;
+}
+.code-h .grow { margin-left: auto; }
+.code pre { margin: 0; padding: var(--s4); overflow-x: auto; font-size: 12.5px; line-height: 1.75; color: var(--ink-2); }
+/* Monochrome syntax: brightness only, zero hue. Matches the actrone-dark Shiki theme. */
+.k  { color: var(--dim); }
+.s  { color: var(--muted); }
+.fn { color: var(--ink); }
+.cm { color: var(--dim); font-style: normal; }
+.pn { color: var(--dim); }
+
+.langbar { display: inline-flex; border: 1px solid var(--line); border-radius: var(--r-sm); overflow: hidden; }
+.langbar button {
+  padding: 4px 12px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .04em;
+  color: var(--dim); transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.langbar button + button { border-left: 1px solid var(--line); }
+.langbar button[aria-pressed="true"] { color: var(--on-accent); background: var(--ink); }
+.langbar button:not([aria-pressed="true"]):hover { color: var(--ink); background: var(--surface); }
+
+/* Two-pane parity */
+.parity { display: grid; grid-template-columns: 1fr 1fr; gap: 0; border: 1px solid var(--line); }
+.parity > * + * { border-left: 1px solid var(--line); }
+.parity .code { border: 0; }
+@media (max-width: 860px) {
+  .parity { grid-template-columns: 1fr; }
+  .parity > * + * { border-left: 0; border-top: 1px solid var(--line); }
+}
+.parity-out {
+  border-top: 1px solid var(--line); background: var(--bg-band); padding: var(--s4);
+  font-family: var(--f-mono); font-size: 12px; color: var(--muted); line-height: 1.8;
+}
+.parity-out b { color: var(--ink); font-weight: 400; }
+
+/* Recall fusion diagram */
+.fuse { display: grid; grid-template-columns: 1fr 1fr 1fr 24px 1.15fr; gap: 0; border: 1px solid var(--line); background: var(--surface); }
+.fuse-col { border-left: 1px solid var(--line); }
+.fuse-col:first-child { border-left: 0; }
+.fuse-h {
+  padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line); background: var(--bg-band);
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em; color: var(--dim);
+}
+.fuse-h span { display: block; color: var(--dim); font-size: 10px; letter-spacing: .04em; margin-top: 2px; }
+.fuse-i {
+  display: grid; grid-template-columns: 18px 1fr auto; gap: var(--s3); align-items: baseline;
+  padding: 9px var(--s4); border-bottom: 1px solid var(--line-soft);
+  font-size: 12.5px; color: var(--muted);
+}
+.fuse-i:last-child { border-bottom: 0; }
+.fuse-i .r { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); }
+.fuse-i .sc { font-family: var(--f-mono); font-size: 11px; color: var(--dim); font-variant-numeric: tabular-nums; }
+.fuse-arrow { display: grid; place-items: center; border-left: 1px solid var(--line); color: var(--faint); }
+.fuse-out .fuse-i { color: var(--ink); }
+.fuse-out .fuse-i .sc { color: var(--muted); }
+@media (max-width: 900px) {
+  .fuse { grid-template-columns: 1fr 1fr; }
+  .fuse-arrow { display: none; }
+  .fuse-col:nth-child(3) { border-left: 0; border-top: 1px solid var(--line); }
+  .fuse-out { grid-column: 1 / -1; border-left: 0; border-top: 1px solid var(--line); }
+}
+
+/* Budget meter */
+.budget { border: 1px solid var(--line); background: var(--surface); }
+.budget-h { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: baseline; padding: var(--s4); border-bottom: 1px solid var(--line); }
+.budget-h .t { font-family: var(--f-mono); font-size: 11.5px; color: var(--dim); letter-spacing: .05em; }
+.budget-h .v { margin-left: auto; font-family: var(--f-mono); font-size: 12.5px; color: var(--ink); font-variant-numeric: tabular-nums; }
+.meter { display: flex; height: 28px; border-bottom: 1px solid var(--line); }
+.meter div { border-right: 1px solid var(--bg); }
+.meter div:last-child { border-right: 0; }
+.m-sys  { background: color-mix(in srgb, var(--ink) 62%, var(--bg)); }
+.m-turn { background: color-mix(in srgb, var(--ink) 40%, var(--bg)); }
+.m-mem  { background: color-mix(in srgb, var(--ink) 22%, var(--bg)); }
+.m-free { background: var(--bg-band); }
+.budget-key { display: flex; flex-wrap: wrap; gap: var(--s5); padding: var(--s4); }
+.bk { display: inline-flex; align-items: center; gap: 8px; font-size: 12.5px; color: var(--muted); }
+.bk i { width: 10px; height: 10px; display: block; border: 1px solid var(--line); }
+.bk b { font-family: var(--f-mono); color: var(--ink); font-weight: 400; font-variant-numeric: tabular-nums; }
+
+/* Sensitivity legend: four ruled cells sharing one frame, not four cards */
+.sens-grid {
+  display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line);
+  grid-template-columns: repeat(4, 1fr);
+}
+.sens-cell { background: var(--bg-band); padding: var(--s5); }
+.sens-cell p { margin-top: var(--s3); color: var(--muted); font-size: .875rem; line-height: 1.65; }
+@media (max-width: 860px) { .sens-grid { grid-template-columns: repeat(2, 1fr); } }
+@media (max-width: 460px) { .sens-grid { grid-template-columns: 1fr; } }
+
+/* Honesty band */
+.honest { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); }
+.honest-i { background: var(--bg); padding: var(--s5) var(--s6); display: grid; grid-template-columns: 22px 1fr; gap: var(--s4); }
+.honest-i .ic { color: var(--warn); padding-top: 2px; }
+.honest-i h3 { font-size: .9375rem; font-weight: 500; color: var(--ink); letter-spacing: -.005em; }
+.honest-i p { margin-top: 6px; color: var(--muted); font-size: .875rem; line-height: 1.7; max-width: 76ch; }
+.honest-i p code { font-family: var(--f-mono); font-size: .8125rem; color: var(--ink-2); }
+
+/* Founding */
+.found { border: 1px solid var(--line); background: var(--surface); }
+.found-h { padding: var(--s6); border-bottom: 1px solid var(--line); }
+.found-h h3 { font-size: 1.375rem; font-weight: 500; letter-spacing: -.022em; color: var(--ink); }
+.found-h p { margin-top: var(--s3); color: var(--muted); font-size: .9375rem; max-width: 58ch; line-height: 1.7; }
+.spots { padding: var(--s4) var(--s6); border-bottom: 1px solid var(--line); background: var(--bg-band); }
+.spots-row { display: flex; gap: var(--s4); align-items: baseline; font-family: var(--f-mono); font-size: 12px; }
+.spots-row .l { color: var(--ink); }
+.spots-row .r { margin-left: auto; color: var(--dim); font-variant-numeric: tabular-nums; }
+.spots-track { margin-top: 10px; height: 4px; background: var(--line); border-radius: 1px; }
+.spots-fill { height: 100%; background: var(--ink); border-radius: 1px; }
+.found-form { padding: var(--s6); display: grid; gap: var(--s3); grid-template-columns: 1fr auto; }
+.field {
+  border: 1px solid var(--line); background: var(--input); border-radius: var(--r-md);
+  padding: 10px var(--s4); font-size: 13.5px; color: var(--ink); width: 100%;
+}
+.field::placeholder { color: var(--faint); }
+.field:focus-visible { border-color: var(--line-hover); box-shadow: var(--glow); }
+.field:hover { border-color: var(--line-hover); }
+@media (max-width: 620px) { .found-form { grid-template-columns: 1fr; } }
+.found-fine { padding: 0 var(--s6) var(--s6); font-size: 12px; color: var(--dim); max-width: 62ch; line-height: 1.6; }
+
+/* Footer */
+.foot { border-top: 1px solid var(--line); background: var(--bg-hero); padding: var(--s12) 0 var(--s8); }
+.foot-grid { display: grid; grid-template-columns: 1.6fr repeat(4, 1fr); gap: var(--s8); }
+.foot-brand .wordmark { font-size: 17px; }
+.foot-brand p { margin-top: var(--s3); font-size: 13px; color: var(--dim); max-width: 34ch; line-height: 1.65; }
+.foot h4 { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .07em; color: var(--dim); font-weight: 400; }
+.foot ul { margin-top: var(--s3); display: grid; gap: 9px; }
+.foot a { font-size: 13px; color: var(--muted); text-decoration: none; transition: color var(--dur) var(--ease); }
+.foot a:hover { color: var(--ink); }
+.foot-base {
+  margin-top: var(--s10); padding-top: var(--s5); border-top: 1px solid var(--line);
+  display: flex; flex-wrap: wrap; gap: var(--s4); align-items: center;
+  font-family: var(--f-mono); font-size: 11px; color: var(--dim); letter-spacing: .03em;
+}
+.foot-base .grow { margin-left: auto; }
+@media (max-width: 900px) { .foot-grid { grid-template-columns: 1fr 1fr; } }
+
+/* ── Docs shell ────────────────────────────────────────────────────────── */
+.docs { display: grid; grid-template-columns: 232px 1fr 196px; background: var(--bg); }
+.docs-nav { border-right: 1px solid var(--line); padding: var(--s5) 0; }
+.docs-group { padding: 0 var(--s5) var(--s5); }
+.docs-group h5 {
+  font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .07em; color: var(--dim);
+  font-weight: 400; margin: 0 0 var(--s3) 6px;
+}
+.docs-nav a {
+  display: block; padding: 5px 10px; font-size: 13px; color: var(--muted);
+  text-decoration: none; border-radius: var(--r-sm); border-left: 1px solid transparent;
+  transition: color var(--dur) var(--ease), background-color var(--dur) var(--ease);
+}
+.docs-nav a:hover { color: var(--ink); background: var(--surface); }
+.docs-nav a[aria-current] { color: var(--ink); background: var(--surface); border-left-color: var(--ink); border-radius: 0 var(--r-sm) var(--r-sm) 0; }
+.docs-main { padding: var(--s8) var(--s10); min-width: 0; }
+.docs-toc { border-left: 1px solid var(--line); padding: var(--s8) var(--s5); }
+.docs-toc h5 { font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .07em; color: var(--dim); font-weight: 400; margin: 0 0 var(--s3); }
+.docs-toc a { display: block; padding: 4px 0; font-size: 12.5px; color: var(--dim); text-decoration: none; border-left: 1px solid var(--line); padding-left: var(--s3); }
+.docs-toc a[aria-current] { color: var(--ink); border-left-color: var(--ink); }
+.docs-toc a:hover { color: var(--muted); }
+@media (max-width: 1000px) { .docs { grid-template-columns: 1fr; } .docs-nav, .docs-toc { display: none; } .docs-main { padding: var(--s6); } }
+
+.docs-bar {
+  display: flex; align-items: center; gap: var(--s3); height: 52px; padding: 0 var(--s5);
+  border-bottom: 1px solid var(--line); background: var(--bg-hero);
+}
+.docs-search {
+  flex: 1; max-width: 380px; display: flex; align-items: center; gap: var(--s2);
+  border: 1px solid var(--line); border-radius: var(--r-md); background: var(--input);
+  padding: 6px var(--s3); color: var(--muted); font-size: 13px;
+}
+.docs-search kbd {
+  margin-left: auto; font-family: var(--f-mono); font-size: 10px; color: var(--dim);
+  border: 1px solid var(--line); border-radius: 3px; padding: 1px 5px;
+}
+.crumb { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.crumb b { color: var(--muted); font-weight: 400; }
+
+.prose { max-width: 70ch; }
+.prose .h1 { font-size: 2.125rem; font-weight: 500; letter-spacing: -.03em; line-height: 1.1; color: var(--ink); text-wrap: balance; }
+.prose > .lede { margin-top: var(--s5); font-size: 1.0625rem; line-height: 1.7; color: var(--muted); }
+.prose h2 {
+  margin-top: var(--s12); padding-top: var(--s5); border-top: 1px solid var(--line);
+  font-size: 1.3125rem; font-weight: 500; letter-spacing: -.02em; color: var(--ink);
+}
+.prose h3 { margin-top: var(--s8); font-size: 1rem; font-weight: 500; color: var(--ink); letter-spacing: -.008em; }
+.prose p { margin-top: var(--s4); font-size: .9375rem; line-height: 1.75; color: var(--ink-2); }
+.prose p code, .prose li code, .prose td code {
+  font-family: var(--f-mono); font-size: .8125rem; color: var(--ink);
+  background: var(--surface); border: 1px solid var(--line); border-radius: var(--r-sm); padding: 1px 5px;
+}
+.prose .code, .prose .parity, .prose .callout, .prose .ptable { margin-top: var(--s5); }
+.prose ul.bul { margin-top: var(--s4); display: grid; gap: var(--s3); }
+.prose ul.bul li { display: grid; grid-template-columns: 14px 1fr; gap: var(--s3); font-size: .9375rem; line-height: 1.7; color: var(--ink-2); }
+.prose ul.bul li .m { color: var(--dim); font-family: var(--f-mono); font-size: .75rem; padding-top: 5px; }
+
+.callout { border: 1px solid var(--line); border-left: 2px solid var(--warn); background: var(--surface); padding: var(--s4) var(--s5); }
+.callout .h { display: flex; align-items: center; gap: 8px; font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--warn); }
+.callout p { margin-top: 8px; font-size: .875rem; line-height: 1.7; color: var(--muted); }
+.callout-info { border-left-color: var(--info); }
+.callout-info .h { color: var(--info); }
+
+.ptable { border: 1px solid var(--line); }
+.ptable th {
+  text-align: left; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em;
+  color: var(--dim); font-weight: 400; padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line); background: var(--bg-band); white-space: nowrap;
+}
+.ptable td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line-soft); font-size: .875rem; color: var(--muted); vertical-align: top; }
+.ptable tr:last-child td { border-bottom: 0; }
+.ptable td:first-child { font-family: var(--f-mono); font-size: .8125rem; color: var(--ink); white-space: nowrap; }
+.ptable .req { font-family: var(--f-mono); font-size: 10.5px; color: var(--dim); }
+
+/* ── Component gallery ─────────────────────────────────────────────────── */
+.gal { display: grid; gap: 1px; background: var(--line); border: 1px solid var(--line); margin-top: var(--s6); }
+.gal-row { background: var(--bg); padding: var(--s5) var(--s6); display: grid; grid-template-columns: 168px 1fr; gap: var(--s5); align-items: center; }
+.gal-k { font-family: var(--f-mono); font-size: 11px; letter-spacing: .05em; color: var(--dim); }
+.gal-k span { display: block; color: var(--dim); font-size: 10.5px; margin-top: 4px; letter-spacing: .02em; }
+.gal-v { display: flex; flex-wrap: wrap; gap: var(--s3); align-items: center; }
+@media (max-width: 720px) { .gal-row { grid-template-columns: 1fr; } }
+
+.skel { display: grid; gap: 8px; width: 260px; }
+.skel i { display: block; height: 9px; background: var(--surface); border: 1px solid var(--line-soft); }
+.skel i:nth-child(2) { width: 78%; }
+.skel i:nth-child(3) { width: 52%; }
+@media (prefers-reduced-motion: no-preference) {
+  .skel i { animation: pulse 1.6s ease-in-out infinite; }
+  .skel i:nth-child(2) { animation-delay: .12s; }
+  .skel i:nth-child(3) { animation-delay: .24s; }
+}
+@keyframes pulse { 0%,100% { opacity: .5; } 50% { opacity: 1; } }
+
+.state {
+  border: 1px solid var(--line); background: var(--surface); padding: var(--s6);
+  display: grid; gap: var(--s3); justify-items: start; max-width: 420px;
+}
+.state .ic { color: var(--dim); }
+.state h4 { font-size: .9375rem; font-weight: 500; color: var(--ink); }
+.state p { font-size: .875rem; color: var(--muted); line-height: 1.65; }
+.state-err { border-left: 2px solid var(--err); }
+.state-err .ic { color: var(--err); }
+
+/* Contrast audit table */
+.audit { border: 1px solid var(--line); margin-top: var(--s6); }
+.audit th {
+  text-align: left; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em;
+  color: var(--dim); font-weight: 400; padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line); background: var(--bg-band); white-space: nowrap;
+}
+.audit td { padding: var(--s3) var(--s4); border-bottom: 1px solid var(--line-soft); font-size: .8125rem; color: var(--muted); }
+.audit tr:last-child td { border-bottom: 0; }
+.audit td:first-child { font-family: var(--f-mono); font-size: .75rem; color: var(--ink); white-space: nowrap; }
+.audit .r { font-family: var(--f-mono); font-variant-numeric: tabular-nums; text-align: right; white-space: nowrap; }
+.audit .fail { color: var(--err); }
+.audit .pass { color: var(--ok); }
+.audit-scroll { overflow-x: auto; }
+
+/* ── Change table (part 06) ────────────────────────────────────────────── */
+.chg { border: 1px solid var(--line); margin-top: var(--s6); }
+.chg th {
+  text-align: left; font-family: var(--f-mono); font-size: 10.5px; letter-spacing: .06em;
+  color: var(--dim); font-weight: 400; padding: var(--s3) var(--s4);
+  border-bottom: 1px solid var(--line); background: var(--bg-band);
+}
+.chg td { padding: var(--s4); border-bottom: 1px solid var(--line-soft); font-size: .875rem; color: var(--muted); vertical-align: top; line-height: 1.65; }
+.chg tr:last-child td { border-bottom: 0; }
+.chg td:first-child { font-family: var(--f-mono); font-size: .75rem; color: var(--ink-2); white-space: nowrap; }
+.chg b { color: var(--ink); font-weight: 500; }
+.chg-scroll { overflow-x: auto; }
+
+.approve {
+  margin-top: var(--s16); border: 1px solid var(--line); background: var(--surface); padding: var(--s8);
+}
+.approve h3 { font-size: 1.25rem; font-weight: 500; letter-spacing: -.02em; color: var(--ink); }
+.approve p { margin-top: var(--s3); color: var(--muted); font-size: .9375rem; max-width: 68ch; line-height: 1.7; }
+.approve ol { margin-top: var(--s5); display: grid; gap: var(--s3); }
+.approve ol li { display: grid; grid-template-columns: 26px 1fr; gap: var(--s3); font-size: .9375rem; color: var(--muted); line-height: 1.7; }
+.approve ol li .m { font-family: var(--f-mono); font-size: .75rem; color: var(--dim); padding-top: 5px; }
+.approve ol li b { color: var(--ink); font-weight: 500; }
+</style>
+<style>img{max-width:100%}[hidden]{display:none!important}</style>
+</head>
+<body>
+
+<a class="skip" href="#doc-start">Skip to the design direction</a>
+<div class="spec-bar">
+  <strong>Actrone</strong>
+  <span class="sep">/</span><span>oss launch mode</span>
+  <span class="sep">/</span><span>site and docs redesign</span>
+  <span class="sep">/</span><span>direction 01</span>
+  <span class="spec-bar-right">
+    <button class="tgl" id="theme-btn" type="button" aria-label="Switch colour theme">
+      <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="4"></circle><path d="M12 2v2"></path><path d="M12 20v2"></path><path d="m4.93 4.93 1.41 1.41"></path><path d="m17.66 17.66 1.41 1.41"></path><path d="M2 12h2"></path><path d="M20 12h2"></path><path d="m6.34 17.66-1.41 1.41"></path><path d="m19.07 4.93-1.41 1.41"></path></svg>
+      <span id="theme-label">light</span>
+    </button>
+  </span>
+</div>
+
+<div class="doc" id="doc-start">
+
+  <!-- ══════════════════════════════════════════════════════ COVER ═══ -->
+  <header class="cover">
+    <p class="cover-kicker">design direction · 2026-09-05</p>
+    <h1>Stop describing the memory. <em>Show it.</em></h1>
+    <p class="cover-lede">
+      In OSS launch mode, actrone.com is one thing: the front door to a free memory library for AI
+      agents. Everything a visitor needs to judge it is concrete, and none of it is currently on
+      screen. They see a hero, a bento grid of capability cards, and a waitlist form. They never see
+      a memory.
+    </p>
+    <p class="cover-lede">
+      This redesign turns the site into <strong>the thing it is selling</strong>: an inspectable
+      ledger. The hero is a real memory table with real sensitivity tags. The page then walks the
+      actual lifecycle of a fact, store, classify, recall, budget, and each step is drawn, not
+      claimed. The brand does not move: Black and Apple Silver, Geist, 1px borders, status-only
+      chroma, all locked and all honoured. What changes is the craft, the typography, and the
+      information design.
+    </p>
+    <dl class="cover-meta">
+      <div><dt>surface</dt><dd>frontend/apps/marketing, NEXT_PUBLIC_LAUNCH_MODE=oss</dd></div>
+      <div><dt>routes in scope</dt><dd>/, /docs and 6 memory pages, /about, /contact, /founding-500, /legal</dd></div>
+      <div><dt>brand</dt><dd>locked, CLAUDE.md 8.1.1 and docs/branding.md</dd></div>
+      <div><dt>status</dt><dd>direction for review, not yet implemented</dd></div>
+    </dl>
+  </header>
+
+  <!-- ══════════════════════════════════════════════════════ PART 01 ═══ -->
+  <section class="part">
+    <div class="part-head">
+      <span class="part-no">01</span>
+      <div>
+        <h2>What is wrong today</h2>
+        <p>
+          Not the palette. The palette is right and it is locked. The problem is that the OSS home
+          is the platform home with three sections left in, and that the type, spacing and structure
+          are doing no work at all.
+        </p>
+      </div>
+    </div>
+
+    <ul class="finds">
+      <li class="find">
+        <span class="find-k">rhythm</span>
+        <span class="find-v">
+          <b>Three sections, all generic.</b> <code>OssHome</code> renders a hero, a capability bento
+          and a waitlist. A visitor evaluating a memory library gets adjectives (hybrid, budget-aware,
+          PII-aware) and never one row of memory. The mechanism is the product, and the mechanism is
+          absent.
+        </span>
+      </li>
+      <li class="find">
+        <span class="find-k">typography</span>
+        <span class="find-v">
+          <b>Geist at default settings is not a type system.</b> Display type sits at
+          <code>text-7xl</code> with Tailwind’s default tracking, so a 72px headline reads soft and
+          wide. There is no measure discipline on body copy, no tabular figures on data, and mono is
+          used decoratively rather than structurally.
+        </span>
+      </li>
+      <li class="find">
+        <span class="find-k">surfaces</span>
+        <span class="find-v">
+          <b>Everything is a card.</b> Nearly every block on the page is
+          <code>rounded-lg border p-6</code> on <code>--color-surface</code>. When each element gets
+          the same border, radius and fill, hierarchy flattens and nothing can be emphasised. The
+          brand says depth comes from 1px rules; the site uses rules to draw boxes instead of
+          structure.
+        </span>
+      </li>
+      <li class="find">
+        <span class="find-k">proof</span>
+        <span class="find-v">
+          <b>The proof strip is a slogan strip.</b> <code>OSS_HERO_PROOF</code> prints “RRF” and
+          “0 API keys” as four large values. Both are true and neither is shown. A developer cannot
+          verify a claim rendered as a number in a grid.
+        </span>
+      </li>
+      <li class="find">
+        <span class="find-k">docs</span>
+        <span class="find-v">
+          <b>The docs index is a link farm.</b> Six pages survive OSS mode, and the entry point
+          presents them as a card grid with a start-here section, which is the shape you use for
+          forty pages. At six, the docs should open into content.
+        </span>
+      </li>
+      <li class="find">
+        <span class="find-k">honesty</span>
+        <span class="find-v">
+          <b>The best asset is buried in the README.</b> Both memory repos carry a candid section on
+          exactly where PII protection holds and where it does not. That candour is a stated brand
+          trait and a differentiator in a category full of overclaim. It should be on the homepage.
+        </span>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ PART 02 ═══ -->
+  <section class="part">
+    <div class="part-head">
+      <span class="part-no">02</span>
+      <div>
+        <h2>Foundations</h2>
+        <p>
+          Same tokens, set properly. Every value below already exists in
+          <code style="font-family:var(--f-mono);font-size:.8125rem">globals.css</code>; what is new
+          is the scale, the tracking, the measure, and the rule about which voice speaks when.
+        </p>
+      </div>
+    </div>
+
+    <div class="ramp">
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>display</b>clamp(2.6rem, 6.4vw, 4.75rem)<br>weight 500 · tracking -0.040em<br>leading 0.99 · balance</div>
+        <div class="ramp-sample t-d1">Your agent’s memory,<br>written down.</div>
+      </div>
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>accent</b>Big Shoulders Display 500<br>one phrase per page, hero only<br>never body, nav, buttons or data</div>
+        <div class="ramp-sample t-acc">written down.</div>
+      </div>
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>section</b>clamp(1.7rem, 3vw, 2.25rem)<br>weight 500 · tracking -0.028em<br>leading 1.10 · max 22ch</div>
+        <div class="ramp-sample t-d2">Recall is fused, not guessed</div>
+      </div>
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>heading</b>1.0625rem · weight 500<br>tracking -0.008em · leading 1.45</div>
+        <div class="ramp-sample t-h3">Token budget is allocated before anything is ranked</div>
+      </div>
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>body</b>1rem · leading 1.65<br>measure 62 to 66ch<br>colour --ink-2, never --ink</div>
+        <div class="ramp-sample t-body" style="max-width:62ch">Two-tier memory keeps the last few turns hot and everything older searchable. You call one method, you get back a context object that already fits the budget you gave it.</div>
+      </div>
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>label</b>Geist Mono 400 · 0.6875rem<br>tracking +0.07em · lowercase<br>never uppercase, per brand</div>
+        <div class="ramp-sample"><span class="t-lab">sensitivity · classified at extraction</span></div>
+      </div>
+      <div class="ramp-row">
+        <div class="ramp-spec"><b>data</b>Geist Mono 400 · 0.8125rem<br>tabular-nums always<br>right-aligned in columns</div>
+        <div class="ramp-sample t-data nums">4&#8239;096 budget · 1&#8239;480 turns · 812 memories · 1&#8239;484 free</div>
+      </div>
+    </div>
+
+    <div class="grid2">
+      <div class="panel">
+        <div class="panel-h"><span>colour is a status vector</span><span>4 hues, no others</span></div>
+        <div class="panel-b" style="padding:0">
+          <ul class="sw-list">
+            <li class="sw"><i class="sw-chip" style="background:var(--ink)"></i><span class="sw-name">Silver<span>primary action, active state, headline ink</span></span><span class="sw-hex">--ink</span></li>
+            <li class="sw"><i class="sw-chip" style="background:var(--info)"></i><span class="sw-name">Info<span>links, and the <code style="font-family:var(--f-mono);font-size:.75rem">low</code> sensitivity tag</span></span><span class="sw-hex">--info</span></li>
+            <li class="sw"><i class="sw-chip" style="background:var(--warn)"></i><span class="sw-name">Warning<span>the <code style="font-family:var(--f-mono);font-size:.75rem">pii</code> tag, and honesty callouts</span></span><span class="sw-hex">--warn</span></li>
+            <li class="sw"><i class="sw-chip" style="background:var(--err)"></i><span class="sw-name">Error<span>the <code style="font-family:var(--f-mono);font-size:.75rem">sensitive</code> tag, destructive only</span></span><span class="sw-hex">--err</span></li>
+            <li class="sw"><i class="sw-chip" style="background:var(--ok)"></i><span class="sw-name">Success<span>parity passing, health checks</span></span><span class="sw-hex">--ok</span></li>
+          </ul>
+        </div>
+      </div>
+
+      <div class="panel">
+        <div class="panel-h"><span>structure rules</span><span>borders, not shadows</span></div>
+        <div class="panel-b">
+          <ul class="rule-list">
+            <li><span class="m">01</span><span><b>Panels share edges.</b> Adjacent blocks sit in one bordered container split by 1px rules, instead of floating as separate cards with their own borders and gaps.</span></li>
+            <li><span class="m">02</span><span><b>Radius means operable.</b> 4, 6 and 8px go on buttons, inputs, tags and menus. Structural panels, tables and section bands are square.</span></li>
+            <li><span class="m">03</span><span><b>Bands alternate.</b> Full-bleed sections alternate <code style="font-family:var(--f-mono);font-size:.75rem">--bg</code> and <code style="font-family:var(--f-mono);font-size:.75rem">--bg-band</code>, separated by a single hairline. That is the whole depth system.</span></li>
+            <li><span class="m">04</span><span><b>One shadow exists.</b> The inner hairline glow on hover for the primary button. Floating overlays may cast a real shadow. Nothing else does.</span></li>
+            <li><span class="m">05</span><span><b>Mono is structure.</b> Labels, section numbers, keys, paths, counts and code. Never a paragraph, never a headline.</span></li>
+            <li><span class="m">06</span><span><b>Motion is a budget.</b> One orchestrated settle on the hero ledger. Hover states change border colour and hold. No counters, no pulses, no scroll reveals.</span></li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+    <div class="panel" style="margin-top:var(--s6)">
+      <div class="panel-h"><span>the accessibility floor</span><span>audited, not assumed</span></div>
+      <div class="panel-b">
+        <p class="note" style="margin-bottom:var(--s5)">
+          Every token pair in the ramp was measured against WCAG AA, on both the canvas and the
+          card surface, since a token that passes on one can fail on the other.
+          <strong>One token fails: <code style="font-family:var(--f-mono);font-size:.8125rem">--color-text-placeholder</code>,
+          in both themes.</strong> It is in use on the live site today, so this is a fix to
+          <code style="font-family:var(--f-mono);font-size:.8125rem">globals.css</code>, not just to
+          this design. It was fixed in all three apps that define the token, since the grounds are
+          identical across them. Everything else in the ramp passes and is left alone.
+        </p>
+        <div class="audit-scroll">
+          <table class="audit">
+            <thead>
+              <tr>
+                <th>token</th><th>theme</th><th class="r">today</th><th class="r">proposed</th><th>resolution</th>
+              </tr>
+            </thead>
+            <tbody>
+              <tr><td>--color-text-secondary</td><td>dark</td><td class="r pass">16.4:1</td><td class="r">unchanged</td><td>Passes. Body copy.</td></tr>
+              <tr><td>--color-text-secondary</td><td>light</td><td class="r pass">10.4:1</td><td class="r">unchanged</td><td>Passes.</td></tr>
+              <tr><td>--color-text-muted</td><td>dark</td><td class="r pass">8.1:1</td><td class="r">unchanged</td><td>Passes. Supporting text.</td></tr>
+              <tr><td>--color-text-muted</td><td>light</td><td class="r pass">4.8:1</td><td class="r">unchanged</td><td>Passes.</td></tr>
+              <tr><td>--color-text-dim</td><td>dark</td><td class="r pass">5.6:1</td><td class="r">unchanged</td><td>Passes on canvas and on surface (5.1:1). Safe for labels and metadata.</td></tr>
+              <tr><td>--color-text-dim</td><td>light</td><td class="r pass">5.3:1</td><td class="r">unchanged</td><td>Passes. #6b6b73 on canvas, 5.1:1 on surface.</td></tr>
+              <tr><td>--color-text-placeholder</td><td>dark</td><td class="r fail">2.4:1</td><td class="r pass">4.9:1</td><td><b>Fails AA</b> on --color-surface. #52525B becomes <b>#818189</b>, which clears 4.5:1 on canvas, surface and input alike.</td></tr>
+              <tr><td>--color-text-placeholder</td><td>light</td><td class="r fail">2.5:1</td><td class="r pass">4.6:1</td><td><b>Fails AA</b> on --color-surface. #a1a1aa becomes <b>#71717a</b>, same reasoning.</td></tr>
+              <tr><td>status chroma, all 4</td><td>both</td><td class="r pass">4.8 to 9.6:1</td><td class="r">unchanged</td><td>Every sensitivity tag colour passes on its own ground.</td></tr>
+            </tbody>
+          </table>
+        </div>
+        <ul class="rule-list" style="margin-top:var(--s6)">
+          <li><span class="m">07</span><span><b>Never colour alone.</b> The dropped recall row in band 03 carries a <code style="font-family:var(--f-mono);font-size:.75rem">dropped</code> label, not just a dimmer grey. Sensitivity tags carry their name, not just their hue.</span></li>
+          <li><span class="m">08</span><span><b>One z-index scale.</b> <code style="font-family:var(--f-mono);font-size:.75rem">--z-sticky 20 · --z-header 40 · --z-overlay 60 · --z-skip 100</code>. No arbitrary values, and every layer names itself.</span></li>
+          <li><span class="m">09</span><span><b>State lives in the URL.</b> The TypeScript and Python choice is a query parameter, so a link to a docs page carries the reader's language with it. Today it is client state only and a shared link loses it.</span></li>
+          <li><span class="m">10</span><span><b>Focus is never removed.</b> Inputs add the inner glow on <code style="font-family:var(--f-mono);font-size:.75rem">:focus-visible</code>; they do not replace the focus ring with it.</span></li>
+        </ul>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ PART 03 ═══ -->
+  <section class="part">
+    <div class="part-head">
+      <span class="part-no">03</span>
+      <div>
+        <h2>The homepage</h2>
+        <p>
+          Rendered at full fidelity below, top to bottom, in the theme you are viewing. Use the
+          toggle in the bar above to check the Apple-silver light counterpart, which ships too.
+        </p>
+      </div>
+    </div>
+
+    <div class="render" role="figure" aria-label="Render: the redesigned actrone.com homepage in OSS launch mode">
+      <div class="render-bar"><span class="dotless">render</span> actrone.com / home / oss mode</div>
+      <div class="render-body">
+        <div class="site">
+
+          <!-- nav -->
+          <nav class="nav">
+            <span class="wordmark" translate="no">actrone</span>
+            <span class="nav-mode">memory · mit</span>
+            <div class="nav-links">
+              <a href="#part03" aria-current="page">Memory</a>
+              <a href="#part04">Docs</a>
+              <a href="#honesty">Honesty</a>
+              <a href="#founding">Founding 500</a>
+            </div>
+            <div class="nav-right">
+              <a class="stars" href="#founding">
+                <svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg>
+                <span class="n nums">1&#8239;284</span>
+              </a>
+              <a class="btn btn-p" href="#founding">Join the Founding 500</a>
+            </div>
+          </nav>
+
+          <!-- hero -->
+          <section class="hero">
+            <div class="wrap">
+              <p class="hero-eyebrow">
+                <span>actrone-memory v0.1</span><span class="pipe">·</span>
+                <span>mit licence</span><span class="pipe">·</span>
+                <span>typescript and python</span>
+              </p>
+              <div class="h1">Your agent’s memory, <em>written down.</em></div>
+              <p class="hero-sub">
+                Two-tier memory for AI agents. Every turn is stored, every durable fact is extracted
+                and classified, and recall is fused from three signals and trimmed to the token
+                budget you set. <b>You can read all of it.</b> No API key and no database to start.
+              </p>
+              <div class="hero-cta">
+                <a class="btn btn-p btn-lg" href="#part04">Read the docs</a>
+                <a class="btn btn-s btn-lg" href="#founding">
+                  Join the Founding 500
+                  <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                </a>
+              </div>
+              <p class="hero-inline">npm install actrone-memory &nbsp;·&nbsp; pip install actrone-memory</p>
+
+              <!-- the ledger -->
+              <div class="ledger">
+                <div class="ledger-h">
+                  <span>agent: support-bot</span>
+                  <span>session: sess-1</span>
+                  <span class="grow">long-term store · 5 memories</span>
+                </div>
+                <table>
+                  <thead>
+                    <tr>
+                      <th style="width:52%">memory</th>
+                      <th>tier</th>
+                      <th>sensitivity</th>
+                      <th class="c-num">tokens</th>
+                    </tr>
+                  </thead>
+                  <tbody>
+                    <tr>
+                      <td class="fact">Alex is building a trading bot</td>
+                      <td class="c-tier">L2</td>
+                      <td><span class="tag tag-none">none</span></td>
+                      <td class="c-num nums">9</td>
+                    </tr>
+                    <tr>
+                      <td class="fact">Prefers Python over TypeScript</td>
+                      <td class="c-tier">L2</td>
+                      <td><span class="tag tag-none">none</span></td>
+                      <td class="c-num nums">7</td>
+                    </tr>
+                    <tr>
+                      <td class="fact">Works at Northwind Capital</td>
+                      <td class="c-tier">L2</td>
+                      <td><span class="tag tag-low">low</span></td>
+                      <td class="c-num nums">8</td>
+                    </tr>
+                    <tr>
+                      <td class="fact">alex@northwind.example</td>
+                      <td class="c-tier">L2</td>
+                      <td><span class="tag tag-pii">pii</span></td>
+                      <td class="c-num nums">11</td>
+                    </tr>
+                    <tr>
+                      <td class="fact">Portfolio value 2.4M USD</td>
+                      <td class="c-tier">L2</td>
+                      <td><span class="tag tag-sens">sensitive</span></td>
+                      <td class="c-num nums">10</td>
+                    </tr>
+                  </tbody>
+                </table>
+                <div class="ledger-f">
+                  <p class="q">retrieveContext("support-bot", "sess-1", "what should I watch out for?", 4096)</p>
+                  <p class="r">→ 3 of 5 memories fused and kept · 2 recent turns · <b>812 tokens</b> assembled · 3&#8239;284 left</p>
+                </div>
+              </div>
+            </div>
+
+            <!-- datasheet -->
+            <div class="sheet" style="margin-top:0">
+              <div class="wrap" style="padding:0">
+                <div class="sheet-grid">
+                  <div class="sheet-cell"><p class="sheet-k">licence</p><p class="sheet-v">MIT, free forever</p></div>
+                  <div class="sheet-cell"><p class="sheet-k">to start</p><p class="sheet-v">no services, no API key, nothing leaves the machine</p></div>
+                  <div class="sheet-cell"><p class="sheet-k">quality eval</p><p class="sheet-v">ships one. <span class="m">recall@5 0.929</span>, offline, CI-gated</p></div>
+                  <div class="sheet-cell"><p class="sheet-k">integrations</p><p class="sheet-v">16 frameworks in Python, 11 in TypeScript</p></div>
+                  <div class="sheet-cell"><p class="sheet-k">tiers</p><p class="sheet-v"><span class="m">L1</span> session turns · <span class="m">L2</span> semantic</p></div>
+                  <div class="sheet-cell"><p class="sheet-k">recall</p><p class="sheet-v">dense and lexical, RRF fused, recency weighted</p></div>
+                  <div class="sheet-cell"><p class="sheet-k">classification</p><p class="sheet-v"><span class="m">none · low · pii · sensitive</span></p></div>
+                  <div class="sheet-cell"><p class="sheet-k">stores</p><p class="sheet-v">in-memory default, Redis and Qdrant adapters</p></div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 01 store -->
+          <section class="band">
+            <div class="wrap">
+              <div class="band-head">
+                <span class="band-no">01</span>
+                <div>
+                  <h2>Store a turn. That is the whole setup.</h2>
+                  <p>
+                    <code style="font-family:var(--f-mono);font-size:.8125rem;color:var(--ink)">MemoryManager.create()</code>
+                    with no arguments gives you an in-process store and a dependency-free embedder.
+                    <b>No Redis, no Qdrant, no OpenAI key.</b> Swap any of the three later by passing
+                    an adapter; the manager and your calling code do not change.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <div class="code">
+                  <div class="code-h">
+                    <span data-lang-label>quickstart.ts</span>
+                    <span class="grow"></span>
+                    <span class="langbar">
+                      <button type="button" data-lang="ts" aria-pressed="true">typescript</button>
+                      <button type="button" data-lang="py" aria-pressed="false">python</button>
+                    </span>
+                  </div>
+                  <pre translate="no" data-pane="ts"><span class="k">import</span> { <span class="fn">MemoryManager</span> } <span class="k">from</span> <span class="s">"actrone-memory"</span><span class="pn">;</span>
+
+<span class="cm">// In-memory store plus a local embedder. Nothing to run, nothing to configure.</span>
+<span class="k">const</span> mm <span class="pn">=</span> <span class="k">await</span> <span class="fn">MemoryManager</span><span class="pn">.</span><span class="fn">create</span><span class="pn">();</span>
+
+<span class="k">await</span> mm<span class="pn">.</span><span class="fn">storeTurn</span><span class="pn">(</span>
+  <span class="s">"support-bot"</span><span class="pn">,</span> <span class="s">"sess-1"</span><span class="pn">,</span>
+  <span class="s">"I'm Alex, I'm building a trading bot."</span><span class="pn">,</span>
+  <span class="s">"Nice to meet you. Which asset class?"</span><span class="pn">,</span>
+<span class="pn">);</span>
+
+<span class="cm">// A durable fact, written straight to long-term memory.</span>
+<span class="k">await</span> mm<span class="pn">.</span><span class="fn">injectMemory</span><span class="pn">(</span><span class="s">"support-bot"</span><span class="pn">,</span> <span class="s">"Works at Northwind Capital"</span><span class="pn">,</span> <span class="s">0.9</span><span class="pn">);</span></pre>
+                  <pre translate="no" data-pane="py" hidden><span class="k">import</span> asyncio
+<span class="k">from</span> actrone_memory <span class="k">import</span> <span class="fn">MemoryManager</span>
+
+<span class="k">async def</span> <span class="fn">main</span><span class="pn">():</span>
+    <span class="cm"># In-memory store plus a local embedder. Nothing to run, nothing to configure.</span>
+    <span class="k">async with</span> <span class="fn">MemoryManager</span><span class="pn">.</span><span class="fn">create</span><span class="pn">()</span> <span class="k">as</span> memory<span class="pn">:</span>
+        <span class="k">await</span> memory<span class="pn">.</span><span class="fn">store_turn</span><span class="pn">(</span>
+            agent_id<span class="pn">=</span><span class="s">"support-bot"</span><span class="pn">,</span> session_id<span class="pn">=</span><span class="s">"sess-1"</span><span class="pn">,</span>
+            user_message<span class="pn">=</span><span class="s">"I'm Alex, I'm building a trading bot."</span><span class="pn">,</span>
+            assistant_message<span class="pn">=</span><span class="s">"Nice to meet you. Which asset class?"</span><span class="pn">,</span>
+        <span class="pn">)</span>
+
+        <span class="cm"># A durable fact, written straight to long-term memory.</span>
+        <span class="k">await</span> memory<span class="pn">.</span><span class="fn">inject_memory</span><span class="pn">(</span><span class="s">"support-bot"</span><span class="pn">,</span> <span class="s">"Works at Northwind Capital"</span><span class="pn">,</span> <span class="s">0.9</span><span class="pn">)</span>
+
+asyncio<span class="pn">.</span><span class="fn">run</span><span class="pn">(</span><span class="fn">main</span><span class="pn">())</span></pre>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 02 classify -->
+          <section class="band band-alt">
+            <div class="wrap">
+              <div class="band-head">
+                <span class="band-no">02</span>
+                <div>
+                  <h2>Every fact carries its sensitivity</h2>
+                  <p>
+                    Extraction pulls durable facts out of a turn and tags each one
+                    <code style="font-family:var(--f-mono);font-size:.8125rem;color:var(--ink)">none</code>,
+                    <code style="font-family:var(--f-mono);font-size:.8125rem;color:var(--info)">low</code>,
+                    <code style="font-family:var(--f-mono);font-size:.8125rem;color:var(--warn)">pii</code> or
+                    <code style="font-family:var(--f-mono);font-size:.8125rem;color:var(--err)">sensitive</code>.
+                    The tag travels with the memory, so you can redact, filter or audit on it. This
+                    is memory that is <b>governance-adjacent by construction</b>, which is the thing
+                    a black-box memory store cannot give you.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <ul class="sens-grid">
+                  <li class="sens-cell">
+                    <span class="tag tag-none">none</span>
+                    <p>Ordinary preferences and project facts. Stored plainly, always recallable.</p>
+                  </li>
+                  <li class="sens-cell">
+                    <span class="tag tag-low">low</span>
+                    <p>Identifying but not private. Employer, city, role. Filterable at recall.</p>
+                  </li>
+                  <li class="sens-cell">
+                    <span class="tag tag-pii">pii</span>
+                    <p>Personal data. Email, phone, address. Maskable in place at recall.</p>
+                  </li>
+                  <li class="sens-cell">
+                    <span class="tag tag-sens">sensitive</span>
+                    <p>Financial, health, credentials. Masked with pii, and worth a policy.</p>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- 03 recall -->
+          <section class="band">
+            <div class="wrap">
+              <div class="band-head">
+                <span class="band-no">03</span>
+                <div>
+                  <h2>Recall is fused, not guessed</h2>
+                  <p>
+                    Pure vector search returns things that sound related. Actrone runs a dense search
+                    and a lexical search, weights recency, then fuses the three ranked lists with
+                    reciprocal rank fusion. <b>An item that places well on two signals beats an item
+                    that wins one.</b> Reranking is optional on top.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <div class="fuse">
+                  <div class="fuse-col">
+                    <div class="fuse-h">dense<span>embedding similarity</span></div>
+                    <div class="fuse-i"><span class="r">1</span><span>Portfolio value 2.4M</span><span class="sc nums">.81</span></div>
+                    <div class="fuse-i"><span class="r">2</span><span>Trading bot project</span><span class="sc nums">.77</span></div>
+                    <div class="fuse-i"><span class="r">3</span><span>Northwind Capital</span><span class="sc nums">.64</span></div>
+                    <div class="fuse-i"><span class="r">4</span><span>Prefers Python</span><span class="sc nums">.41</span></div>
+                  </div>
+                  <div class="fuse-col">
+                    <div class="fuse-h">lexical<span>bm25 term match</span></div>
+                    <div class="fuse-i"><span class="r">1</span><span>Trading bot project</span><span class="sc nums">6.2</span></div>
+                    <div class="fuse-i"><span class="r">2</span><span>Northwind Capital</span><span class="sc nums">4.9</span></div>
+                    <div class="fuse-i"><span class="r">3</span><span>Portfolio value 2.4M</span><span class="sc nums">3.1</span></div>
+                    <div class="fuse-i"><span class="r">4</span><span>alex@northwind</span><span class="sc nums">1.8</span></div>
+                  </div>
+                  <div class="fuse-col">
+                    <div class="fuse-h">recency<span>decay over turns</span></div>
+                    <div class="fuse-i"><span class="r">1</span><span>Portfolio value 2.4M</span><span class="sc nums">.95</span></div>
+                    <div class="fuse-i"><span class="r">2</span><span>alex@northwind</span><span class="sc nums">.88</span></div>
+                    <div class="fuse-i"><span class="r">3</span><span>Trading bot project</span><span class="sc nums">.52</span></div>
+                    <div class="fuse-i"><span class="r">4</span><span>Prefers Python</span><span class="sc nums">.30</span></div>
+                  </div>
+                  <div class="fuse-arrow" aria-hidden="true">
+                    <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="M5 12h14"></path><path d="m12 5 7 7-7 7"></path></svg>
+                  </div>
+                  <div class="fuse-col fuse-out">
+                    <div class="fuse-h" style="color:var(--muted)">fused · rrf<span>k = 60, then pruned to budget</span></div>
+                    <div class="fuse-i"><span class="r">1</span><span>Portfolio value 2.4M</span><span class="sc nums">.0492</span></div>
+                    <div class="fuse-i"><span class="r">2</span><span>Trading bot project</span><span class="sc nums">.0487</span></div>
+                    <div class="fuse-i"><span class="r">3</span><span>Northwind Capital</span><span class="sc nums">.0322</span></div>
+                    <div class="fuse-i" style="color:var(--dim)"><span class="r">4</span><span>alex@northwind <span class="tag tag-none" style="margin-left:6px">dropped</span></span><span class="sc nums">.0161</span></div>
+                  </div>
+                </div>
+                <p class="hero-inline" style="margin-top:var(--s4)">
+                  rank 4 dropped: the assembled context reached its 812 token allocation at rank 3
+                </p>
+              </div>
+            </div>
+          </section>
+
+          <!-- 04 budget -->
+          <section class="band band-alt">
+            <div class="wrap">
+              <div class="band-head">
+                <span class="band-no">04</span>
+                <div>
+                  <h2>Context that fits, every time</h2>
+                  <p>
+                    You pass a token budget. The manager fetches turns and memories in parallel,
+                    allocates the budget across them, ranks, then prunes to fit. <b>You never get
+                    back a context object that blows your window</b>, and you never write the
+                    trimming logic yourself.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <div class="budget">
+                  <div class="budget-h">
+                    <span class="t">token_budget</span>
+                    <span class="v nums">4&#8239;096</span>
+                  </div>
+                  <div class="meter" role="img" aria-label="Token budget: 320 system, 1480 recent turns, 812 memories, 1484 unused of 4096">
+                    <div class="m-sys"  style="flex: 320"></div>
+                    <div class="m-turn" style="flex: 1480"></div>
+                    <div class="m-mem"  style="flex: 812"></div>
+                    <div class="m-free" style="flex: 1484"></div>
+                  </div>
+                  <div class="budget-key">
+                    <span class="bk"><i class="m-sys"></i>system <b class="nums">320</b></span>
+                    <span class="bk"><i class="m-turn"></i>recent turns <b class="nums">1&#8239;480</b></span>
+                    <span class="bk"><i class="m-mem"></i>episodic memories <b class="nums">812</b></span>
+                    <span class="bk"><i class="m-free"></i>unused <b class="nums">1&#8239;484</b></span>
+                  </div>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- 05 parity -->
+          <section class="band">
+            <div class="wrap">
+              <div class="band-head">
+                <span class="band-no">05</span>
+                <div>
+                  <h2>The same call, in both languages</h2>
+                  <p>
+                    Not “we also have a Python version”. The same architecture, the same method
+                    names in each language’s casing, and <b>the same result shapes</b>, verified by
+                    a cross-language acceptance harness that runs one scenario against both backends.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <div class="parity">
+                  <div class="code">
+                    <div class="code-h"><span>actrone-memory</span><span class="grow"></span><span>typescript</span></div>
+<pre translate="no"><span class="k">const</span> ctx <span class="pn">=</span> <span class="k">await</span> mm<span class="pn">.</span><span class="fn">retrieveContext</span><span class="pn">(</span>
+  <span class="s">"support-bot"</span><span class="pn">,</span>
+  <span class="s">"sess-1"</span><span class="pn">,</span>
+  <span class="s">"what should I watch out for?"</span><span class="pn">,</span>
+  <span class="s">4096</span><span class="pn">,</span>
+<span class="pn">);</span>
+
+ctx<span class="pn">.</span>recentTurns
+ctx<span class="pn">.</span>episodicMemories</pre>
+                  </div>
+                  <div class="code">
+                    <div class="code-h"><span>actrone-memory</span><span class="grow"></span><span>python</span></div>
+<pre translate="no">ctx <span class="pn">=</span> <span class="k">await</span> memory<span class="pn">.</span><span class="fn">retrieve_context</span><span class="pn">(</span>
+    agent_id<span class="pn">=</span><span class="s">"support-bot"</span><span class="pn">,</span>
+    session_id<span class="pn">=</span><span class="s">"sess-1"</span><span class="pn">,</span>
+    query<span class="pn">=</span><span class="s">"what should I watch out for?"</span><span class="pn">,</span>
+    token_budget<span class="pn">=</span><span class="s">4096</span><span class="pn">,</span>
+<span class="pn">)</span>
+
+ctx<span class="pn">.</span>recent_turns
+ctx<span class="pn">.</span>episodic_memories</pre>
+                  </div>
+                </div>
+                <div class="parity-out">
+                  <span class="tag tag-ok">parity</span>
+                  &nbsp; identical result: <b>2 recent turns</b>, <b>3 episodic memories</b>,
+                  <b>812 tokens</b> assembled, same order.
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- honesty -->
+          <section class="band band-alt" id="honesty">
+            <div class="wrap">
+              <div class="band-head">
+                <span class="band-no">06</span>
+                <div>
+                  <h2>What this does not do</h2>
+                  <p>
+                    Every memory library’s landing page lists what it does. Here is the other half,
+                    on the homepage rather than three clicks into a README, because you will find it
+                    out on day two anyway and we would rather you trust the first list.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <ul class="honest">
+                  <li class="honest-i">
+                    <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+                    <div>
+                      <h3>PII tagging is not PII protection on a cloud model</h3>
+                      <p>
+                        The <code>pii</code> and <code>sensitive</code> tags are produced by the
+                        extraction step, and that step sees the raw text. With the defaults,
+                        extraction and embedding run in-process, so nothing leaves your machine and
+                        the protection is real. Point either at a cloud provider and the raw text,
+                        including everything tagged <code>pii</code>, is sent to that provider. This
+                        library does not tokenise before inference. The hosted platform does.
+                      </p>
+                    </div>
+                  </li>
+                  <li class="honest-i">
+                    <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+                    <div>
+                      <h3>It stores and recalls. It does not build a knowledge graph</h3>
+                      <p>
+                        Turns and extracted facts, retrieved well. It does not do the entity
+                        consolidation or temporal graph reasoning some alternatives do. If your
+                        problem is “my agent forgets”, this fits. If your problem is “resolve
+                        conflicting facts about an entity over time”, it does not, yet.
+                      </p>
+                    </div>
+                  </li>
+                  <li class="honest-i">
+                    <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+                    <div>
+                      <h3>We publish our own eval, not a head-to-head</h3>
+                      <p>
+                        The library ships a quality eval that runs offline in one command and is
+                        gated in CI at <code>recall@5 &gt;= 0.85</code>. It currently scores
+                        <b style="color:var(--muted);font-weight:400"> 0.929</b>. Two things that
+                        number is not. It is not a public-dataset result: the bundled set is
+                        LongMemEval-style, not LongMemEval itself. And it is not a comparison: we
+                        have never run Mem0 or Zep through the harness, so there are no head-to-head
+                        figures here, and there will not be until we have run them. The
+                        zero-dependency default embedder is keyword overlap, so paraphrases score
+                        low.
+                      </p>
+                    </div>
+                  </li>
+                  <li class="honest-i">
+                    <span class="ic" aria-hidden="true"><svg width="17" height="17" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+                    <div>
+                      <h3>The two languages are at parity in the core, not in the adapters</h3>
+                      <p>
+                        <code>MemoryManager</code> behaves identically in both. The framework
+                        integrations do not: Python ships deep adapters as optional extras, and
+                        TypeScript ships structural helpers. If you need a specific framework
+                        adapter, check the integrations page before you commit.
+                      </p>
+                    </div>
+                  </li>
+                </ul>
+              </div>
+            </div>
+          </section>
+
+          <!-- founding -->
+          <section class="band" id="founding">
+            <div class="wrap" style="max-width:820px">
+              <div class="band-head">
+                <span class="band-no">07</span>
+                <div>
+                  <h2>The memory is free. The Founding 500 is for later.</h2>
+                  <p>
+                    Nothing here is gated and nothing needs an account. The Founding 500 is a list of
+                    people who want first access to the governed hosted version when it lands, which
+                    is a one-line import swap from this library.
+                  </p>
+                </div>
+              </div>
+              <div class="band-body">
+                <div class="found">
+                  <div class="found-h">
+                    <h3>Be one of the first 500</h3>
+                    <p>
+                      A founding discount at launch, priority onboarding, and a direct line into what
+                      ships first.
+                    </p>
+                  </div>
+                  <div class="spots">
+                    <div class="spots-row">
+                      <span class="l nums">217 of 500 spots claimed</span>
+                      <span class="r nums">283 left</span>
+                    </div>
+                    <div class="spots-track"><div class="spots-fill" style="width:43.4%"></div></div>
+                  </div>
+                  <form class="found-form" onsubmit="return false">
+                    <label class="visually-hidden" for="demo-email" style="position:absolute;width:1px;height:1px;overflow:hidden;clip:rect(0 0 0 0)">Work email</label>
+                    <input class="field" id="demo-email" type="email" placeholder="you@company.com" autocomplete="email">
+                    <button class="btn btn-p" type="submit">Claim a spot</button>
+                  </form>
+                  <p class="found-fine">
+                    No spam. We store your details only to contact you about the launch, and you can
+                    unsubscribe at any time.
+                  </p>
+                </div>
+              </div>
+            </div>
+          </section>
+
+          <!-- footer -->
+          <footer class="foot">
+            <div class="wrap">
+              <div class="foot-grid">
+                <div class="foot-brand">
+                  <span class="wordmark" translate="no">actrone</span>
+                  <p>Open-source, two-tier memory for AI agents: TypeScript and Python.</p>
+                </div>
+                <div>
+                  <h4>library</h4>
+                  <ul><li><a href="#part03">How it works</a></li><li><a href="#part04">Documentation</a></li><li><a href="#part04">Quickstart</a></li><li><a href="#honesty">Honesty</a></li></ul>
+                </div>
+                <div>
+                  <h4>source</h4>
+                  <ul><li><a href="#">actrone-memory-py</a></li><li><a href="#">actrone-memory-ts</a></li><li><a href="#">Changelog</a></li></ul>
+                </div>
+                <div>
+                  <h4>company</h4>
+                  <ul><li><a href="#">About</a></li><li><a href="#">Contact</a></li><li><a href="#founding">Founding 500</a></li></ul>
+                </div>
+                <div>
+                  <h4>legal</h4>
+                  <ul><li><a href="#">Terms</a></li><li><a href="#">Privacy</a></li></ul>
+                </div>
+              </div>
+              <div class="foot-base">
+                <span>mit licensed</span>
+                <span>·</span>
+                <span>v0.1</span>
+                <span class="grow">© 2026 Actrone</span>
+              </div>
+            </div>
+          </footer>
+
+        </div>
+      </div>
+    </div>
+
+    <p class="render-note">
+      <b>notes ·</b> the hero ledger is the only element with load motion, a 260ms staggered settle
+      that is disabled under <code>prefers-reduced-motion</code>. The spots meter uses a 1px radius
+      track, not <code>rounded-full</code>, per the brand’s avatars-only rule. The wordmark here is
+      set as text; production renders the <code>&lt;Wordmark /&gt;</code> SVG from
+      <code>@actrone/ui</code>. No status dots anywhere, live or otherwise.
+    </p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ PART 04 ═══ -->
+  <section class="part" id="part04">
+    <div class="part-head">
+      <span class="part-no">04</span>
+      <div>
+        <h2>The docs</h2>
+        <p>
+          Six pages survive OSS mode, so the docs open into content, not into a card grid. Three
+          columns, a real prose stack, and the language switcher applied globally so every sample on
+          the page follows one choice.
+        </p>
+      </div>
+    </div>
+
+    <div class="render" role="figure" aria-label="Render: the redesigned memory documentation page">
+      <div class="render-bar"><span class="dotless">render</span> actrone.com / docs / memory / overview</div>
+      <div class="render-body">
+        <div class="site" style="min-width:900px">
+          <div class="docs-bar">
+            <span class="wordmark" translate="no">actrone</span>
+            <span class="nav-mode">docs</span>
+            <div class="docs-search">
+              <svg width="14" height="14" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg>
+              <span>Search the memory docs</span>
+              <kbd>⌘K</kbd>
+            </div>
+            <div class="nav-right">
+              <span class="langbar">
+                <button type="button" data-lang="ts" aria-pressed="true">typescript</button>
+                <button type="button" data-lang="py" aria-pressed="false">python</button>
+              </span>
+              <a class="stars" href="#"><svg width="14" height="14" viewBox="0 0 24 24" fill="currentColor" aria-hidden="true"><path d="M12 2C6.477 2 2 6.484 2 12.017c0 4.425 2.865 8.18 6.839 9.504.5.092.682-.217.682-.483 0-.237-.008-.868-.013-1.703-2.782.605-3.369-1.343-3.369-1.343-.454-1.158-1.11-1.466-1.11-1.466-.908-.62.069-.608.069-.608 1.003.07 1.531 1.032 1.531 1.032.892 1.53 2.341 1.088 2.91.832.092-.647.35-1.088.636-1.338-2.22-.253-4.555-1.113-4.555-4.951 0-1.093.39-1.988 1.029-2.688-.103-.253-.446-1.272.098-2.65 0 0 .84-.27 2.75 1.026A9.564 9.564 0 0 1 12 6.844a9.59 9.59 0 0 1 2.504.337c1.909-1.296 2.747-1.027 2.747-1.027.546 1.379.202 2.398.1 2.651.64.7 1.028 1.595 1.028 2.688 0 3.848-2.339 4.695-4.566 4.943.359.309.678.92.678 1.855 0 1.338-.012 2.419-.012 2.747 0 .268.18.58.688.482A10.019 10.019 0 0 0 22 12.017C22 6.484 17.522 2 12 2z"/></svg><span class="n nums">1&#8239;284</span></a>
+              <a class="btn btn-p" href="#founding" style="padding:6px 13px;font-size:12.5px">Founding 500</a>
+            </div>
+          </div>
+
+          <div class="docs">
+            <nav class="docs-nav" aria-label="Documentation">
+              <div class="docs-group">
+                <h5>getting started</h5>
+                <a href="#">Installation</a>
+                <a href="#">Quickstart</a>
+              </div>
+              <div class="docs-group">
+                <h5>memory</h5>
+                <a href="#" aria-current="page">Overview</a>
+                <a href="#">Configuration</a>
+                <a href="#">Retrieval</a>
+                <a href="#">Framework integrations</a>
+              </div>
+              <div class="docs-group">
+                <h5>source</h5>
+                <a href="#">actrone-memory-py</a>
+                <a href="#">actrone-memory-ts</a>
+              </div>
+            </nav>
+
+            <main class="docs-main">
+              <p class="crumb">memory <b>/</b> overview</p>
+              <article class="prose" style="margin-top:var(--s5)">
+                <div class="h1">Two-tier memory</div>
+                <p class="lede">
+                  A memory manager keeps two stores. L1 holds the recent turns of the current
+                  session and is read by recency. L2 holds durable facts and is searched
+                  semantically. One call reads both and returns a context that fits your budget.
+                </p>
+
+                <div class="code">
+                  <div class="code-h"><span data-lang-label>install</span><span class="grow"></span><span>shell</span></div>
+                  <pre translate="no" data-pane="ts">npm install actrone-memory</pre>
+                  <pre translate="no" data-pane="py" hidden>pip install actrone-memory</pre>
+                </div>
+
+                <h2>How a turn becomes memory</h2>
+                <p>
+                  <code>storeTurn</code> appends the user and assistant messages to L1. If extraction
+                  is enabled, durable facts are pulled out of the turn, classified, and written to
+                  L2. Session turns expire; L2 facts do not.
+                </p>
+                <ul class="bul">
+                  <li><span class="m">L1</span><span><b style="color:var(--ink);font-weight:500">Session turns.</b> Recency-ordered, token-bounded, cleared by <code>clearSession</code>. In-memory by default, Redis in production.</span></li>
+                  <li><span class="m">L2</span><span><b style="color:var(--ink);font-weight:500">Episodic memories.</b> Embedded and searchable, each carrying an importance score and a sensitivity tag. In-memory by default, Qdrant in production.</span></li>
+                </ul>
+
+                <div class="callout callout-info">
+                  <p class="h">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><circle cx="12" cy="12" r="10"></circle><path d="M12 16v-4"></path><path d="M12 8h.01"></path></svg>
+                    note
+                  </p>
+                  <p>
+                    The defaults need no services. <code>MemoryManager.create()</code> with no
+                    arguments gives you an in-process store and a dependency-free embedder, which is
+                    also what makes the test suite run fully offline.
+                  </p>
+                </div>
+
+                <h2>retrieveContext</h2>
+                <p>
+                  Four phases, in order: fetch turns and search L2 in parallel, allocate the token
+                  budget across both, rank by fused score, prune to fit.
+                </p>
+
+                <div class="ptable">
+                  <table>
+                    <thead>
+                      <tr><th>parameter</th><th>type</th><th></th><th>description</th></tr>
+                    </thead>
+                    <tbody>
+                      <tr><td>agentId</td><td><span class="req">string</span></td><td><span class="req">required</span></td><td>Namespace for the memory. Two agents never see each other’s L2.</td></tr>
+                      <tr><td>sessionId</td><td><span class="req">string</span></td><td><span class="req">required</span></td><td>Which session’s L1 turns to read. L2 is not scoped by session.</td></tr>
+                      <tr><td>query</td><td><span class="req">string</span></td><td><span class="req">required</span></td><td>What the agent is about to answer. Embedded and term-matched against L2.</td></tr>
+                      <tr><td>tokenBudget</td><td><span class="req">number</span></td><td><span class="req">required</span></td><td>Ceiling for the assembled context. The result is guaranteed to fit.</td></tr>
+                    </tbody>
+                  </table>
+                </div>
+
+                <div class="callout">
+                  <p class="h">
+                    <svg width="13" height="13" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg>
+                    where PII protection holds
+                  </p>
+                  <p>
+                    Sensitivity classification happens during extraction, and extraction sees the raw
+                    text. With local models nothing leaves the machine. Point extraction or
+                    embeddings at a cloud provider and the raw text is sent there, tags included.
+                  </p>
+                </div>
+              </article>
+            </main>
+
+            <aside class="docs-toc">
+              <h5>on this page</h5>
+              <a href="#" aria-current="true">Two-tier memory</a>
+              <a href="#">How a turn becomes memory</a>
+              <a href="#">retrieveContext</a>
+              <a href="#">Where PII protection holds</a>
+            </aside>
+          </div>
+        </div>
+      </div>
+    </div>
+
+    <p class="render-note">
+      <b>notes ·</b> the language switcher in the docs header is the same control as the one on the
+      homepage and drives every code pane on the page at once, which is what
+      <code>DocsLanguageProvider</code> already does. The prose column is capped at 70ch. Headings
+      take a top rule instead of extra whitespace, so long pages stay scannable without growing.
+    </p>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ PART 05 ═══ -->
+  <section class="part">
+    <div class="part-head">
+      <span class="part-no">05</span>
+      <div>
+        <h2>Components and states</h2>
+        <p>
+          The pieces the two renders are built from, plus the three states every async surface must
+          ship. Loading, error and empty are not optional.
+        </p>
+      </div>
+    </div>
+
+    <div class="gal">
+      <div class="gal-row">
+        <span class="gal-k">buttons<span>radius 6</span></span>
+        <span class="gal-v">
+          <a class="btn btn-p" href="#">Join the Founding 500</a>
+          <a class="btn btn-s" href="#">Read the docs</a>
+          <a class="btn btn-g" href="#">Skip for now</a>
+        </span>
+      </div>
+      <div class="gal-row">
+        <span class="gal-k">sensitivity tags<span>the only chroma on the page</span></span>
+        <span class="gal-v">
+          <span class="tag tag-none">none</span>
+          <span class="tag tag-low">low</span>
+          <span class="tag tag-pii">pii</span>
+          <span class="tag tag-sens">sensitive</span>
+          <span class="tag tag-ok">parity</span>
+        </span>
+      </div>
+      <div class="gal-row">
+        <span class="gal-k">field<span>focus takes the inner glow</span></span>
+        <span class="gal-v" style="max-width:340px">
+          <input class="field" type="email" placeholder="you@company.com" aria-label="Work email example">
+        </span>
+      </div>
+      <div class="gal-row">
+        <span class="gal-k">language switch<span>global, docs and home</span></span>
+        <span class="gal-v">
+          <span class="langbar">
+            <button type="button" data-lang="ts" aria-pressed="true">typescript</button>
+            <button type="button" data-lang="py" aria-pressed="false">python</button>
+          </span>
+        </span>
+      </div>
+      <div class="gal-row">
+        <span class="gal-k">loading<span>skeleton, never a bare spinner</span></span>
+        <span class="gal-v"><span class="skel" role="status" aria-label="Loading"><i></i><i></i><i></i></span></span>
+      </div>
+      <div class="gal-row">
+        <span class="gal-k">error<span>says what to do next</span></span>
+        <span class="gal-v">
+          <div class="state state-err">
+            <span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><path d="m21.73 18-8-14a2 2 0 0 0-3.48 0l-8 14A2 2 0 0 0 4 21h16a2 2 0 0 0 1.73-3"></path><path d="M12 9v4"></path><path d="M12 17h.01"></path></svg></span>
+            <h4>The star count did not load</h4>
+            <p>GitHub’s API did not answer in time. The number below is the last one we cached. Refresh to try again.</p>
+          </div>
+        </span>
+      </div>
+      <div class="gal-row">
+        <span class="gal-k">empty<span>offers the next action</span></span>
+        <span class="gal-v">
+          <div class="state">
+            <span class="ic" aria-hidden="true"><svg width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.5" stroke-linecap="round" stroke-linejoin="round"><circle cx="11" cy="11" r="8"></circle><path d="m21 21-4.3-4.3"></path></svg></span>
+            <h4>No page matches that</h4>
+            <p>The memory docs are six pages. Try “budget”, “recall” or “sensitivity”, or open the overview.</p>
+            <a class="btn btn-s" href="#part04" style="margin-top:4px">Open the overview</a>
+          </div>
+        </span>
+      </div>
+    </div>
+  </section>
+
+  <!-- ══════════════════════════════════════════════════════ PART 06 ═══ -->
+  <section class="part">
+    <div class="part-head">
+      <span class="part-no">06</span>
+      <div>
+        <h2>What this changes in the codebase</h2>
+        <p>
+          Scoped to OSS mode. The full-platform homepage below the <code>OSS_ONLY</code> branch is
+          untouched by this direction, so nothing regresses when the hosted packs launch.
+        </p>
+      </div>
+    </div>
+
+    <div class="chg-scroll">
+      <table class="chg">
+        <thead>
+          <tr><th style="width:34%">file</th><th style="width:22%">change</th><th>what and why</th></tr>
+        </thead>
+        <tbody>
+          <tr>
+            <td>app/globals.css</td>
+            <td><b>extend</b></td>
+            <td>Add the display and label scale (tracking, leading, measure) as tokens. No colour values change. Today the type scale is sizes only, so every headline inherits Tailwind’s default tracking.</td>
+          </tr>
+          <tr>
+            <td>app/(marketing)/page.tsx<br><span style="color:var(--dim)">OssHome, OssHero, OssShowcaseSection</span></td>
+            <td><b>replace</b></td>
+            <td>Three sections become nine: hero with the ledger, datasheet, four numbered lifecycle bands, parity, honesty, Founding 500. <code>OSS_HERO_PROOF</code> and the capability bento are deleted.</td>
+          </tr>
+          <tr>
+            <td>components/marketing/ <span style="color:var(--faint)">MemoryLedger.tsx</span></td>
+            <td><b>new</b></td>
+            <td>The hero proof object. Reads its rows from the demo repo’s <code>spec/scenario.json</code>, the same file the acceptance tests assert against, so the homepage cannot show a number the tests do not produce.</td>
+          </tr>
+          <tr>
+            <td>components/marketing/ <span style="color:var(--faint)">FusionDiagram.tsx, BudgetMeter.tsx</span></td>
+            <td><b>new</b></td>
+            <td>The two mechanism drawings for bands 03 and 04. Static SVG and CSS, no library, no animated counters.</td>
+          </tr>
+          <tr>
+            <td>components/marketing/TopNav.tsx</td>
+            <td><b>edit</b></td>
+            <td>OSS nav gains an anchor to the honesty section and drops the new-tab behaviour on Docs. Height 64 to 56. Removes the active-state dot on mobile, which is a status dot the brand retired.</td>
+          </tr>
+          <tr>
+            <td>components/marketing/Footer.tsx</td>
+            <td><b>edit</b></td>
+            <td>Five columns instead of four, with a source column linking both repos directly. Mono column headings, sentence case.</td>
+          </tr>
+          <tr>
+            <td>app/(marketing)/docs/page.tsx</td>
+            <td><b>replace</b></td>
+<td><b>Reverted 2026-09-09.</b> An earlier revision of this spec redirected <code>/docs</code> to <code>/docs/memory/overview</code> in OSS mode. <code>/docs</code> is the documentation entry point in every launch mode: the root is the overview, and a root that bounces you elsewhere is a broken entry point. The index stays, filtered to the routes the proxy allows.</td>
+          </tr>
+          <tr>
+            <td>app/(marketing)/docs/ <span style="color:var(--faint)">DocsLayoutClient.tsx</span></td>
+            <td><b>edit</b></td>
+            <td>Section tabs are unnecessary at two sections; the sidebar carries the whole tree. Adds the right-hand table of contents at 1000px and up.</td>
+          </tr>
+          <tr>
+            <td>components/docs/*</td>
+            <td><b>edit</b></td>
+            <td>Prose stack, callout, and parameter table restyled to the rules in part 02. The language switcher and <code>CodeBlock</code> keep their current behaviour.</td>
+          </tr>
+          <tr>
+            <td>app/globals.css<br><span style="color:var(--dim)">--color-text-placeholder</span></td>
+            <td><b>fix</b></td>
+            <td><b>Accessibility defect, present today.</b> <code>--color-text-placeholder</code> measures 2.4:1 (dark) and 2.5:1 (light) on <code>--color-surface</code>, against a 4.5:1 requirement. New values in part 02. Fixed in all three apps that define the token: marketing, control-tower and marketplace. (super-admin defines no placeholder token and has no inputs.)</td>
+          </tr>
+          <tr>
+            <td>lib/docs-language.tsx</td>
+            <td><b>edit</b></td>
+            <td>Reflect the TypeScript and Python choice in a <code>?lang=</code> query parameter so a shared docs link carries the reader's language. Currently client state only.</td>
+          </tr>
+          <tr>
+            <td>lib/flags.ts</td>
+            <td><b>edit</b></td>
+            <td>One addition to <code>isRouteAllowedInOss</code> if the honesty section becomes its own route. If it stays an anchor on the homepage, no change.</td>
+          </tr>
+        </tbody>
+      </table>
+    </div>
+
+    <div class="approve">
+      <h3>Where I would like your call</h3>
+      <p>
+        The direction above is one coherent position. These four are the places where a different
+        answer changes the build, so tell me and I will fold it into the next pass.
+      </p>
+      <ol>
+        <li><span class="m">01</span><span><b>The hero.</b> A ledger of real memories instead of a code panel. It is the single biggest departure from the current page and everything else follows from it.</span></li>
+        <li><span class="m">02</span><span><b>The honesty section on the homepage.</b> Four things the library does not do, given the same typographic weight as the features. Defensible and unusual. Also the easiest thing to lose your nerve on.</span></li>
+        <li><span class="m">03</span><span><b>The headline.</b> “Your agent’s memory, written down.” replaces “Memory your agents don’t forget.” The accent face carries “written down.”</span></li>
+        <li><span class="m">04</span><span><b>Docs root is the entry point.</b> <s>Redirect <code>/docs</code> into the overview.</s> <b>Rejected by the owner, 2026-09-09.</b> <code>/docs</code> renders its own index in every launch mode; the Home tab stays in the docs header.</span></li>
+      </ol>
+    </div>
+  </section>
+</div>
+
+<script>
+(function () {
+  "use strict";
+
+  // Theme toggle. Stamps data-theme so the choice beats the OS preference in
+  // both directions, matching how ThemeProvider drives the real site.
+  var root = document.documentElement;
+  var btn = document.getElementById("theme-btn");
+  var label = document.getElementById("theme-label");
+
+  function currentIsDark() {
+    var stamped = root.getAttribute("data-theme");
+    if (stamped) return stamped === "dark";
+    return !window.matchMedia("(prefers-color-scheme: light)").matches;
+  }
+  function sync() {
+    label.textContent = currentIsDark() ? "light" : "dark";
+  }
+  btn.addEventListener("click", function () {
+    root.setAttribute("data-theme", currentIsDark() ? "light" : "dark");
+    sync();
+  });
+  sync();
+
+  // Language switch. Every switcher on the page is one control: pressing either
+  // swaps every code pane and every filename label at once, which is what the
+  // docs language provider already does on the real site.
+  function setLang(lang) {
+    document.querySelectorAll("[data-lang]").forEach(function (b) {
+      b.setAttribute("aria-pressed", String(b.getAttribute("data-lang") === lang));
+    });
+    document.querySelectorAll("[data-pane]").forEach(function (p) {
+      p.hidden = p.getAttribute("data-pane") !== lang;
+    });
+    document.querySelectorAll("[data-lang-label]").forEach(function (l) {
+      var t = l.textContent.trim();
+      if (t === "quickstart.ts" || t === "quickstart.py") {
+        l.textContent = lang === "ts" ? "quickstart.ts" : "quickstart.py";
+      }
+    });
+  }
+  document.querySelectorAll("[data-lang]").forEach(function (b) {
+    b.addEventListener("click", function () {
+      var lang = b.getAttribute("data-lang");
+      setLang(lang);
+      // State lives in the URL, so a shared link carries the reader's language.
+      var url = new URL(window.location.href);
+      url.searchParams.set("lang", lang);
+      window.history.replaceState({}, "", url);
+    });
+  });
+
+  var initial = new URLSearchParams(window.location.search).get("lang");
+  if (initial === "ts" || initial === "py") setLang(initial);
+})();
+</script>
+</body>
+</html>

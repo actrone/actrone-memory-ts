@@ -1,0 +1,874 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="description" content="Design spec mockup for the Actrone agent map run view: causal graph, waterfall, history playback and governance drawer, in the locked Black and Apple-Silver brand.">
+<title>Actrone Agent Map</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=Geist:wght@400;500;600&family=Geist+Mono:wght@400;500&display=swap">
+<style>
+/* Token layer. Dark-first because the brand is dark-first. Values mirror
+   frontend/apps/control-tower/src/app/globals.css, plus the proposed status
+   ink tokens (light theme) and map component tokens from README.md. */
+:root {
+  --bg: #030303;
+  --surface: #111111;
+  --raised: #121214;
+  --input: #0d0d0d;
+  --line: #262629;
+  --line-soft: #1c1c1f;
+  --line-hover: #3a3a3e;
+  --line-focus: #525255;
+  --ink: #F5F5F7;
+  --ink-2: #E5E5E7;
+  --muted: #A1A1AA;
+  --dim: #84848C;
+  --ok: #22C55E;
+  --warn: #F59E0B;
+  --err: #EF4444;
+  --info: #3B82F6;
+  --ok-bg: rgba(34, 197, 94, 0.12);
+  --warn-bg: rgba(245, 158, 11, 0.12);
+  --err-bg: rgba(239, 68, 68, 0.10);
+  --info-bg: rgba(59, 130, 246, 0.12);
+  --hover-bg: rgba(255, 255, 255, 0.04);
+  --active-bg: rgba(255, 255, 255, 0.06);
+  --glow: 0 0 0 1px rgba(255, 255, 255, 0.08);
+  --glow-focus: 0 0 0 1px rgba(255, 255, 255, 0.14);
+  --map-edge: #84848C;
+  --map-edge-active: #F5F5F7;
+  --map-dot: #1c1c1f;
+  --font-sans: "Geist", system-ui, -apple-system, "Segoe UI", sans-serif;
+  --font-mono: "Geist Mono", ui-monospace, "SFMono-Regular", Menlo, Consolas, monospace;
+  --radius-sm: 4px;
+  --radius-md: 6px;
+  --radius-lg: 8px;
+  --fast: 100ms;
+  --base: 200ms;
+  --ease-out: cubic-bezier(0, 0, 0.2, 1);
+  color-scheme: dark;
+}
+@media (prefers-color-scheme: light) {
+  :root:not([data-theme="dark"]) {
+    --bg: #ffffff; --surface: #fafafa; --raised: #ffffff; --input: #ffffff;
+    --line: #e4e4e7; --line-soft: #f1f1f3; --line-hover: #d4d4d8; --line-focus: #a1a1aa;
+    --ink: #09090b; --ink-2: #3f3f46; --muted: #71717a; --dim: #6b6b73;
+    --ok: #15803D; --warn: #B45309; --err: #B91C1C; --info: #1D4ED8;
+    --ok-bg: rgba(21, 128, 61, 0.08); --warn-bg: rgba(180, 83, 9, 0.08);
+    --err-bg: rgba(185, 28, 28, 0.07); --info-bg: rgba(29, 78, 216, 0.07);
+    --hover-bg: rgba(0, 0, 0, 0.03); --active-bg: rgba(0, 0, 0, 0.05);
+    --glow: 0 0 0 1px rgba(0, 0, 0, 0.08); --glow-focus: 0 0 0 1px rgba(0, 0, 0, 0.16);
+    --map-edge: #6b6b73; --map-edge-active: #09090b; --map-dot: #e4e4e7;
+    color-scheme: light;
+  }
+}
+:root[data-theme="light"] {
+  --bg: #ffffff; --surface: #fafafa; --raised: #ffffff; --input: #ffffff;
+  --line: #e4e4e7; --line-soft: #f1f1f3; --line-hover: #d4d4d8; --line-focus: #a1a1aa;
+  --ink: #09090b; --ink-2: #3f3f46; --muted: #71717a; --dim: #6b6b73;
+  --ok: #15803D; --warn: #B45309; --err: #B91C1C; --info: #1D4ED8;
+  --ok-bg: rgba(21, 128, 61, 0.08); --warn-bg: rgba(180, 83, 9, 0.08);
+  --err-bg: rgba(185, 28, 28, 0.07); --info-bg: rgba(29, 78, 216, 0.07);
+  --hover-bg: rgba(0, 0, 0, 0.03); --active-bg: rgba(0, 0, 0, 0.05);
+  --glow: 0 0 0 1px rgba(0, 0, 0, 0.08); --glow-focus: 0 0 0 1px rgba(0, 0, 0, 0.16);
+  --map-edge: #6b6b73; --map-edge-active: #09090b; --map-dot: #e4e4e7;
+  color-scheme: light;
+}
+
+* { box-sizing: border-box; }
+body {
+  margin: 0;
+  background: var(--bg);
+  color: var(--ink-2);
+  font: 400 13px/1.5 var(--font-sans);
+  padding-inline: 16px;
+  padding-block: 24px 56px;
+  -webkit-font-smoothing: antialiased;
+}
+.wrap { max-width: 1440px; margin: 0 auto; display: grid; gap: 40px; }
+.mono { font-family: var(--font-mono); }
+.sr-only { position: absolute; width: 1px; height: 1px; overflow: hidden; clip: rect(0 0 0 0); white-space: nowrap; }
+button, input, select { font: inherit; color: inherit; }
+:focus-visible { outline: 1px solid var(--ink); outline-offset: 2px; }
+svg.lucide { width: 14px; height: 14px; flex: none; }
+
+/* Spec header */
+.spec-head { display: grid; gap: 8px; max-width: 72ch; }
+.eyebrow { margin: 0; font: 400 11px/1.4 var(--font-mono); color: var(--dim); }
+.spec-head h1 { margin: 0; font: 600 30px/1.2 var(--font-sans); color: var(--ink); letter-spacing: -0.01em; text-wrap: balance; }
+.lede { margin: 0; font-size: 15px; color: var(--muted); line-height: 1.6; }
+.note { margin: 0; font-size: 12px; color: var(--dim); }
+
+/* App frame */
+.app { border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--bg); overflow: hidden; }
+
+.runbar { display: flex; flex-wrap: wrap; align-items: center; gap: 12px 32px; padding: 14px 16px; background: var(--surface); border-bottom: 1px solid var(--line); }
+.run-id { display: grid; gap: 4px; min-width: 0; }
+.crumb { margin: 0; font-size: 11px; color: var(--dim); }
+.title-row { display: flex; flex-wrap: wrap; align-items: center; gap: 8px; }
+.title-row h2 { margin: 0; font: 500 16px/1.3 var(--font-mono); color: var(--ink); }
+.runstats { display: flex; flex-wrap: wrap; gap: 8px 24px; margin: 0; }
+.runstats div { display: grid; gap: 2px; }
+.runstats dt { font-size: 11px; color: var(--dim); }
+.runstats dd { margin: 0; font: 500 14px/1.2 var(--font-mono); color: var(--ink); }
+.runactions { display: flex; flex-wrap: wrap; gap: 8px; margin-left: auto; align-items: center; }
+.attest { font-size: 12px; color: var(--muted); }
+
+.chip { display: inline-flex; align-items: center; gap: 4px; height: 22px; padding: 0 8px; border-radius: var(--radius-sm); font: 500 11px/1 var(--font-sans); color: var(--muted); background: var(--active-bg); border: 1px solid var(--line); white-space: nowrap; }
+.chip svg.lucide { width: 12px; height: 12px; }
+.chip.ok { color: var(--ok); background: var(--ok-bg); border-color: transparent; }
+.chip.warn { color: var(--warn); background: var(--warn-bg); border-color: transparent; }
+.chip.err { color: var(--err); background: var(--err-bg); border-color: transparent; }
+.chip.info { color: var(--info); background: var(--info-bg); border-color: transparent; }
+
+.btn { display: inline-flex; align-items: center; gap: 6px; height: 32px; padding: 0 12px; border-radius: var(--radius-md); border: 1px solid var(--line); background: transparent; color: var(--ink-2); font-weight: 500; font-size: 13px; cursor: pointer; transition: border-color var(--fast) linear, background-color var(--fast) linear, box-shadow var(--fast) linear; }
+.btn:hover { border-color: var(--line-hover); background: var(--hover-bg); box-shadow: var(--glow); }
+.btn.primary { background: var(--ink); color: var(--bg); border-color: var(--ink); }
+.btn.primary:hover { box-shadow: var(--glow-focus); }
+.icon-btn { width: 32px; padding: 0; justify-content: center; }
+@media (pointer: coarse) { .btn { min-height: 44px; } .icon-btn { min-width: 44px; } }
+
+.toolbar { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; padding: 8px 16px; border-bottom: 1px solid var(--line); }
+.seg { display: inline-flex; gap: 2px; padding: 2px; border: 1px solid var(--line); border-radius: var(--radius-md); }
+.seg button { display: inline-flex; align-items: center; gap: 6px; height: 26px; padding: 0 10px; border: 0; border-radius: var(--radius-sm); background: transparent; color: var(--dim); cursor: pointer; font-weight: 500; }
+.seg button:hover { color: var(--muted); }
+.seg button[aria-checked="true"] { background: var(--active-bg); color: var(--ink); }
+.check { display: inline-flex; align-items: center; gap: 6px; color: var(--muted); cursor: pointer; }
+.check input { accent-color: var(--ink); margin: 0; }
+.search { position: relative; display: flex; align-items: center; }
+.search svg.lucide { position: absolute; left: 9px; color: var(--dim); pointer-events: none; }
+.search input { height: 30px; width: 200px; padding: 0 10px 0 28px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--input); color: var(--ink); }
+.search input::placeholder { color: var(--dim); }
+.search input:focus-visible { border-color: var(--line-focus); box-shadow: var(--glow-focus); outline: none; }
+.toolbar .spacer { flex: 1; }
+.kbd { font: 400 11px/1 var(--font-mono); color: var(--dim); }
+.zoom { display: inline-flex; gap: 4px; }
+
+.main { display: grid; grid-template-columns: minmax(0, 1fr) 360px; }
+.stage { position: relative; min-width: 0; border-right: 1px solid var(--line); }
+.canvas-scroll { height: 560px; overflow: auto; overscroll-behavior: contain; background: var(--bg); }
+.sizer { position: relative; }
+.canvas { position: absolute; top: 0; left: 0; transform-origin: 0 0; }
+.edges { position: absolute; top: 0; left: 0; overflow: visible; }
+.grid-dots { fill: var(--map-dot); }
+.edge { fill: none; stroke: var(--map-edge); stroke-width: 1; transition: opacity var(--fast) linear; }
+.edge.on { stroke: var(--map-edge-active); stroke-width: 1.5; }
+.edge.future, .edge-label.future { opacity: 0.25; }
+.edge-label { font: 400 11px var(--font-mono); fill: var(--dim); }
+.arrow { fill: var(--map-edge); }
+.arrow-on { fill: var(--map-edge-active); }
+
+.node { position: absolute; display: grid; grid-template-columns: 28px minmax(0, 1fr) auto; align-items: center; gap: 10px; height: 56px; padding: 0 10px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); color: var(--ink-2); text-align: left; cursor: pointer; transition: border-color var(--fast) linear, box-shadow var(--fast) linear, opacity var(--fast) linear; }
+.node:hover { border-color: var(--line-hover); }
+.node[aria-pressed="true"] { border-color: var(--line-focus); box-shadow: var(--glow-focus); }
+.node.st-running { border-color: var(--ink); }
+.node.st-held { border-color: var(--warn); }
+.node.st-blocked, .node.st-failed { border-color: var(--err); }
+.node.future { opacity: 0.28; }
+.node.dim { opacity: 0.4; }
+.node-ico { display: grid; place-items: center; width: 28px; height: 28px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg); color: var(--muted); }
+.node-text { display: grid; min-width: 0; gap: 1px; }
+.node-name { font: 500 12px/1.3 var(--font-mono); color: var(--ink); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.node-meta { font: 400 11px/1.3 var(--font-mono); color: var(--dim); overflow: hidden; text-overflow: ellipsis; white-space: nowrap; }
+.tag { display: inline-flex; align-items: center; gap: 3px; font: 500 11px/1 var(--font-sans); white-space: nowrap; }
+.tag svg.lucide { width: 12px; height: 12px; }
+.tag.running { color: var(--ink); }
+.tag.held { color: var(--warn); }
+.tag.blocked, .tag.failed { color: var(--err); }
+.node.loop::before, .node.loop::after { content: ""; position: absolute; inset: -1px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--surface); z-index: -1; transform: translate(4px, 4px); }
+.node.loop::after { z-index: -2; transform: translate(8px, 8px); }
+.group { position: absolute; border: 1px solid var(--line); border-radius: var(--radius-lg); transition: opacity var(--fast) linear; }
+.group.future { opacity: 0.28; }
+.group-head { display: flex; align-items: center; gap: 6px; width: 100%; height: 30px; padding: 0 10px; border: 0; border-bottom: 1px solid var(--line-soft); background: transparent; color: var(--dim); font: 400 11px/1 var(--font-mono); text-align: left; cursor: pointer; border-radius: var(--radius-lg) var(--radius-lg) 0 0; }
+.group-head:hover { color: var(--muted); background: var(--hover-bg); }
+.group-head[aria-pressed="true"] { color: var(--ink); background: var(--active-bg); }
+.legend { position: absolute; left: 12px; bottom: 10px; margin: 0; font: 400 11px var(--font-mono); color: var(--dim); background: var(--bg); padding: 2px 6px; border: 1px solid var(--line-soft); border-radius: var(--radius-sm); }
+.minimap { position: absolute; right: 12px; bottom: 10px; width: 150px; border: 1px solid var(--line); border-radius: var(--radius-sm); background: var(--bg); }
+.minimap svg { display: block; width: 100%; height: auto; }
+.mm-node { fill: var(--line-hover); }
+.mm-node.sel { fill: var(--ink); }
+.mm-node.bad { fill: var(--err); }
+
+.tree-wrap { height: 560px; overflow: auto; padding: 12px 16px; }
+.tree, .tree ul { list-style: none; margin: 0; padding: 0; }
+.tree ul { margin-left: 14px; padding-left: 10px; border-left: 1px solid var(--line-soft); }
+.titem { display: flex; align-items: center; gap: 8px; min-height: 32px; padding: 0 8px; border-radius: var(--radius-sm); cursor: pointer; }
+.titem:hover { background: var(--hover-bg); }
+.titem[aria-selected="true"] { background: var(--active-bg); color: var(--ink); }
+.titem .n { font: 500 12px var(--font-mono); color: var(--ink); }
+.titem .m { font: 400 11px var(--font-mono); color: var(--dim); }
+
+.drawer { min-width: 0; background: var(--surface); display: grid; align-content: start; }
+.dr-head { display: grid; gap: 6px; padding: 14px 16px; border-bottom: 1px solid var(--line); }
+.dr-kind { display: flex; align-items: center; gap: 6px; font-size: 11px; color: var(--dim); }
+.dr-name { margin: 0; font: 500 14px/1.35 var(--font-mono); color: var(--ink); overflow-wrap: anywhere; }
+.dr-sec { display: grid; gap: 8px; padding: 12px 16px; border-bottom: 1px solid var(--line-soft); }
+.dr-sec h3 { margin: 0; font: 500 12px/1.3 var(--font-sans); color: var(--muted); }
+.dl { display: grid; grid-template-columns: 112px minmax(0, 1fr); gap: 4px 12px; margin: 0; }
+.dl dt { font-size: 12px; color: var(--dim); }
+.dl dd { margin: 0; font: 400 12px/1.45 var(--font-mono); color: var(--ink-2); overflow-wrap: anywhere; }
+.dl dd.ok { color: var(--ok); } .dl dd.warn { color: var(--warn); } .dl dd.err { color: var(--err); }
+.code { margin: 0; max-height: 180px; overflow: auto; padding: 10px 12px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--bg); font: 400 12px/1.55 var(--font-mono); color: var(--ink-2); }
+.tk-key { color: var(--ink); } .tk-str { color: var(--muted); } .tk-num { color: var(--ink-2); } .tk-pun { color: var(--dim); }
+.locked { display: grid; gap: 8px; padding: 10px 12px; border: 1px dashed var(--line-hover); border-radius: var(--radius-md); color: var(--muted); font-size: 12px; }
+.locked p { margin: 0; display: flex; gap: 6px; align-items: flex-start; }
+.dr-actions { display: flex; flex-wrap: wrap; gap: 8px; padding: 12px 16px; }
+.confirm { display: grid; gap: 8px; margin: 0 16px 14px; padding: 10px 12px; border: 1px solid var(--line-hover); border-radius: var(--radius-md); font-size: 12px; color: var(--muted); }
+.confirm p { margin: 0; }
+.confirm .row { display: flex; gap: 8px; }
+
+.playback { display: grid; grid-template-columns: auto minmax(0, 1fr) auto; gap: 16px; align-items: center; padding: 12px 16px; border-top: 1px solid var(--line); background: var(--surface); }
+.pb-controls { display: flex; align-items: center; gap: 4px; }
+.pb-controls select { height: 32px; margin-left: 6px; padding: 0 8px; border: 1px solid var(--line); border-radius: var(--radius-md); background: var(--input); color: var(--ink-2); font: 400 12px var(--font-mono); }
+.ruler { position: relative; padding-top: 26px; }
+.notches { position: absolute; top: 0; left: 6px; right: 6px; height: 22px; }
+.notch { position: absolute; top: 0; display: grid; place-items: center; width: 22px; height: 22px; padding: 0; transform: translateX(-50%); border: 0; border-radius: var(--radius-sm); background: transparent; cursor: pointer; }
+.notch:hover { background: var(--active-bg); }
+.notch svg.lucide { width: 13px; height: 13px; }
+.notch.ok { color: var(--ok); } .notch.warn { color: var(--warn); } .notch.err { color: var(--err); } .notch.info { color: var(--info); }
+.range { width: 100%; margin: 0; height: 20px; background: transparent; -webkit-appearance: none; appearance: none; cursor: pointer; }
+.range::-webkit-slider-runnable-track { height: 2px; background: var(--line-hover); }
+.range::-moz-range-track { height: 2px; background: var(--line-hover); }
+.range::-webkit-slider-thumb { -webkit-appearance: none; width: 12px; height: 16px; margin-top: -7px; border-radius: 2px; background: var(--ink); border: 0; }
+.range::-moz-range-thumb { width: 12px; height: 16px; border-radius: 2px; background: var(--ink); border: 0; }
+.ticks { position: relative; height: 16px; margin: 2px 6px 0; font: 400 11px/16px var(--font-mono); color: var(--dim); }
+.ticks span { position: absolute; transform: translateX(-50%); }
+.ticks span:first-child { transform: none; }
+.ticks span.end { transform: translateX(-100%); }
+.readout { margin: 0; font: 400 12px var(--font-mono); color: var(--muted); white-space: nowrap; font-variant-numeric: tabular-nums; }
+
+.waterfall { border-top: 1px solid var(--line); }
+.wf-scroll { overflow-x: auto; }
+.wf { position: relative; min-width: 760px; }
+.wf-head, .wf-row { display: grid; grid-template-columns: 280px minmax(0, 1fr); }
+.wf-head { height: 28px; border-bottom: 1px solid var(--line-soft); font: 400 11px/28px var(--font-mono); color: var(--dim); }
+.wf-head .lbl { padding-left: 16px; }
+.wf-axis { position: relative; margin-right: 16px; }
+.wf-axis span { position: absolute; transform: translateX(-50%); }
+.wf-axis span:first-child { transform: none; }
+.wf-axis span.end { transform: translateX(-100%); }
+.wf-row { width: 100%; height: 28px; padding: 0; border: 0; background: transparent; text-align: left; cursor: pointer; }
+.wf-row:hover { background: var(--hover-bg); }
+.wf-row[aria-current="true"] { background: var(--active-bg); }
+.wf-lbl { display: flex; align-items: center; gap: 6px; min-width: 0; padding-right: 12px; color: var(--dim); }
+.wf-lbl .n { flex: 1; min-width: 0; overflow: hidden; text-overflow: ellipsis; white-space: nowrap; font: 400 12px var(--font-mono); color: var(--ink-2); }
+.wf-lbl .d { font: 400 11px var(--font-mono); color: var(--dim); font-variant-numeric: tabular-nums; }
+.wf-lbl svg.lucide { width: 12px; height: 12px; }
+.wf-track { position: relative; margin-right: 16px; }
+.bar { position: absolute; top: 9px; height: 10px; min-width: 2px; border-radius: 2px; background: var(--dim); }
+.bar.running { background: var(--ink); }
+.bar.held { background: var(--warn); }
+.bar.blocked, .bar.failed { background: var(--err); }
+.wf-grid { position: absolute; top: 28px; bottom: 0; left: 280px; right: 16px; pointer-events: none; }
+.wf-grid i { position: absolute; top: 0; bottom: 0; width: 1px; background: var(--line-soft); }
+.wf-grid .playhead { background: var(--ink); }
+
+/* Spec sections */
+.sec { display: grid; gap: 16px; }
+.sec h2 { margin: 0; font: 600 20px/1.3 var(--font-sans); color: var(--ink); }
+.sec > p { margin: 0; max-width: 72ch; color: var(--muted); line-height: 1.6; }
+.kinds { list-style: none; margin: 0; padding: 0; display: grid; grid-template-columns: repeat(auto-fill, minmax(250px, 1fr)); border-top: 1px solid var(--line); border-left: 1px solid var(--line); }
+.kinds li { display: grid; grid-template-columns: 28px 1fr; gap: 10px; padding: 12px; border-right: 1px solid var(--line); border-bottom: 1px solid var(--line); }
+.kinds .k { margin: 0; font: 500 12px var(--font-mono); color: var(--ink); }
+.kinds .w { margin: 0; font-size: 12px; color: var(--muted); }
+.states { display: grid; grid-template-columns: repeat(auto-fill, minmax(300px, 1fr)); gap: 12px; }
+.tile { display: grid; gap: 10px; align-content: start; padding: 14px; border: 1px solid var(--line); border-radius: var(--radius-lg); background: var(--surface); }
+.tile h3 { margin: 0; font: 500 13px var(--font-sans); color: var(--ink); }
+.tile p { margin: 0; font-size: 12px; color: var(--muted); line-height: 1.55; }
+.tile.warn { border-color: var(--warn); }
+.tile.err { border-color: var(--err); }
+.skel { display: grid; gap: 8px; }
+.skel i { display: block; height: 14px; border-radius: var(--radius-sm); background: var(--active-bg); }
+.status-row { display: flex; flex-wrap: wrap; gap: 8px; }
+.calls { margin: 0; padding-left: 18px; display: grid; gap: 8px; max-width: 80ch; color: var(--muted); }
+.calls strong { color: var(--ink); font-weight: 500; }
+.foot { font-size: 12px; color: var(--dim); }
+
+@media (max-width: 1359px) {
+  .main { grid-template-columns: minmax(0, 1fr); }
+  .stage { border-right: 0; border-bottom: 1px solid var(--line); }
+}
+@media (max-width: 760px) {
+  .kbd, .minimap { display: none; }
+  .runactions { margin-left: 0; }
+  .playback { grid-template-columns: minmax(0, 1fr); }
+  .search input { width: 100%; }
+  .search { flex: 1 1 160px; }
+  .canvas-scroll, .tree-wrap { height: 460px; }
+}
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after { transition-duration: 0.01ms !important; animation-duration: 0.01ms !important; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+<header class="spec-head">
+  <p class="eyebrow">design spec · agent map · run view · milestone M2</p>
+  <h1>Agent map</h1>
+  <p class="lede">One run, drawn three ways at once: the causal graph of what the agent did, the waterfall of when it did it, and the governance record of what was allowed, held, blocked and signed. Drag the playhead to replay the run; select any span to see its detail.</p>
+  <p class="note">Example run with invented values, not customer data. Switch the viewer theme to review the light counterpart. Authoritative spec: docs/design/agent-map/README.md.</p>
+</header>
+
+<section class="app" aria-label="Run view, example run">
+  <div class="runbar">
+    <div class="run-id">
+      <p class="crumb mono">tasks / 0198f3a2-7c41 / agent map</p>
+      <div class="title-row">
+        <h2>ap-reconciler</h2>
+        <span class="chip ok"><i data-lucide="check"></i>completed</span>
+        <span class="chip err"><i data-lucide="ban"></i>1 blocked</span>
+        <span class="chip warn"><i data-lucide="clock"></i>1 held for approval</span>
+      </div>
+    </div>
+    <dl class="runstats">
+      <div><dt>duration</dt><dd>48.2s</dd></div>
+      <div><dt>spans</dt><dd>15</dd></div>
+      <div><dt>tokens</dt><dd>41,208</dd></div>
+      <div><dt>cost</dt><dd>$0.3841</dd></div>
+    </dl>
+    <div class="runactions">
+      <span class="attest" id="attest" aria-live="polite"></span>
+      <button class="btn" id="verify" type="button"><i data-lucide="badge-check"></i>Verify attestation</button>
+      <button class="btn" type="button"><i data-lucide="download"></i>Export OTLP</button>
+    </div>
+  </div>
+
+  <div class="toolbar" role="toolbar" aria-label="Map controls">
+    <div class="seg" role="radiogroup" aria-label="View">
+      <button type="button" role="radio" aria-checked="true" data-view="graph" id="view-graph"><i data-lucide="network"></i>Graph</button>
+      <button type="button" role="radio" aria-checked="false" data-view="tree" id="view-tree"><i data-lucide="list-tree"></i>Tree</button>
+    </div>
+    <label class="check" for="gov-only"><input type="checkbox" id="gov-only">Governance path only</label>
+    <div class="search">
+      <i data-lucide="search"></i>
+      <input id="span-search" type="search" placeholder="Find a span…" aria-label="Find a span" autocomplete="off" spellcheck="false">
+    </div>
+    <div class="spacer"></div>
+    <span class="kbd">space play · , and . step · f fit</span>
+    <div class="zoom">
+      <button class="btn icon-btn" type="button" id="zoom-out" aria-label="Zoom out"><i data-lucide="zoom-out"></i></button>
+      <button class="btn icon-btn" type="button" id="zoom-in" aria-label="Zoom in"><i data-lucide="zoom-in"></i></button>
+      <button class="btn icon-btn" type="button" id="zoom-fit" aria-label="Fit graph to view"><i data-lucide="maximize"></i></button>
+    </div>
+  </div>
+
+  <div class="main">
+    <div class="stage">
+      <div class="canvas-scroll" id="canvas-scroll" role="group" aria-label="Run graph. The tree view lists the same spans for keyboard and screen reader use.">
+        <div class="sizer" id="sizer">
+          <div class="canvas" id="canvas">
+            <svg class="edges" id="edges" aria-hidden="true">
+              <defs>
+                <pattern id="dots" width="24" height="24" patternUnits="userSpaceOnUse"><circle class="grid-dots" cx="1" cy="1" r="1"></circle></pattern>
+                <marker id="arr" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="arrow" d="M0,0 L8,4 L0,8 z"></path></marker>
+                <marker id="arr-on" viewBox="0 0 8 8" refX="7" refY="4" markerWidth="8" markerHeight="8" orient="auto"><path class="arrow-on" d="M0,0 L8,4 L0,8 z"></path></marker>
+              </defs>
+              <rect id="dot-bg" x="0" y="0" fill="url(#dots)"></rect>
+              <g id="edge-layer"></g>
+            </svg>
+          </div>
+        </div>
+      </div>
+      <div class="tree-wrap" id="tree-wrap" hidden>
+        <ul class="tree" role="tree" id="tree" aria-label="Run spans"></ul>
+      </div>
+      <p class="legend" id="legend">line: parent to child span · labelled: governance hop</p>
+      <div class="minimap" id="minimap-box" aria-hidden="true"><svg id="minimap"></svg></div>
+    </div>
+    <aside class="drawer" id="drawer" aria-label="Span detail"></aside>
+  </div>
+
+  <div class="playback">
+    <div class="pb-controls">
+      <button class="btn icon-btn" type="button" id="pb-back" aria-label="Previous span start"><i data-lucide="skip-back"></i></button>
+      <button class="btn icon-btn" type="button" id="pb-play" aria-label="Replay from the start"><i data-lucide="play"></i></button>
+      <button class="btn icon-btn" type="button" id="pb-fwd" aria-label="Next span start"><i data-lucide="skip-forward"></i></button>
+      <label class="sr-only" for="pb-speed">Playback speed</label>
+      <select id="pb-speed">
+        <option value="1">1x</option>
+        <option value="2">2x</option>
+        <option value="5" selected>5x</option>
+        <option value="10">10x</option>
+      </select>
+    </div>
+    <div class="ruler">
+      <div class="notches" id="notches"></div>
+      <input class="range" type="range" id="pb-range" min="0" max="48.2" step="0.1" value="48.2" aria-label="Playback position">
+      <div class="ticks" id="ticks" aria-hidden="true"></div>
+    </div>
+    <p class="readout" id="readout" aria-live="off"></p>
+  </div>
+
+  <div class="waterfall" role="region" aria-label="Span waterfall">
+    <div class="wf-scroll">
+      <div class="wf" id="wf">
+        <div class="wf-head" aria-hidden="true"><span class="lbl">span</span><div class="wf-axis" id="wf-axis"></div></div>
+        <div id="wf-rows"></div>
+        <div class="wf-grid" id="wf-grid" aria-hidden="true"></div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="kinds-h">
+  <h2 id="kinds-h">Node vocabulary</h2>
+  <p>Icon and label carry a span's kind, never colour, so eleven kinds need no categorical palette and chroma stays free for state. A span with an ok outcome shows no tag at all: the map is quiet until something needs a look.</p>
+  <ul class="kinds">
+    <li><i data-lucide="bot"></i><div><p class="k">agent</p><p class="w">One agent run, root or sub-agent</p></div></li>
+    <li><i data-lucide="message-square"></i><div><p class="k">chat</p><p class="w">One model call: model id, tokens, cost</p></div></li>
+    <li><i data-lucide="wrench"></i><div><p class="k">tool</p><p class="w">One execution, paired to its request by tool_call_id</p></div></li>
+    <li><i data-lucide="layers"></i><div><p class="k">context</p><p class="w">What entered the prompt, and what was dropped and why</p></div></li>
+    <li><i data-lucide="brain"></i><div><p class="k">memory</p><p class="w">L1 and L2 hits with ids and scores</p></div></li>
+    <li><i data-lucide="shield-x"></i><div><p class="k">policy</p><p class="w">DPE verdict, rule and policy version</p></div></li>
+    <li><i data-lucide="user-check"></i><div><p class="k">approval</p><p class="w">Who approved, and how long the write was held</p></div></li>
+    <li><i data-lucide="receipt"></i><div><p class="k">action</p><p class="w">GAL write with its Ed25519 receipt</p></div></li>
+    <li><i data-lucide="git-branch"></i><div><p class="k">handoff</p><p class="w">MACP spawn of a sub-agent run, drawn as a group</p></div></li>
+    <li><i data-lucide="globe"></i><div><p class="k">a2a</p><p class="w">Cross-org call: only what the peer attests</p></div></li>
+    <li><i data-lucide="eye-off"></i><div><p class="k">mediaguard</p><p class="w">Redaction counts, never the redacted value</p></div></li>
+  </ul>
+  <div class="status-row" aria-label="State tags">
+    <span class="chip"><i data-lucide="check"></i>ok, no tag on the node</span>
+    <span class="chip">running, held border in ink</span>
+    <span class="chip warn"><i data-lucide="clock"></i>held for approval</span>
+    <span class="chip err"><i data-lucide="ban"></i>blocked by policy</span>
+    <span class="chip err"><i data-lucide="x"></i>failed after retries</span>
+    <span class="chip"><i data-lucide="lock"></i>content hidden</span>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="states-h">
+  <h2 id="states-h">Loading, empty, gap and error states</h2>
+  <p>Every state keeps the frame, so nothing jumps when data arrives. Copy says what happened and what to do next.</p>
+  <div class="states">
+    <div class="tile"><h3>Loading the snapshot</h3><div class="skel" aria-hidden="true"><i style="width:62%"></i><i style="width:44%"></i><i style="width:71%"></i></div><p>Static skeleton in the node positions of the last layout, never a spinner over a blank canvas.</p></div>
+    <div class="tile"><h3>Waiting for the first event</h3><p>Queued. The map draws as soon as the run emits its first span.</p><span class="chip">queued</span></div>
+    <div class="tile"><h3>Reconstructed run</h3><p>This run predates the run log. Tool calls, approvals and signed writes are shown; prompts and model calls were not recorded.</p><span class="chip">reconstructed</span></div>
+    <div class="tile warn"><h3>Events missing</h3><p>Events 41 to 48 didn't arrive. The graph between them may be incomplete.</p><div><button class="btn" type="button"><i data-lucide="rotate-ccw"></i>Reload snapshot</button></div></div>
+    <div class="tile"><h3>Content hidden</h3><p>Prompt content is redacted by this agent's capture policy. Revealing it needs an auditor and is recorded.</p><div><button class="btn" type="button"><i data-lucide="lock"></i>Request auditor reveal</button></div></div>
+    <div class="tile err"><h3>Couldn't load this run</h3><p>The server returned an internal error. Retry, or send the request id to support.</p><p class="mono">request 0198f3c1-2b7e-7d10</p><div><button class="btn" type="button"><i data-lucide="rotate-ccw"></i>Retry</button></div></div>
+  </div>
+</section>
+
+<section class="sec" aria-labelledby="calls-h">
+  <h2 id="calls-h">Skill recommendations rejected on brand grounds</h2>
+  <ul class="calls">
+    <li><strong>ui-ux-pro-max design system:</strong> proposed Fira Code and Fira Sans, a slate palette with a green accent, and oversized display type. Rejected: Geist only, monochrome canvas, dense app scale.</li>
+    <li><strong>ui-ux-pro-max network chart guidance:</strong> categorical node colours and an amber highlight path. Rejected: kind is icon plus label, and the active path is drawn in ink, because chroma is reserved for state.</li>
+    <li><strong>ui-ux-pro-max icon default:</strong> Phosphor. Rejected: lucide at stroke width 1.5.</li>
+    <li><strong>web-design-guidelines copy rule:</strong> Title Case for headings and buttons. Rejected: sentence case everywhere.</li>
+    <li><strong>design prompt v1.0:</strong> a pulsing 6px running dot. Superseded: status dots were retired from the brand; running is a text tag plus a held ink border.</li>
+  </ul>
+  <p class="foot">Mockup for design review. Real layout comes from elkjs; this page positions nodes by hand to show the result.</p>
+</section>
+
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/lucide@0.469.0/dist/umd/lucide.min.js"></script>
+<script>
+(function () {
+  "use strict";
+  var END = 48.2, W = 1316, H = 644, NW = 196, NH = 56;
+
+  // Example run. x/y mirror an elkjs layered LR layout (rank step 268 px).
+  var S = [
+    { id: "s1", kind: "agent", icon: "bot", name: "ap-reconciler", meta: "invoke_agent · 48.2s", final: "ok", x: 24, y: 302, start: 0, end: 48.2, parent: null },
+    { id: "s2", kind: "context", icon: "layers", name: "context.assemble", meta: "18 admitted · 6 dropped", final: "ok", x: 292, y: 32, start: 0.1, end: 0.4, parent: "s1" },
+    { id: "s3", kind: "memory", icon: "brain", name: "memory.retrieve", meta: "3 hits · top 0.91", final: "ok", x: 560, y: 32, start: 0.12, end: 0.35, parent: "s2" },
+    { id: "s4", kind: "chat", icon: "message-square", name: "chat · turn 1", meta: "claude-sonnet-5 · 9,412 tok", final: "ok", x: 292, y: 222, start: 0.4, end: 3.1, parent: "s1" },
+    { id: "s5", kind: "tool", icon: "wrench", name: "netsuite.search_invoices", meta: "812 ms · policy allow", final: "ok", x: 560, y: 108, start: 3.2, end: 4.0, parent: "s4" },
+    { id: "s6", kind: "tool", icon: "wrench", name: "gmail.read_thread", meta: "1.3s · 2 redactions", final: "ok", x: 560, y: 184, start: 4.0, end: 5.3, parent: "s4", gov: true },
+    { id: "s7", kind: "handoff", icon: "git-branch", name: "vendor-matcher", meta: "sub-agent · run 0198f3b7 · 14.4s", final: "ok", x: 292, y: 424, w: 464, h: 108, start: 5.4, end: 19.8, parent: "s1", group: true, label: "handoff" },
+    { id: "s8", kind: "chat", icon: "message-square", name: "chat · matcher", meta: "claude-haiku-4-5 · 2,210 tok", final: "ok", x: 308, y: 460, w: 180, start: 5.5, end: 7.0, parent: "s7" },
+    { id: "s9", kind: "tool", icon: "repeat", name: "vendors.lookup", meta: "3 attempts · 2 retried", final: "ok", x: 560, y: 460, w: 180, start: 7.1, end: 19.6, parent: "s8", loop: true },
+    { id: "s10", kind: "tool", icon: "wrench", name: "netsuite.update_invoice", meta: "19.8s · approved", final: "ok", x: 560, y: 260, start: 20.0, end: 39.8, parent: "s4", gov: true },
+    { id: "s11", kind: "approval", icon: "user-check", name: "finance approver", meta: "held 18.6s · approved", final: "ok", x: 828, y: 260, start: 20.9, end: 39.5, parent: "s10", label: "approval", gov: true },
+    { id: "s12", kind: "action", icon: "receipt", name: "action.commit", meta: "receipt 9f3c…a41e", final: "ok", x: 1096, y: 260, start: 39.5, end: 39.8, parent: "s11", label: "commit", gov: true },
+    { id: "s13", kind: "tool", icon: "wrench", name: "stripe.create_refund", meta: "not executed", final: "blocked", x: 560, y: 336, start: 41.58, end: 41.62, parent: "s4", gov: true },
+    { id: "s14", kind: "policy", icon: "shield-x", name: "policy.evaluate", meta: "refunds-v42 · block", final: "blocked", x: 828, y: 336, start: 41.59, end: 41.61, parent: "s13", label: "evaluate", gov: true },
+    { id: "s15", kind: "chat", icon: "message-square", name: "chat · turn 2", meta: "claude-sonnet-5 · 6,118 tok", final: "ok", x: 292, y: 556, start: 41.9, end: 48.1, parent: "s1" }
+  ];
+  var byId = {};
+  S.forEach(function (s, i) { s.seq = i + 1; s.w = s.w || NW; s.h = s.h || NH; byId[s.id] = s; });
+  S.slice().sort(function (a, b) { return a.start - b.start; }).forEach(function (s, i) { s.seq = i + 1; });
+  function children(id) { return S.filter(function (s) { return s.parent === id; }).sort(function (a, b) { return a.start - b.start; }); }
+
+  var D = {
+    s13: [
+      { h: "Governance", rows: [["decision", "block", "err"], ["policy", "dpe/refunds-v42"], ["rule", "money.refund.max_autonomous"], ["reason", "Refund of $2,480.00 exceeds the $1,000.00 autonomous limit"], ["write attempted", "no"]] },
+      { h: "Call", code: '{"charge":"ch_3PzK81","amount":248000,"currency":"usd","reason":"duplicate"}' },
+      { h: "Result", note: "No result: the call was refused before execution." }
+    ],
+    s14: [{ h: "Governance", rows: [["decision", "block", "err"], ["policy", "dpe/refunds-v42"], ["evaluated in", "0.02s"], ["inputs", "risk_class money · amount 248000"]] }],
+    s12: [{ h: "Signed receipt", rows: [["outcome", "committed", "ok"], ["risk class", "write"], ["hash", "sha256:9f3c2b7d…a41e"], ["prev hash", "sha256:5a01ce9f…77b2"], ["signature", "ed25519, valid", "ok"], ["reversible", "yes, until 2026-09-15 14:02 UTC"]] }],
+    s11: [{ h: "Approval", rows: [["requested by", "policy require_approval"], ["approver", "finance approver"], ["channel", "Slack approval"], ["held for", "18.6s", "warn"], ["decision", "approved", "ok"]] }],
+    s10: [
+      { h: "Governance", rows: [["decision", "require approval", "warn"], ["policy", "dpe/ap-writes-v17"], ["receipt", "sha256:9f3c2b7d…a41e"]] },
+      { h: "Call", code: '{"invoice":"INV-20931","status":"matched","vendor":"V-1182"}' }
+    ],
+    s6: [
+      { h: "MediaGuard", rows: [["redactions", "2"], ["classes", "email address, IBAN"], ["stored", "counts only, never values"]] },
+      { h: "Result", locked: "Tool result content is redacted by this agent's capture policy." }
+    ],
+    s4: [
+      { h: "Context ledger", rows: [["admitted", "18 items · 7,980 tok"], ["from", "12 L1 turns, 3 memories, 3 tool results"], ["dropped", "6 items"], ["why dropped", "4 over session budget, 2 low relevance"]] },
+      { h: "Prompt", locked: "Prompt content is redacted by this agent's capture policy. Revealing it needs an auditor and is recorded." }
+    ],
+    s9: [{ h: "Loop", rows: [["attempts", "3"], ["retries", "2, after 429 rate limits"], ["backoff", "1.2s, then 3.9s"], ["folded", "identical calls, expand to inspect"]] }],
+    s3: [{ h: "Memory hits", rows: [["mem_7f21", "0.91 · vendor bank change policy"], ["mem_0c9a", "0.84 · INV-20931 thread"], ["mem_a113", "0.77 · refund limits"]] }],
+    s2: [{ h: "Context ledger", rows: [["admitted", "18"], ["dropped", "6"], ["pinned", "2 audit items"]] }],
+    s7: [{ h: "Sub-agent", rows: [["agent", "vendor-matcher"], ["run", "0198f3b7-11ac"], ["protocol", "MACP spawn"], ["outcome", "matched V-1182", "ok"]] }]
+  };
+  var USAGE = { s4: ["$0.0712", "7,980 in · 1,432 out"], s8: ["$0.0031", "1,904 in · 306 out"], s15: ["$0.0498", "5,204 in · 914 out"], s1: ["$0.3841", "41,208 total"] };
+
+  var $ = function (id) { return document.getElementById(id); };
+  var canvas = $("canvas"), sizer = $("sizer"), scroll = $("canvas-scroll"), edgeLayer = $("edge-layer");
+  var svgEdges = $("edges");
+  svgEdges.setAttribute("width", W); svgEdges.setAttribute("height", H);
+  $("dot-bg").setAttribute("width", W); $("dot-bg").setAttribute("height", H);
+  canvas.style.width = W + "px"; canvas.style.height = H + "px";
+
+  var t = END, selected = "s13", zoom = 1, playing = false, lastTs = 0;
+  var nodeEls = {}, edgeEls = [], rowEls = {}, barEls = {}, treeEls = {};
+  var NS = "http://www.w3.org/2000/svg";
+
+  function el(tag, cls, text) { var e = document.createElement(tag); if (cls) e.className = cls; if (text != null) e.textContent = text; return e; }
+  function icon(name) { var i = document.createElement("i"); i.setAttribute("data-lucide", name); return i; }
+  function paintIcons() { if (window.lucide && window.lucide.createIcons) window.lucide.createIcons({ attrs: { "stroke-width": 1.5 } }); }
+  function fmt(s) { return s < 1 ? Math.round(s * 1000) + " ms" : s.toFixed(1) + "s"; }
+
+  function stateAt(s, time) {
+    if (time < s.start) return "future";
+    if (time < s.end) return s.kind === "approval" ? "held" : "running";
+    return s.final;
+  }
+  var TAG = { running: [null, "running"], held: ["clock", "held"], blocked: ["ban", "blocked"], failed: ["x", "failed"] };
+
+  // Nodes
+  S.forEach(function (s) {
+    if (s.group) {
+      var g = el("div", "group"); g.style.left = s.x + "px"; g.style.top = s.y + "px"; g.style.width = s.w + "px"; g.style.height = s.h + "px";
+      var head = el("button", "group-head"); head.type = "button"; head.setAttribute("aria-pressed", "false");
+      head.setAttribute("aria-label", "Sub-agent group " + s.name);
+      head.appendChild(icon("git-branch")); head.appendChild(document.createTextNode("sub-agent · " + s.name + " · run 0198f3b7"));
+      head.addEventListener("click", function () { select(s.id); });
+      g.appendChild(head); canvas.appendChild(g); nodeEls[s.id] = { root: g, btn: head, tag: null };
+      return;
+    }
+    var b = el("button", "node" + (s.loop ? " loop" : "")); b.type = "button";
+    b.style.left = s.x + "px"; b.style.top = s.y + "px"; b.style.width = s.w + "px";
+    var ico = el("span", "node-ico"); ico.appendChild(icon(s.icon));
+    var tx = el("span", "node-text"); tx.appendChild(el("span", "node-name", s.name)); tx.appendChild(el("span", "node-meta", s.meta));
+    var tag = el("span", "tag");
+    b.appendChild(ico); b.appendChild(tx); b.appendChild(tag);
+    b.addEventListener("click", function () { select(s.id); });
+    canvas.appendChild(b); nodeEls[s.id] = { root: b, btn: b, tag: tag };
+  });
+
+  // Edges: orthogonal, bend 16 px after the source, 6 px corner radius.
+  function edgeTargetY(c) { return c.group ? c.y + c.h / 2 : c.y + c.h / 2; }
+  S.forEach(function (c) {
+    if (!c.parent) return;
+    var p = byId[c.parent];
+    if (p.group) return; // containment already shows the first hop inside a group
+    var sx = p.x + p.w, sy = p.y + p.h / 2, tx = c.x, ty = edgeTargetY(c), mx = sx + 16, r = 6, d;
+    if (Math.abs(ty - sy) < 1) d = "M" + sx + "," + sy + " H" + (tx - 1);
+    else {
+      var dir = ty > sy ? 1 : -1;
+      d = "M" + sx + "," + sy + " H" + (mx - r) + " Q" + mx + "," + sy + " " + mx + "," + (sy + dir * r) +
+          " V" + (ty - dir * r) + " Q" + mx + "," + ty + " " + (mx + r) + "," + ty + " H" + (tx - 1);
+    }
+    var path = document.createElementNS(NS, "path"); path.setAttribute("d", d); path.setAttribute("class", "edge"); path.setAttribute("marker-end", "url(#arr)");
+    edgeLayer.appendChild(path);
+    var lab = null;
+    if (c.label) {
+      lab = document.createElementNS(NS, "text"); lab.setAttribute("class", "edge-label");
+      if (Math.abs(ty - sy) < 1) { lab.setAttribute("x", (sx + tx) / 2); lab.setAttribute("text-anchor", "middle"); }
+      else { lab.setAttribute("x", mx + 6); }
+      lab.setAttribute("y", ty - 7); lab.textContent = c.label; edgeLayer.appendChild(lab);
+    }
+    edgeEls.push({ child: c, parent: p, path: path, label: lab });
+  });
+
+  // Minimap
+  var mm = $("minimap"); mm.setAttribute("viewBox", "0 0 " + W + " " + H);
+  var mmRects = {};
+  S.forEach(function (s) {
+    if (s.group) return;
+    var r = document.createElementNS(NS, "rect");
+    r.setAttribute("x", s.x); r.setAttribute("y", s.y); r.setAttribute("width", s.w); r.setAttribute("height", s.h); r.setAttribute("rx", 6);
+    r.setAttribute("class", "mm-node"); mm.appendChild(r); mmRects[s.id] = r;
+  });
+
+  // Tree view (WAI-ARIA tree, roving tabindex)
+  function buildTree(parentId, ul, level) {
+    children(parentId).forEach(function (s) {
+      var li = el("li"); li.setAttribute("role", "none");
+      var item = el("div", "titem"); item.setAttribute("role", "treeitem"); item.setAttribute("aria-level", level);
+      item.setAttribute("aria-selected", "false"); item.tabIndex = -1; item.dataset.id = s.id;
+      item.appendChild(icon(s.icon)); item.appendChild(el("span", "n", s.name)); item.appendChild(el("span", "m", s.meta));
+      item.addEventListener("click", function () { select(s.id); });
+      li.appendChild(item); treeEls[s.id] = item;
+      var kids = children(s.id);
+      if (kids.length) { item.setAttribute("aria-expanded", "true"); var sub = el("ul"); sub.setAttribute("role", "group"); buildTree(s.id, sub, level + 1); li.appendChild(sub); }
+      ul.appendChild(li);
+    });
+  }
+  buildTree(null, $("tree"), 1);
+  $("tree").addEventListener("keydown", function (e) {
+    var items = Array.prototype.slice.call($("tree").querySelectorAll('[role="treeitem"]'));
+    var i = items.indexOf(document.activeElement); if (i < 0) return;
+    var next = null;
+    if (e.key === "ArrowDown") next = items[Math.min(items.length - 1, i + 1)];
+    else if (e.key === "ArrowUp") next = items[Math.max(0, i - 1)];
+    else if (e.key === "Home") next = items[0];
+    else if (e.key === "End") next = items[items.length - 1];
+    else if (e.key === "Enter" || e.key === " ") { e.preventDefault(); select(items[i].dataset.id); return; }
+    if (next) { e.preventDefault(); items.forEach(function (x) { x.tabIndex = -1; }); next.tabIndex = 0; next.focus(); }
+  });
+
+  // Waterfall, DFS order, one time scale shared with the ruler
+  var order = [];
+  (function walk(pid, depth) { children(pid).forEach(function (s) { s.depth = depth; order.push(s); walk(s.id, depth + 1); }); })(null, 0);
+  var rows = $("wf-rows");
+  order.forEach(function (s) {
+    var row = el("button", "wf-row"); row.type = "button";
+    row.setAttribute("aria-label", s.kind + " " + s.name + ", " + fmt(s.end - s.start));
+    var lbl = el("span", "wf-lbl"); lbl.style.paddingLeft = (16 + s.depth * 14) + "px";
+    lbl.appendChild(icon(s.icon)); lbl.appendChild(el("span", "n", s.name)); lbl.appendChild(el("span", "d", fmt(s.end - s.start)));
+    var track = el("span", "wf-track"); var bar = el("span", "bar"); track.appendChild(bar);
+    row.appendChild(lbl); row.appendChild(track);
+    row.addEventListener("click", function () { select(s.id); });
+    rows.appendChild(row); rowEls[s.id] = row; barEls[s.id] = bar;
+  });
+  var TICKS = [0, 10, 20, 30, 40];
+  function pct(v) { return (v / END * 100) + "%"; }
+  function renderTicks(container, extraCls) {
+    TICKS.forEach(function (v) { var sp = el("span", null, v + "s"); sp.style.left = pct(v); container.appendChild(sp); });
+    var e = el("span", "end", END + "s"); e.style.left = "100%"; container.appendChild(e);
+  }
+  renderTicks($("ticks")); renderTicks($("wf-axis"));
+  var grid = $("wf-grid");
+  TICKS.slice(1).forEach(function (v) { var i = el("i"); i.style.left = pct(v); grid.appendChild(i); });
+  var playhead = el("i", "playhead"); grid.appendChild(playhead);
+
+  // Governance notches on the ruler
+  var NOTCHES = [
+    { t: 5.3, cls: "info", icon: "eye-off", label: "2 redactions in gmail.read_thread", span: "s6" },
+    { t: 20.9, cls: "warn", icon: "clock", label: "netsuite.update_invoice held for approval", span: "s11" },
+    { t: 39.8, cls: "ok", icon: "receipt", label: "approved, signed write committed", span: "s12" },
+    { t: 41.61, cls: "err", icon: "ban", label: "stripe.create_refund blocked by policy", span: "s14" }
+  ];
+  NOTCHES.forEach(function (n) {
+    var b = el("button", "notch " + n.cls); b.type = "button"; b.style.left = pct(n.t);
+    b.setAttribute("aria-label", n.label + " at " + n.t + "s"); b.title = n.label;
+    b.appendChild(icon(n.icon));
+    b.addEventListener("click", function () { stop(); setTime(n.t + 0.01); select(n.span); });
+    $("notches").appendChild(b);
+  });
+
+  // Drawer
+  function renderDrawer(id) {
+    var s = byId[id], dr = $("drawer"); dr.textContent = "";
+    var head = el("div", "dr-head");
+    var kind = el("div", "dr-kind"); kind.appendChild(icon(s.icon)); kind.appendChild(document.createTextNode(s.kind + " · seq " + s.seq));
+    head.appendChild(kind); head.appendChild(el("h2", "dr-name", s.name));
+    var st = stateAt(s, t);
+    var chip = el("div", "title-row");
+    var map = { ok: ["ok", "check", "completed"], running: ["", null, "running"], held: ["warn", "clock", "held for approval"], blocked: ["err", "ban", "blocked by policy"], failed: ["err", "x", "failed"], future: ["", null, "not started at this point"] };
+    var m = map[st]; var c = el("span", "chip " + m[0]); if (m[1]) c.appendChild(icon(m[1])); c.appendChild(document.createTextNode(m[2]));
+    chip.appendChild(c); head.appendChild(chip); dr.appendChild(head);
+
+    (D[id] || []).forEach(function (sec) {
+      var box = el("section", "dr-sec"); box.appendChild(el("h3", null, sec.h));
+      if (sec.rows) {
+        var dl = el("dl", "dl");
+        sec.rows.forEach(function (r) { dl.appendChild(el("dt", null, r[0])); dl.appendChild(el("dd", r[2] || null, r[1])); });
+        box.appendChild(dl);
+      }
+      if (sec.code) box.appendChild(codeBlock(sec.code));
+      if (sec.note) box.appendChild(el("p", "note", sec.note));
+      if (sec.locked) {
+        var lk = el("div", "locked"); var p = el("p"); p.appendChild(icon("lock")); p.appendChild(document.createTextNode(sec.locked));
+        var rb = el("button", "btn"); rb.type = "button"; rb.textContent = "Request auditor reveal";
+        lk.appendChild(p); var wrapBtn = el("div"); wrapBtn.appendChild(rb); lk.appendChild(wrapBtn); box.appendChild(lk);
+      }
+      dr.appendChild(box);
+    });
+
+    var usage = el("section", "dr-sec"); usage.appendChild(el("h3", null, "Timing and usage"));
+    var dl2 = el("dl", "dl");
+    [["started", s.start.toFixed(2) + "s"], ["duration", fmt(s.end - s.start)]].concat(USAGE[id] ? [["cost", USAGE[id][0]], ["tokens", USAGE[id][1]]] : []).forEach(function (r) { dl2.appendChild(el("dt", null, r[0])); dl2.appendChild(el("dd", null, r[1])); });
+    usage.appendChild(dl2); dr.appendChild(usage);
+
+    var trace = el("section", "dr-sec"); trace.appendChild(el("h3", null, "Trace"));
+    var dl3 = el("dl", "dl");
+    [["span id", "b7e1" + (1000 + s.seq * 37).toString(16) + "c2a9f04d"], ["parent span", s.parent ? "b7e1" + (1000 + byId[s.parent].seq * 37).toString(16) + "c2a9f04d" : "none, root"], ["trace id", "4bf92f3577b34da6a3ce929d0e0e4736"]].forEach(function (r) { dl3.appendChild(el("dt", null, r[0])); dl3.appendChild(el("dd", null, r[1])); });
+    trace.appendChild(dl3); dr.appendChild(trace);
+
+    var actions = el("div", "dr-actions");
+    if (s.kind === "tool" || s.kind === "chat" || s.kind === "policy") {
+      var fork = el("button", "btn"); fork.type = "button"; fork.appendChild(icon("git-fork")); fork.appendChild(document.createTextNode("Fork from here"));
+      fork.addEventListener("click", function () { showConfirm(s); });
+      actions.appendChild(fork);
+    }
+    if (s.kind === "action") { var vr = el("button", "btn"); vr.type = "button"; vr.appendChild(icon("badge-check")); vr.appendChild(document.createTextNode("Verify receipt")); actions.appendChild(vr); }
+    var cp = el("button", "btn"); cp.type = "button"; cp.appendChild(icon("copy")); cp.appendChild(document.createTextNode("Copy span link")); actions.appendChild(cp);
+    dr.appendChild(actions);
+    var slot = el("div"); slot.id = "confirm-slot"; dr.appendChild(slot);
+    paintIcons();
+  }
+  function showConfirm(s) {
+    var slot = $("confirm-slot"); slot.textContent = "";
+    var box = el("div", "confirm"); box.setAttribute("role", "group"); box.setAttribute("aria-label", "Confirm fork");
+    box.appendChild(el("p", null, "Fork re-runs this task from seq " + s.seq + " under the current policy. Governed writes are evaluated again, and the new run links back here."));
+    var row = el("div", "row");
+    var ok = el("button", "btn primary", "Fork run"); ok.type = "button";
+    var no = el("button", "btn", "Cancel"); no.type = "button";
+    ok.addEventListener("click", function () { slot.textContent = ""; var done = el("p", "confirm", "Fork queued as task 0198f3d9 (example). It appears as a linked child run."); done.setAttribute("role", "status"); slot.appendChild(done); });
+    no.addEventListener("click", function () { slot.textContent = ""; });
+    row.appendChild(ok); row.appendChild(no); box.appendChild(row); slot.appendChild(box); ok.focus();
+  }
+  function codeBlock(src) {
+    var pre = el("pre", "code");
+    var pretty = JSON.stringify(JSON.parse(src), null, 2);
+    var re = /("(?:[^"\\]|\\.)*")(\s*:)?|(-?\d+(?:\.\d+)?)|(true|false|null)|([{}\[\],:])|(\s+)/g, mt;
+    while ((mt = re.exec(pretty)) !== null) {
+      if (mt[1]) { pre.appendChild(el("span", mt[2] ? "tk-key" : "tk-str", mt[1])); if (mt[2]) pre.appendChild(el("span", "tk-pun", mt[2])); }
+      else if (mt[3] || mt[4]) pre.appendChild(el("span", "tk-num", mt[3] || mt[4]));
+      else if (mt[5]) pre.appendChild(el("span", "tk-pun", mt[5]));
+      else pre.appendChild(document.createTextNode(mt[6]));
+    }
+    return pre;
+  }
+
+  // Selection: highlight the ancestor path to the root and the direct children
+  function select(id) {
+    selected = id;
+    var path = {}; var cur = byId[id]; while (cur) { path[cur.id] = true; cur = cur.parent ? byId[cur.parent] : null; }
+    S.forEach(function (s) {
+      var n = nodeEls[s.id]; n.btn.setAttribute("aria-pressed", s.id === id ? "true" : "false");
+      rowEls[s.id].setAttribute("aria-current", s.id === id ? "true" : "false");
+      treeEls[s.id].setAttribute("aria-selected", s.id === id ? "true" : "false");
+      treeEls[s.id].tabIndex = s.id === id ? 0 : -1;
+      if (mmRects[s.id]) mmRects[s.id].classList.toggle("sel", s.id === id);
+    });
+    edgeEls.forEach(function (e) {
+      var on = (path[e.child.id] && path[e.parent.id]) || e.parent.id === id;
+      e.path.classList.toggle("on", !!on); e.path.setAttribute("marker-end", on ? "url(#arr-on)" : "url(#arr)");
+    });
+    renderDrawer(id);
+  }
+
+  // Playhead
+  function setTime(v) {
+    t = Math.max(0, Math.min(END, v));
+    var started = 0, ended = 0;
+    S.forEach(function (s) {
+      if (s.start <= t) started++; if (s.end <= t) ended++;
+      var st = stateAt(s, t), n = nodeEls[s.id];
+      n.root.classList.toggle("future", st === "future");
+      if (!s.group) {
+        n.root.classList.remove("st-running", "st-held", "st-blocked", "st-failed");
+        if (TAG[st]) n.root.classList.add("st-" + st);
+        n.tag.textContent = ""; n.tag.className = "tag";
+        if (TAG[st]) { n.tag.className = "tag " + st; if (TAG[st][0]) n.tag.appendChild(icon(TAG[st][0])); n.tag.appendChild(document.createTextNode(TAG[st][1])); }
+        n.root.setAttribute("aria-label", s.kind + " " + s.name + ", " + (st === "future" ? "not started" : st));
+      }
+      if (mmRects[s.id]) mmRects[s.id].classList.toggle("bad", st === "blocked" || st === "failed");
+      var bar = barEls[s.id];
+      if (st === "future") { bar.style.width = "0"; bar.style.left = pct(s.start); bar.className = "bar"; }
+      else { bar.style.left = pct(s.start); bar.style.width = "calc(" + pct(Math.min(t, s.end) - s.start) + " + 2px)"; bar.className = "bar " + (TAG[st] ? st : ""); }
+    });
+    edgeEls.forEach(function (e) { var f = t < e.child.start; e.path.classList.toggle("future", f); if (e.label) e.label.classList.toggle("future", f); });
+    playhead.style.left = pct(t);
+    $("pb-range").value = t.toFixed(1);
+    var events = started + ended;
+    var txt = t.toFixed(1) + "s · event " + events + " of " + (S.length * 2) + " · replay";
+    $("readout").textContent = txt;
+    $("pb-range").setAttribute("aria-valuetext", t.toFixed(1) + " seconds, event " + events + " of " + (S.length * 2));
+    paintIcons();
+  }
+  function frame(ts) {
+    if (!playing) return;
+    if (lastTs) setTime(t + (ts - lastTs) / 1000 * Number($("pb-speed").value));
+    lastTs = ts;
+    if (t >= END) { stop(); return; }
+    requestAnimationFrame(frame);
+  }
+  function setPlayIcon(name, label) { var b = $("pb-play"); b.textContent = ""; b.appendChild(icon(name)); b.setAttribute("aria-label", label); paintIcons(); }
+  function play() { if (t >= END) setTime(0); playing = true; lastTs = 0; setPlayIcon("pause", "Pause replay"); $("readout").setAttribute("aria-live", "off"); requestAnimationFrame(frame); }
+  function stop() { playing = false; setPlayIcon("play", t >= END ? "Replay from the start" : "Resume replay"); $("readout").setAttribute("aria-live", "polite"); if (selected) renderDrawer(selected); }
+  $("pb-play").addEventListener("click", function () { playing ? stop() : play(); });
+  $("pb-range").addEventListener("input", function (e) { stop(); setTime(Number(e.target.value)); });
+  var starts = S.map(function (s) { return s.start; }).sort(function (a, b) { return a - b; });
+  function step(dir) {
+    stop();
+    var target = dir > 0 ? starts.find(function (v) { return v > t + 0.001; }) : starts.slice().reverse().find(function (v) { return v < t - 0.001; });
+    setTime(target == null ? (dir > 0 ? END : 0) : target + 0.001);
+  }
+  $("pb-back").addEventListener("click", function () { step(-1); });
+  $("pb-fwd").addEventListener("click", function () { step(1); });
+
+  // Zoom
+  function applyZoom(z) {
+    zoom = Math.max(0.5, Math.min(1.5, z));
+    canvas.style.transform = "scale(" + zoom + ")";
+    sizer.style.width = (W * zoom) + "px"; sizer.style.height = (H * zoom) + "px";
+  }
+  function fit() { applyZoom(Math.min(1, (scroll.clientWidth - 8) / W, (scroll.clientHeight - 8) / H * 1.35)); }
+  $("zoom-in").addEventListener("click", function () { applyZoom(zoom + 0.1); });
+  $("zoom-out").addEventListener("click", function () { applyZoom(zoom - 0.1); });
+  $("zoom-fit").addEventListener("click", fit);
+
+  // Views
+  function setView(v) {
+    var tree = v === "tree";
+    $("view-graph").setAttribute("aria-checked", tree ? "false" : "true");
+    $("view-tree").setAttribute("aria-checked", tree ? "true" : "false");
+    scroll.hidden = tree; $("tree-wrap").hidden = !tree; $("legend").hidden = tree; $("minimap-box").hidden = tree;
+  }
+  $("view-graph").addEventListener("click", function () { setView("graph"); });
+  $("view-tree").addEventListener("click", function () { setView("tree"); });
+
+  // Filters: governance path and search dim everything else, never hide it
+  var govIds = {};
+  S.forEach(function (s) { if (s.gov || s.kind === "policy" || s.kind === "approval" || s.kind === "action") { var c = s; while (c) { govIds[c.id] = true; c = c.parent ? byId[c.parent] : null; } } });
+  function applyFilters() {
+    var gov = $("gov-only").checked, q = $("span-search").value.trim().toLowerCase();
+    S.forEach(function (s) {
+      var keep = (!gov || govIds[s.id]) && (!q || s.name.toLowerCase().indexOf(q) >= 0 || s.kind.indexOf(q) >= 0);
+      nodeEls[s.id].root.classList.toggle("dim", !keep);
+    });
+  }
+  $("gov-only").addEventListener("change", applyFilters);
+  $("span-search").addEventListener("input", applyFilters);
+
+  $("verify").addEventListener("click", function () {
+    var a = $("attest"); a.textContent = "";
+    var c = el("span", "chip ok"); c.appendChild(icon("badge-check")); c.appendChild(document.createTextNode("verified · root sha256:4be1…c09a"));
+    a.appendChild(c); paintIcons();
+  });
+
+  document.addEventListener("keydown", function (e) {
+    var tg = e.target, tag = tg && tg.tagName;
+    if (tag === "INPUT" || tag === "SELECT" || tag === "TEXTAREA" || (tg && tg.getAttribute && tg.getAttribute("role") === "treeitem")) return;
+    if (e.key === " " && (tg === document.body || tg === scroll)) { e.preventDefault(); playing ? stop() : play(); }
+    else if (e.key === ",") step(-1);
+    else if (e.key === ".") step(1);
+    else if (e.key === "f") fit();
+  });
+
+  if (window.matchMedia("(max-width: 760px)").matches) setView("tree");
+  setTime(END);
+  select(selected);
+  fit();
+  scroll.scrollLeft = 0;
+  window.addEventListener("resize", function () { if (zoom < 1) fit(); });
+})();
+</script>
+</body>
+</html>

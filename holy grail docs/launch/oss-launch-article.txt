@@ -1,0 +1,35 @@
+Introducing Actrone Memory: open-source, local-first memory for AI agents
+
+Every agent demo looks the same after the second exchange. Say your name, get a friendly reply, refresh the page, and the agent has no idea who you are. Most frameworks hand an agent a context window, not a memory: kill the process and it forgets everything it just learned. We kept rebuilding the same missing layer across project after project, so we built it once, properly, and today we are giving it away.
+
+Two tiers, not one big bucket
+
+Actrone Memory splits memory the way a person actually recalls things: a hot tier for what just happened in this session, and a semantic tier for everything the agent has learned over time. Retrieval fuses dense embeddings, keyword search and recency into one ranked list, so an exact-keyword match a vector search would under-rank still surfaces. Context assembly is budget-aware: hand it a token budget and it fits what it returns to that budget, instead of blowing your context window or truncating blindly.
+
+Every fact gets classified, not just stored
+
+Most memory libraries treat every remembered fact the same. Ours classifies each one, none, low, PII, or sensitive, at the moment it is extracted. That is the piece we think nobody else frames this way: memory that already knows what kind of data it is holding, before it ever reaches a compliance review. It is the memory that graduates to governed.
+
+Zero-service by default
+
+The default backend is fully local and in-process: a dependency-free embedder plus an in-memory store, so there is nothing to run and no API key to get. When you are ready to scale, two independent switches take you to a durable Redis and Qdrant backend and to a real embedding provider, local or cloud, your choice.
+
+What it is not
+
+We would rather say this plainly than have you find out later.
+
+- No bitemporal knowledge graph and no self-editing memory blocks. Those live on the hosted platform, not in this library.
+- The Python adapters, LangChain, LangGraph, CrewAI, are deeper than the TypeScript ones today. We are not pretending otherwise.
+- We have not published a head-to-head benchmark against Mem0, Zep, Letta or Cognee. The library ships its own reproducible quality eval, offline, one command, gated in CI so a regression cannot slip in quietly, recall@5 around 0.93 on our bundled dataset. Comparative numbers will follow once we have actually run them, including the places we expect to lose.
+
+A privacy caveat worth stating plainly
+
+Actrone Memory is local-first by default, and also cloud-capable: point it at any OpenAI-compatible model. The PII protection only holds for local models. Point it at a cloud provider and the raw text, including anything classified as PII, is sent there; the library does not tokenize it first. Our hosted platform tokenizes PII before inference, a structural guarantee that makes cloud models safe, but that is a different product and a different promise. We would rather you know the line than assume it is already drawn for you.
+
+Why we are giving it away
+
+There is a larger governed-agent platform behind this, and we are not launching it today. This library stands entirely on its own, and it always will: MIT licensed, free, no account, no key required to start. Memory is infrastructure every agent needs. It should not be something every team rebuilds alone, or something you have to trust a black box to hold.
+
+Install it with pip install actrone-memory or npm install actrone-memory. The quickstart runs in under five minutes with nothing else to set up. Star the repo, break it, file an issue, we read all of them:
+- https://github.com/actrone/actrone-memory-py
+- https://github.com/actrone/actrone-memory-ts
