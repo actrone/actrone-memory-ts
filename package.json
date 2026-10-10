@@ -135,7 +135,7 @@
   },
   "devDependencies": {
     "@types/node": "25.9.3",
-    "openai": "7.25.0",
+    "openai": "7.30.0",
     "tsup": "8.5.1",
     "typedoc": "^0.28.20",
     "typescript": "6.0.3",
