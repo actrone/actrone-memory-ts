@@ -6,7 +6,7 @@ All notable changes to `actrone-memory` are documented here. The format is based
 
 ---
 
-## [Unreleased]
+## [0.2.0] - 2026-10-17
 
 ### Added
 
