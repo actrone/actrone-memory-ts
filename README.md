@@ -25,9 +25,10 @@ for Python. Same two-tier model, same result shapes, same one-import upgrade pat
 (in-memory by default; Redis/Qdrant adapters) and embeddings. Zero required
 dependencies for the on-ramp; MIT licensed.
 
-It's the open-source counterpart to Actrone's governed, hosted memory: when you
-outgrow self-hosting, **swap one import** and every call runs through the
-governed Orchestrator (PII-tokenised, audited, policy-bounded) with the same API.
+It's the open-source counterpart to Actrone's governed, hosted memory, which has
+not launched yet. When it does, **swapping one import** will run every call
+through the governed Orchestrator (PII-tokenised, audited, policy-bounded) with the
+same API.
 
 ```text
   storeTurn ─────────────▶ L1  short-term session turns  (recency, token-budgeted)
@@ -35,8 +36,9 @@ governed Orchestrator (PII-tokenised, audited, policy-bounded) with the same API
                  └───────▶ L2  long-term semantic memory  (embeddings)
 
   retrieveContext(query, budget)
-        │  embed query + fetch recent turns (parallel)
-        │  → L2 search  (+ optional hybrid BM25/RRF, + optional rerank)
+        │  in parallel: fetch recent turns  |  embed query → L2 search
+        │                                      (+ optional hybrid BM25/RRF, + optional rerank)
+        │  → optional redaction by sensitivity
         │  → allocate token budget  → prune to fit
         ▼
   { recentTurns, episodicMemories }   ── prepend to your prompt
@@ -93,9 +95,9 @@ const mm = new MemoryManager({ apiKey: process.env.ACTRONE_API_KEY! });
 | --- | --- |
 | `create(options?)` | Build a manager (in-memory default; pass `l1`/`l2`/`embedder` for Redis/Qdrant/real embeddings) |
 | `storeTurn(agentId, sessionId, userMessage, assistantMessage, toolResults?)` | Persist a conversation turn → turn id |
-| `retrieveContext(agentId, sessionId, query, tokenBudget)` | Assemble budget-bounded context (4-phase: parallel fetch → allocate → rank → prune) |
+| `retrieveContext(agentId, sessionId, query, tokenBudget, options?)` | Assemble budget-bounded context (4-phase: parallel fetch → allocate → rank → prune); `options.redact` masks memories by sensitivity |
 | `injectMemory(agentId, content, importance?, sessionId?, topicTags?)` | Write a long-term fact → memory id |
-| `searchMemories(agentId, query, limit?)` | Semantic search over long-term memory |
+| `searchMemories(agentId, query, limit?, options?)` | Semantic search over long-term memory; `options.redact` as above |
 | `deleteMemory(agentId, memoryId)` | Remove a memory |
 | `clearSession(agentId, sessionId)` | Clear session turns (long-term memories persist) |
 | `getSessionMetadata(agentId, sessionId)` | Session stats, or `null` if expired |
@@ -204,10 +206,21 @@ protection here holds **only for local models** (in-process or a local Ollama en
 point extraction or embeddings at a **cloud** provider, the raw text, including PII-classified content, is
 sent to that provider. This library does **not** tokenise it first.
 
-Actrone's **hosted** platform adds **MAL (Memory Abstraction Layer)**, which tokenises PII *before* any
-inference, a structural guarantee that makes **cloud** models safe. Same API (`MemoryManager`), so migrating
-is a one-import change. Short form: **local-first by default; cloud-capable; PII stays protected only on local
-models; MAL (hosted) makes cloud safe.**
+**Redaction on read.** To keep tagged personal data out of what you send a model, turn on redaction for
+every read with `config: { redactSensitivities: ["pii", "sensitive"] }`, or for one call with `redact`:
+
+```ts
+const ctx = await mm.retrieveContext(agentId, sessionId, query, 4096, { redact: ["pii", "sensitive"] });
+// A fact tagged pii comes back as "[redacted: pii]", with its embedding dropped.
+```
+
+It covers `retrieveContext()` and `searchMemories()`, and so every adapter built on them. Stored memories
+do not change, and `redact: []` turns it off for a single call. It acts only on tags: raw turns are never
+classified, so they are never masked, and the library does not detect personal data on its own.
+
+Actrone's **hosted** platform, when it launches, will add **MAL (Memory Abstraction Layer)** to tokenise PII
+*before* inference, so cloud models never receive the raw values. It has not launched yet. Short form:
+**local-first by default; cloud-capable; PII stays on your machine only with local models.**
 
 ## Framework compatibility
 
@@ -256,6 +269,7 @@ framework-agnostic core (`recall` / `remember` / `memoryFor`) works with any fra
 | `budgetFractionSession` / `budgetFractionEpisodic` | How the token budget is split between recent turns and long-term memory. |
 | `hybridRetrieval` | Fuse lexical (BM25) + dense signals via reciprocal-rank fusion. |
 | `relevanceWeight` / `recencyWeight` | Balance semantic relevance against recency in L2 ranking. |
+| `redactSensitivities` | Sensitivity classes masked whenever memories are read, for example `["pii", "sensitive"]`. Matching memories come back as `[redacted: <class>]`. Default: none. |
 
 Stores and embeddings are injected, not configured by env. Pass `l1` / `l2` /
 `embedder` / `reranker` to `create()`. The defaults need no services. Pass
@@ -273,12 +287,15 @@ The `retrieveContext` recall pipeline (GitHub renders the diagram):
 
 ```mermaid
 flowchart TD
-    Q["retrieveContext(query, budget)"] --> P1["embed query + fetch recent L1 turns<br/>(parallel)"]
-    P1 --> L2["L2 semantic search"]
+    Q["retrieveContext(query, budget)"] -->|"in parallel"| L1["fetch recent L1 turns"]
+    Q -->|"in parallel"| EMB["embed query"]
+    EMB --> L2["L2 semantic search"]
     L2 -->|"hybridRetrieval"| RRF["+ BM25 / reciprocal-rank fusion (optional)"]
     RRF --> RR["+ cross-encoder rerank top-K (optional)"]
     L2 --> RR
-    RR --> ALLOC["allocate token budget<br/>session vs episodic"]
+    RR --> RED["redact by sensitivity (optional)"]
+    L1 --> ALLOC["allocate token budget<br/>session vs episodic"]
+    RED --> ALLOC
     ALLOC --> PRUNE["priority-weighted prune to fit"]
     PRUNE --> OUT["{ recentTurns, episodicMemories }"]
 ```
@@ -324,11 +341,12 @@ npm run typecheck && npm test && npm run build
 ## Part of Actrone
 
 `actrone-memory` is the open-source memory layer behind [Actrone](https://actrone.com), a
-platform for running AI agents under governance: durable task execution, tool supervision,
-PII tokenisation before inference, and an audit trail.
+platform in development for running AI agents under governance: durable task execution,
+tool supervision, PII tokenisation before inference, and an audit trail.
 
 You never have to adopt any of that. This library is MIT and works standalone forever. If
-you do outgrow self-hosting, the migration is the one-import change shown above.
+you outgrow self-hosting once the platform launches, the migration will be the one-import
+change shown above.
 
 ## License
 

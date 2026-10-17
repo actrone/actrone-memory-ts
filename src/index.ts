@@ -106,9 +106,11 @@ export {
   type Turn,
   type RetrievedContext,
   type SessionMetadata,
+  SENSITIVITIES,
   toolResultSchema,
   budgetUtilisation,
 } from "./models.js";
+export { type ReadOptions, redactedContent } from "./redaction.js";
 export {
   MemoryError,
   ValidationError,

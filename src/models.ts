@@ -39,6 +39,9 @@ export type MemorySource =
  */
 export type Sensitivity = "none" | "low" | "pii" | "sensitive";
 
+/** Every sensitivity class, least to most sensitive. */
+export const SENSITIVITIES: readonly Sensitivity[] = ["none", "low", "pii", "sensitive"];
+
 /** The outcome of a single tool call recorded on a conversation turn. */
 export const toolResultSchema = z.object({
   toolName: z.string(),

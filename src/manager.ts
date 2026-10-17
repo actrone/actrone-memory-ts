@@ -14,6 +14,7 @@ import type {
   ToolResult,
   Turn,
 } from "./models.js";
+import { type ReadOptions, redactMemories, resolveRedaction } from "./redaction.js";
 import { InMemoryStore, type L1Store, type L2Store } from "./store.js";
 
 // Input length limits enforced at the public API boundary (mirror the Python lib).
@@ -65,6 +66,8 @@ export class MemoryManager {
   private readonly extractor: FactExtractor | undefined;
   private readonly reranker: Reranker | undefined;
   private readonly threshold: number;
+  /** The sensitivity classes masked on read unless a call passes its own `redact`. */
+  private readonly redactDefault: ReadonlySet<Sensitivity>;
 
   constructor(parts: MemoryManagerParts) {
     this.l1 = parts.l1;
@@ -74,6 +77,8 @@ export class MemoryManager {
     this.extractor = parts.extractor;
     this.reranker = parts.reranker;
     this.threshold = resolveRelevanceThreshold(parts.config, parts.embedder);
+    // `?? []` keeps a hand-built config from before this option working unchanged.
+    this.redactDefault = resolveRedaction(parts.config.redactSensitivities ?? []);
   }
 
   /**
@@ -145,13 +150,21 @@ export class MemoryManager {
   /**
    * Assemble context for the next LLM call using the 4-phase pipeline:
    * parallel L1/L2 fetch → budget allocation → relevance ranking → priority
-   * pruning. The system-prompt + current-turn budget is never consumed here.
+   * pruning. The L1 read runs concurrently with the whole L2 path (embed, search,
+   * optional rerank), so the fetch takes as long as the slower of the two. The
+   * system-prompt + current-turn budget is never consumed here.
+   *
+   * `options.redact` masks memories by sensitivity (see {@link ReadOptions}); turns are
+   * never masked.
+   *
+   * @throws {ValidationError} When an id, the query or `options.redact` is invalid.
    */
   async retrieveContext(
     agentId: string,
     sessionId: string,
     query: string,
     tokenBudget: number,
+    options: ReadOptions = {},
   ): Promise<RetrievedContext> {
     validateId(agentId, "agentId");
     validateId(sessionId, "sessionId");
@@ -159,33 +172,18 @@ export class MemoryManager {
     if (tokenBudget <= 0) {
       throw new TokenBudgetError(`tokenBudget must be > 0, got ${tokenBudget}`, { tokenBudget });
     }
+    const redactClasses = this.redactionFor(options.redact);
 
     const start = performance.now();
 
-    // Phase 1: parallel fetch: embed the query and pull recent L1 turns concurrently.
-    const [queryEmbedding, recentTurns] = await Promise.all([
-      this.embedder.embed(query),
+    // Phase 1: parallel fetch: the L1 read runs alongside the whole L2 path, which has to
+    // embed the query before it can search, so neither waits for the other.
+    const [recentTurns, fetchedMemories] = await Promise.all([
       this.l1.getRecentTurns(agentId, sessionId),
+      this.fetchLongTerm(agentId, query),
     ]);
-
-    // Phase 3: semantic search against L2 (needs the embedding from Phase 1). Hybrid RRF
-    // fuses the query text's lexical signal when enabled.
-    const episodicCandidates = await this.l2.search({
-      agentId,
-      queryEmbedding,
-      threshold: this.threshold,
-      limit: this.cfg.maxEpisodicMemories,
-      relevanceWeight: this.cfg.relevanceWeight,
-      recencyWeight: this.cfg.recencyWeight,
-      ...(this.cfg.hybridRetrieval ? { queryText: query } : {}),
-    });
-    // Phase 3b: optional cross-encoder rerank over the top-K (precision lift; A4).
-    const episodicMemories = await applyReranker(
-      this.reranker,
-      query,
-      episodicCandidates,
-      this.cfg.rerankTopK,
-    );
+    // Mask before pruning, so the budget counts the placeholder that is actually sent.
+    const episodicMemories = redactMemories(fetchedMemories, redactClasses, this.cfg.tokenCounter);
 
     // Phase 2: budget allocation.
     const episodicBudget = Math.floor(tokenBudget * this.cfg.budgetFractionEpisodic);
@@ -284,10 +282,16 @@ export class MemoryManager {
   }
 
   /** Semantic search over long-term memory, ranked by relevance + recency. */
-  async searchMemories(agentId: string, query: string, limit = 10): Promise<MemoryEntry[]> {
+  async searchMemories(
+    agentId: string,
+    query: string,
+    limit = 10,
+    options: ReadOptions = {},
+  ): Promise<MemoryEntry[]> {
     validateId(agentId, "agentId");
     validateText(query, "query", MAX_QUERY_LEN);
     if (limit < 1) throw new ValidationError("limit", "must be ≥ 1");
+    const redactClasses = this.redactionFor(options.redact);
 
     const embedding = await this.embedder.embed(query);
     // Over-fetch when reranking so the cross-encoder has a candidate pool to reorder.
@@ -302,7 +306,12 @@ export class MemoryManager {
       ...(this.cfg.hybridRetrieval ? { queryText: query } : {}),
     });
     const reranked = await applyReranker(this.reranker, query, candidates, this.cfg.rerankTopK);
-    return reranked.slice(0, limit);
+    return redactMemories(reranked.slice(0, limit), redactClasses, this.cfg.tokenCounter);
+  }
+
+  /** The classes to mask for one read: the call's own list, else the configured default. */
+  private redactionFor(redact: readonly Sensitivity[] | undefined): ReadonlySet<Sensitivity> {
+    return redact === undefined ? this.redactDefault : resolveRedaction(redact);
   }
 
   /** Session stats, or null when the session does not exist / has expired. */
@@ -396,6 +405,26 @@ export class MemoryManager {
     if (this.l2 !== (this.l1 as unknown as L2Store)) {
       await this.l2.close?.();
     }
+  }
+
+  // ── Internal retrieval ──────────────────────────────────────────────────────
+
+  /** The L2 half of the parallel fetch: embed the query, search, then the optional
+   * rerank. One promise, so `retrieveContext` can run it alongside the L1 read. */
+  private async fetchLongTerm(agentId: string, query: string): Promise<MemoryEntry[]> {
+    const queryEmbedding = await this.embedder.embed(query);
+    // Hybrid RRF fuses the query text's lexical signal when enabled.
+    const candidates = await this.l2.search({
+      agentId,
+      queryEmbedding,
+      threshold: this.threshold,
+      limit: this.cfg.maxEpisodicMemories,
+      relevanceWeight: this.cfg.relevanceWeight,
+      recencyWeight: this.cfg.recencyWeight,
+      ...(this.cfg.hybridRetrieval ? { queryText: query } : {}),
+    });
+    // Optional cross-encoder rerank over the top-K (precision lift; A4).
+    return applyReranker(this.reranker, query, candidates, this.cfg.rerankTopK);
   }
 
   // ── Internal pruning ────────────────────────────────────────────────────────

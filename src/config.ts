@@ -1,4 +1,5 @@
 import { ConfigurationError } from "./errors.js";
+import { SENSITIVITIES, type Sensitivity } from "./models.js";
 import { heuristicTokenCounter, type TokenCounter } from "./tokens.js";
 
 /**
@@ -41,6 +42,14 @@ export interface MemoryConfig {
   readonly maxSessionTurns: number;
   /** How token counts are computed. Defaults to a dependency-free heuristic. */
   readonly tokenCounter: TokenCounter;
+  /**
+   * Redaction on read (opt-in): sensitivity classes whose memories come back masked from
+   * `retrieveContext` and `searchMemories`, and so from every adapter built on them. The content
+   * becomes `"[redacted: <class>]"` and the embedding is dropped; stored memories are not
+   * changed. Tags come from the fact extractor or `injectMemory`; raw turns carry none, so they
+   * are never redacted. A per-call `redact` option overrides this. Default: none.
+   */
+  readonly redactSensitivities: readonly Sensitivity[];
 }
 
 /** Production-safe defaults. The budget fractions match the roadmap's context
@@ -56,6 +65,7 @@ export const DEFAULT_CONFIG: MemoryConfig = {
   rerankTopK: 20,
   maxSessionTurns: 50,
   tokenCounter: heuristicTokenCounter,
+  redactSensitivities: [],
 };
 
 /**
@@ -127,6 +137,20 @@ export function resolveConfig(overrides: Partial<MemoryConfig> = {}): MemoryConf
 
   if (typeof config.tokenCounter !== "function") {
     throw new ConfigurationError("tokenCounter must be a function");
+  }
+
+  if (!Array.isArray(config.redactSensitivities)) {
+    throw new ConfigurationError(
+      "redactSensitivities must be an array of sensitivity classes, such as ['pii', 'sensitive']",
+    );
+  }
+  for (const value of config.redactSensitivities) {
+    if (!(SENSITIVITIES as readonly unknown[]).includes(value)) {
+      throw new ConfigurationError(
+        `redactSensitivities has unknown sensitivity '${String(value)}'; expected one of ` +
+          SENSITIVITIES.join(", "),
+      );
+    }
   }
 
   return config;

@@ -6,6 +6,24 @@ All notable changes to `actrone-memory` are documented here. The format is based
 
 ---
 
+## [Unreleased]
+
+### Added
+
+- **Redaction on read.** `retrieveContext()` and `searchMemories()` take `{ redact: ["pii", "sensitive"] }`,
+  and the `redactSensitivities` config key sets it for every read, so every adapter built on those
+  methods is covered. A matching memory comes back with its content replaced by `[redacted: <class>]`
+  and its embedding dropped; the stored memory is not changed, and `redact: []` turns it off for one
+  call. It acts only on sensitivity tags: raw turns carry none, so they are never masked.
+  `redactedContent()`, `SENSITIVITIES` and the `ReadOptions` type are exported.
+
+### Changed
+
+- **`retrieveContext` reads L1 while L2 embeds and searches.** The recent-turn read used to run
+  only alongside the query embedding, and the long-term search waited for both. It now runs
+  alongside the whole long-term path (embed, search, optional rerank), so a retrieval waits for
+  the slower of the two tiers instead of their sum, as the docs describe. Results are unchanged.
+
 ## [0.1.3] - 2026-10-02
 
 ### Fixed
