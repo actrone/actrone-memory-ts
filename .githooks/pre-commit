@@ -1,0 +1,65 @@
+#!/bin/sh
+# Pre-commit checks for every Actrone repository (CLAUDE.md sections 5.3 and 9.4): the staged changes are
+# scanned for secrets by gitleaks (every pattern it knows, less the reviewed false positives in
+# .gitleaksignore) and by TruffleHog (credentials it verifies as live, or cannot rule out), and a commit that
+# adds a file over 5 MB or an unresolved merge conflict marker is refused. A missing scanner stops the
+# commit rather than letting it through unscanned.
+#
+# Turn the hooks on once in each clone:   git config core.hooksPath .githooks
+# Both scanners must be on PATH:          gitleaks 8.30 or later, trufflehog 3.99 or later
+#   https://github.com/gitleaks/gitleaks#installing
+#   https://github.com/trufflesecurity/trufflehog#floppy_disk-installation
+# Commands as documented (checked 2026-11-21):
+#   https://github.com/gitleaks/gitleaks#pre-commit
+#   https://github.com/trufflesecurity/trufflehog/blob/main/PreCommit.md
+set -u
+
+fail() {
+  printf 'pre-commit: %s\n' "$1" >&2
+  exit 1
+}
+
+root=$(git rev-parse --show-toplevel) || fail "not inside a git work tree"
+cd "$root" || fail "cannot enter $root"
+
+for tool in gitleaks trufflehog; do
+  command -v "$tool" >/dev/null 2>&1 || fail "$tool is not on PATH; install it (see .githooks/README.md) and commit again"
+done
+
+# Files over 5 MB do not belong in git history: build output, binaries and media go elsewhere.
+max_bytes=5242880
+big=$(git diff --cached --name-only --diff-filter=AM -z | xargs -0 -r -I{} sh -c '
+  size=$(git cat-file -s ":$1" 2>/dev/null || echo 0)
+  if [ "$size" -gt "$2" ]; then printf "  %s (%s bytes)\n" "$1" "$size"; fi
+' _ {} "$max_bytes")
+if [ -n "$big" ]; then
+  fail "these staged files are over 5 MB; keep them out of git:
+$big"
+fi
+
+# An unresolved merge leaves its markers on added lines.
+if git diff --cached -U0 --no-color --diff-filter=AM | grep -qE '^\+(<<<<<<<|>>>>>>>) '; then
+  fail "the staged changes still hold merge conflict markers; resolve them and commit again"
+fi
+
+if ! gitleaks git --pre-commit --staged --redact --no-banner --verbose .; then
+  fail "gitleaks found a possible secret in the staged changes. Remove it, and rotate it if it was ever real.
+A reviewed false positive (a test fixture, a placeholder) goes in .gitleaksignore by its fingerprint."
+fi
+
+# TruffleHog reads the staged changes when it is given the last commit; a repository with no commits yet
+# is scanned whole. A scan error fails the commit too.
+since=""
+if git rev-parse --verify --quiet HEAD >/dev/null; then
+  since="--since-commit=HEAD"
+fi
+# shellcheck disable=SC2086 # $since is one flag or nothing
+trufflehog git file://. $since --results=verified,unknown --fail --fail-on-scan-errors --no-update \
+  --trust-local-git-config --no-color
+status=$?
+if [ "$status" -eq 183 ]; then
+  fail "TruffleHog found a live (or unverifiable) credential in the staged changes. Remove it and rotate it."
+elif [ "$status" -ne 0 ]; then
+  fail "TruffleHog could not finish its scan (exit $status); the commit waits until it can"
+fi
+exit 0

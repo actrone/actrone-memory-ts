@@ -1,0 +1,2 @@
+# The pre-commit hook is a POSIX shell script: it stays LF in every checkout, or sh cannot run it.
+/.githooks/pre-commit text eol=lf
