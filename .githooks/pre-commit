@@ -26,12 +26,14 @@ for tool in gitleaks trufflehog; do
   command -v "$tool" >/dev/null 2>&1 || fail "$tool is not on PATH; install it (see .githooks/README.md) and commit again"
 done
 
-# Files over 5 MB do not belong in git history: build output, binaries and media go elsewhere.
+# Files over 5 MB do not belong in git history: build output, binaries and media go elsewhere. One pass:
+# the staged blobs' ids from the diff, their sizes from a single cat-file (a process per file takes
+# hours on Windows for a large change). A submodule's commit id is not a blob, so it reads as missing.
 max_bytes=5242880
-big=$(git diff --cached --name-only --diff-filter=AM -z | xargs -0 -r -I{} sh -c '
-  size=$(git cat-file -s ":$1" 2>/dev/null || echo 0)
-  if [ "$size" -gt "$2" ]; then printf "  %s (%s bytes)\n" "$1" "$size"; fi
-' _ {} "$max_bytes")
+big=$(git diff --cached --diff-filter=AM --raw --no-abbrev --no-renames |
+  awk -F '\t' '{ split($1, meta, " "); print meta[4] " " $2 }' |
+  git cat-file --batch-check='%(objectsize) %(rest)' |
+  awk -v max="$max_bytes" '$1 ~ /^[0-9]+$/ && $1 + 0 > max { size = $1; $1 = ""; printf "  %s (%s bytes)\n", substr($0, 2), size }')
 if [ -n "$big" ]; then
   fail "these staged files are over 5 MB; keep them out of git:
 $big"
