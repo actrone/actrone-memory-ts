@@ -15,6 +15,7 @@ on:
     - cron: "0 6 * * 1" # Mondays 06:00 UTC: catch new framework releases within a week
   workflow_dispatch: {}
   pull_request:
+    branches: [main, staging]
     # On a PR that only touches the tooling, validate the emitter (fast). The heavy version-matrix
     # (an npm install per framework/boundary) stays scheduled, see the `if` guards below.
     paths:

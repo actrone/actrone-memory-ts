@@ -8,9 +8,9 @@ name: "CodeQL"
 
 on:
   push:
-    branches: [main]
+    branches: [main, staging]
   pull_request:
-    branches: [main]
+    branches: [main, staging]
   schedule:
     # Weekly, independent of any push: new CodeQL query packs land continuously, so a repo with
     # no commits in a given week still gets scanned against the latest rules.
