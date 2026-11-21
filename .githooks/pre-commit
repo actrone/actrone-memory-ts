@@ -50,18 +50,29 @@ A reviewed false positive (a test fixture, a placeholder) goes in .gitleaksignor
 fi
 
 # TruffleHog reads the staged changes when it is given the last commit; a repository with no commits yet
-# is scanned whole. A scan error fails the commit too.
+# is scanned whole. It blocks a credential it verifies as live with its issuer. One it cannot verify
+# (a placeholder such as user:pass@host, or an issuer that did not answer) is listed as a warning: gitleaks
+# above has already refused every secret pattern nobody reviewed. A scan error fails the commit.
 since=""
 if git rev-parse --verify --quiet HEAD >/dev/null; then
   since="--since-commit=HEAD"
 fi
 # shellcheck disable=SC2086 # $since is one flag or nothing
-trufflehog git file://. $since --results=verified,unknown --fail --fail-on-scan-errors --no-update \
-  --trust-local-git-config --no-color
+found=$(trufflehog git file://. $since --results=verified,unknown --json --fail-on-scan-errors --no-update \
+  --trust-local-git-config --no-color 2>/dev/null)
 status=$?
-if [ "$status" -eq 183 ]; then
-  fail "TruffleHog found a live (or unverifiable) credential in the staged changes. Remove it and rotate it."
-elif [ "$status" -ne 0 ]; then
-  fail "TruffleHog could not finish its scan (exit $status); the commit waits until it can"
+if [ "$status" -ne 0 ]; then
+  fail "TruffleHog could not finish its scan (exit $status); run 'trufflehog git file://. $since' to see why"
+fi
+where='s/.*"file":"\([^"]*\)".*"line":\([0-9]*\).*"DetectorName":"\([^"]*\)".*/  \1:\2 (\3)/p'
+live=$(printf '%s\n' "$found" | grep '"Verified":true' | sed -n "$where")
+if [ -n "$live" ]; then
+  fail "TruffleHog verified a live credential in the staged changes. Remove it and rotate it now:
+$live"
+fi
+unverified=$(printf '%s\n' "$found" | grep '"Verified":false' | sed -n "$where")
+if [ -n "$unverified" ]; then
+  printf 'pre-commit: TruffleHog could not verify these; check each is a placeholder, not a credential:\n%s\n' \
+    "$unverified" >&2
 fi
 exit 0

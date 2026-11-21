@@ -3,7 +3,9 @@
 `pre-commit` runs before every commit in this repository:
 
 - **gitleaks** scans the staged changes for anything that looks like a secret.
-- **TruffleHog** checks the staged changes for credentials that are live, or that it cannot rule out.
+- **TruffleHog** checks the staged changes for credentials that are live: one it verifies with its issuer
+  stops the commit. One it cannot verify (a placeholder such as `user:pass@host`) is listed as a warning, so
+  check each is not a real credential.
 - A staged file over 5 MB, or a leftover merge conflict marker, stops the commit.
 
 If a scanner is missing, the commit stops instead of going ahead unscanned.
